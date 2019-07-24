@@ -1,5 +1,3 @@
-`define WB_TIMER_ENABLED 0
-
 module wb_timer
 #(
    parameter WB_DATA_WIDTH = 32,
