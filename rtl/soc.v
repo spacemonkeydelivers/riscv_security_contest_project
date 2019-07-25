@@ -3,7 +3,7 @@ module soc
    input wire clk_i,
    input wire rst_i
 );
-
+   /*verilator no_inline_module*/
    localparam WB_DATA_WIDTH = 32;
    localparam WB_ADDR_WIDTH = 32;
    localparam WB_SEL_WIDTH  = 4;
@@ -121,7 +121,7 @@ module soc
       .dw (WB_DATA_WIDTH),
       .aw (WB_ADDR_WIDTH),
       .depth (8192),
-      .memfile ("/dev/zero")
+      .memfile ("/tmp/zeroes8k.txt")
    )
    ram0
    (
@@ -130,9 +130,29 @@ module soc
       .wb_dat_i (wb_ram_data_in),
       .wb_sel_i (wb_ram_sel),
       .wb_we_i (wb_ram_we),
-      .wb_cyc_i (wb_ram_cyc)
+      .wb_cyc_i (wb_ram_cyc),
+      .wb_dat_o (wb_ram_data_out)
    );
    // TODO: wb_ram_stb ???
    // TODO: wb_ram_ack ???
+   // TODO: rst_i to RAM
+   
+   reg [WB_ADDR_WIDTH - 1:0] wb_cpu_addr_r;
+   reg [WB_DATA_WIDTH - 1:0] wb_cpu_data_in_r;
+   reg wb_cpu_we_r;
+   reg [WB_SEL_WIDTH - 1:0]  wb_cpu_sel_r;
+   reg wb_cpu_stb_r;
+   reg wb_cpu_cyc_r;
+   reg wb_cpu_ack_r;
+   reg [WB_DATA_WIDTH - 1:0] wb_cpu_data_out_r;
+
+   assign wb_cpu_addr = wb_cpu_addr_r;
+   assign wb_cpu_data_in = wb_cpu_data_in_r;
+   assign wb_cpu_we = wb_cpu_we_r;
+   assign wb_cpu_sel = wb_cpu_sel_r;
+   assign wb_cpu_stb = wb_cpu_stb_r;
+   assign wb_cpu_cyc = wb_cpu_cyc_r;
+   assign wb_cpu_ack = wb_cpu_ack_r;
+   assign wb_cpu_data_out = wb_cpu_data_out_r;
 
 endmodule
