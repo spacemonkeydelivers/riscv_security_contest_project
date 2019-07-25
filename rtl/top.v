@@ -116,4 +116,23 @@ module soc
       .wb_uart_data_i (wb_uart_data_out)
    );
 
+   wb_ram
+   #(
+      .dw (WB_DATA_WIDTH),
+      .aw (WB_ADDR_WIDTH),
+      .depth (8192),
+      .memfile ("/dev/zero")
+   )
+   ram0
+   (
+      .wb_clk_i (clk_i),
+      .wb_adr_i (wb_ram_addr),
+      .wb_dat_i (wb_ram_data_in),
+      .wb_sel_i (wb_ram_sel),
+      .wb_we_i (wb_ram_we),
+      .wb_cyc_i (wb_ram_cyc)
+   );
+   // TODO: wb_ram_stb ???
+   // TODO: wb_ram_ack ???
+
 endmodule
