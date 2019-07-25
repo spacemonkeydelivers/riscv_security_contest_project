@@ -41,7 +41,6 @@ module wb_mux
    input  wire                       wb_uart_ack_i,
    input  wire [WB_DATA_WIDTH - 1:0] wb_uart_data_i
 );
-
    localparam WB_WRONG_DATA = 32'hDEAD_BEAF;
 
    localparam WB_ACCESS_TIMER = 0;

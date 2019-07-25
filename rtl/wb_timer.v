@@ -17,6 +17,8 @@ module wb_timer
    output wire [WB_DATA_WIDTH - 1:0] wb_data_o,
    output wire                       timer_irq_o
 );
+   /*verilator public_module*/
+
    // irq pin, raised to HIGH if current time exceeds the threshold
    reg irq = 0;
    assign timer_irq_o = irq;
