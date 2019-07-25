@@ -1,4 +1,7 @@
 module soc
+#(
+   parameter FIRMWARE_FILE = "/tmp/zeroes8k.txt"
+)
 (
    input wire clk_i,
    input wire rst_i
@@ -121,7 +124,11 @@ module soc
       .dw (WB_DATA_WIDTH),
       .aw (WB_ADDR_WIDTH),
       .depth (8192),
+`ifdef FIRMWARE_FILE
+      .memfile (`FIRMWARE_FILE)
+`else
       .memfile ("/tmp/zeroes8k.txt")
+`endif
    )
    ram0
    (
