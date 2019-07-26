@@ -64,20 +64,21 @@ void RV_SOC::tick(unsigned num)
         m_soc->eval();
 
         if (m_trace)
-            m_trace->dump(10 * m_tickCnt - 2);
+            m_trace->dump(m_tickCnt - 1);
 
+        m_tickCnt++;
         m_soc->clk_i = 1;
         m_soc->eval();
 
         if (m_trace)
-            m_trace->dump(10 * m_tickCnt);
+            m_trace->dump(m_tickCnt);
 
         m_soc->clk_i = 0;
         m_soc->eval();
 
         if (m_trace)
         {
-            m_trace->dump(10 * m_tickCnt + 5);
+            m_trace->dump(m_tickCnt + 1);
             m_trace->flush();
         }
     }
@@ -96,11 +97,10 @@ void RV_SOC::dumpRam(unsigned start, unsigned size)
 
 void RV_SOC::reset()
 {
-    m_soc->rst_i = 0;
-    tick();
     m_soc->rst_i = 1;
     tick();
     m_soc->rst_i = 0;
+    tick();
 }
 
 int main(int argc, char **argv)
@@ -109,6 +109,7 @@ int main(int argc, char **argv)
 
     RV_SOC rv_soc("trace.vcd");
 
+    rv_soc.tick(10);
     rv_soc.reset();
     rv_soc.tick(20);
     rv_soc.reset();
