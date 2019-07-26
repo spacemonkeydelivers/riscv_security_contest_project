@@ -48,6 +48,7 @@ set(RTL_SRC_PATH ${CMAKE_SOURCE_DIR}/rtl)
 set(RTL_MODEL_BUILD_PATH ${CMAKE_BINARY_DIR}/rtl_model_build)
 set(MODULE_NAME "soc")
 
+set(VERILATOR_FLAGS "${VERILATOR_FLAGS} -I${RTL_SRC_PATH}")
 separate_arguments(VERILATOR_ARGS_LIST WINDOWS_COMMAND "${VERILATOR_FLAGS}")
 separate_arguments(VERILATOR_ARGS_POST_LIST WINDOWS_COMMAND "${VERILATOR_FLAGS_POST}")
 #TODO: handle multiple verilator_args in one string
