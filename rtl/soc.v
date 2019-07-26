@@ -143,23 +143,33 @@ module soc
    // TODO: wb_ram_stb ???
    // TODO: wb_ram_ack ???
    // TODO: rst_i to RAM
-   
-   reg [WB_ADDR_WIDTH - 1:0] wb_cpu_addr_r;
-   reg [WB_DATA_WIDTH - 1:0] wb_cpu_data_in_r;
-   reg wb_cpu_we_r;
-   reg [WB_SEL_WIDTH - 1:0]  wb_cpu_sel_r;
-   reg wb_cpu_stb_r;
-   reg wb_cpu_cyc_r;
-   reg wb_cpu_ack_r;
-   reg [WB_DATA_WIDTH - 1:0] wb_cpu_data_out_r;
 
-   assign wb_cpu_addr = wb_cpu_addr_r;
-   assign wb_cpu_data_in = wb_cpu_data_in_r;
-   assign wb_cpu_we = wb_cpu_we_r;
-   assign wb_cpu_sel = wb_cpu_sel_r;
-   assign wb_cpu_stb = wb_cpu_stb_r;
-   assign wb_cpu_cyc = wb_cpu_cyc_r;
-   assign wb_cpu_ack = wb_cpu_ack_r;
-   assign wb_cpu_data_out = wb_cpu_data_out_r;
+   reg [31:0] cpu_addr = 0;
+   reg [31:0] cpu_data_in = 0;
+   wire [31:0] cpu_data_out;
+   reg cpu_en = 0;
+   reg [2:0] cpu_op = 0;
+   wire cpu_busy;
+
+   wb_cpu_bus
+   cpu_bus0
+   (
+      .I_en (cpu_en),
+      .I_op (cpu_op),
+      .I_addr (cpu_addr),
+      .I_data (cpu_data_in),
+      .O_data (cpu_data_out),
+      .O_busy (cpu_busy),
+      .CLK_I (clk_i),
+      .ACK_I (wb_cpu_ack),
+      .DAT_I (wb_cpu_data_in),
+      .RST_I (rst_i),
+      .ADR_O (wb_cpu_addr),
+      .DAT_O (wb_cpu_data_out),
+      .SEL_O (wb_cpu_sel),
+      .CYC_O (wb_cpu_cyc),
+      .STB_O (wb_cpu_stb),
+      .WE_O (wb_cpu_we)
+   );
 
 endmodule
