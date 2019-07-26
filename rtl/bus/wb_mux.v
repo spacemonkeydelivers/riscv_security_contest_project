@@ -43,8 +43,8 @@ module wb_mux
 );
    localparam WB_WRONG_DATA = 32'hDEAD_BEAF;
 
-   localparam WB_ACCESS_TIMER = 0;
-   localparam WB_ACCESS_RAM   = 1;
+   localparam WB_ACCESS_TIMER = 1;
+   localparam WB_ACCESS_RAM   = 0;
    localparam WB_ACCESS_UART  = 2;
 
    wire [1:0] wb_periph_select = wb_cpu_addr_i[WB_DATA_WIDTH - 1:WB_DATA_WIDTH - 2];
