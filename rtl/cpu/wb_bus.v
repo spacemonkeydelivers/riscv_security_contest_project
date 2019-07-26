@@ -1,4 +1,4 @@
-`include "/tank/work/smd/riscv/riscv_core/rtl/cpu/busdefs.v"
+`include "cpu/busdefs.v"
 
 module wb_cpu_bus(
 		input I_en,
