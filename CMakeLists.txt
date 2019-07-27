@@ -23,9 +23,6 @@ if (${VERILATOR_BIN} MATCHES "NOTFOUND" OR ${VERILATOR_INCLUDE} MATCHES "NOTFOUN
     message(FATAL_ERROR "Could not find verilator.")
 endif()
 
-include_directories(SYSTEM ${VERILATOR_INCLUDE})
-include_directories(SYSTEM ${VERILATOR_INCLUDE}/vltstd/)
-
 # compile verilator lib =====
 set(VERILATOR_LIBRARY verilated)
 set(VERILATED_SOURCE_LIST
@@ -40,7 +37,9 @@ foreach(src ${VERILATED_SOURCE_LIST})
     set(VERILATED_SOURCES ${VERILATED_SOURCES} ${VERILATOR_INCLUDE}/${src})
 endforeach()
 
-add_library(${VERILATOR_LIBRARY} STATIC ${VERILATED_SOURCES})
+add_library(${VERILATOR_LIBRARY} SHARED ${VERILATED_SOURCES})
+target_include_directories(${VERILATOR_LIBRARY} SYSTEM PUBLIC ${VERILATOR_INCLUDE})
+target_include_directories(${VERILATOR_LIBRARY} SYSTEM PUBLIC ${VERILATOR_INCLUDE}/vltstd/)
 #============================
 
 #TODO: use latest verilator to be able to change top lvl module params
@@ -92,8 +91,6 @@ add_custom_target(
     WORKING_DIRECTORY "${RTL_MODEL_BUILD_PATH}"
 )
 
-include_directories(${RTL_MODEL_BUILD_ROOT})
-
 # Set a list of sources
 set(TESTBENCH_SRC bench/soc.cpp)
 
@@ -103,5 +100,8 @@ add_dependencies(${PROJECT_NAME} Vmodel)
 target_link_libraries(${PROJECT_NAME}
     ${VERILOG_OUTPUT_LIB}
     ${VERILATOR_LIBRARY}
+)
+target_include_directories(${PROJECT_NAME} PUBLIC
+    ${RTL_MODEL_BUILD_ROOT}
 )
 
