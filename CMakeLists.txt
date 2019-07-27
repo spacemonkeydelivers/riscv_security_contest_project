@@ -8,7 +8,7 @@ project(riscv_soc)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 
-set(VERILATOR_FLAGS "--trace --trace-params --trace-structs -Wall -Wno-UNDRIVEN -Wno-UNUSED -Wno-WIDTH --MMD -CFLAGS -g --public")
+set(VERILATOR_FLAGS "--trace --trace-params --trace-structs -Wall -Wno-UNDRIVEN -Wno-UNUSED -Wno-WIDTH --MMD -CFLAGS -g -CFLAGS -fpic --public")
 set(VERILATOR_FLAGS_POST "-Wno-lint")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -g")
 
@@ -94,14 +94,20 @@ add_custom_target(
 # Set a list of sources
 set(TESTBENCH_SRC bench/soc.cpp)
 
-add_executable(${PROJECT_NAME} ${TESTBENCH_SRC})
-add_dependencies(${PROJECT_NAME} Vmodel)
-
-target_link_libraries(${PROJECT_NAME}
+add_library(bench SHARED ${TESTBENCH_SRC})
+add_dependencies(bench Vmodel)
+target_include_directories(bench PUBLIC
+    ${RTL_MODEL_BUILD_ROOT}
+)
+target_link_libraries(bench
     ${VERILOG_OUTPUT_LIB}
     ${VERILATOR_LIBRARY}
 )
-target_include_directories(${PROJECT_NAME} PUBLIC
-    ${RTL_MODEL_BUILD_ROOT}
-)
 
+add_executable(test_basic tests/basic_1.cpp)
+target_link_libraries(test_basic
+    bench
+)
+target_include_directories(test_basic PUBLIC
+    ${CMAKE_SOURCE_DIR}
+)
