@@ -10,7 +10,7 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 
 set(VERILATOR_FLAGS "--trace --trace-params --trace-structs -Wall -Wno-UNDRIVEN -Wno-UNUSED -Wno-WIDTH --MMD -CFLAGS -g --public")
 set(VERILATOR_FLAGS_POST "-Wno-lint")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -g")
 
 find_program(VERILATOR_BIN verilator)
 
