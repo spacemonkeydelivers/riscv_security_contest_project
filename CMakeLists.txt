@@ -45,7 +45,8 @@ add_library(${VERILATOR_LIBRARY} STATIC ${VERILATED_SOURCES})
 
 #TODO: use latest verilator to be able to change top lvl module params
 set(RTL_SRC_PATH ${CMAKE_SOURCE_DIR}/rtl)
-set(RTL_MODEL_BUILD_PATH ${CMAKE_BINARY_DIR}/rtl_model_build)
+set(RTL_MODEL_BUILD_ROOT ${CMAKE_BINARY_DIR}/rtl_model)
+set(RTL_MODEL_BUILD_PATH ${RTL_MODEL_BUILD_ROOT}/rtlsim)
 set(MODULE_NAME "soc")
 
 set(VERILATOR_FLAGS "${VERILATOR_FLAGS} -I${RTL_SRC_PATH}")
@@ -91,12 +92,11 @@ add_custom_target(
     WORKING_DIRECTORY "${RTL_MODEL_BUILD_PATH}"
 )
 
-include_directories(${RTL_MODEL_BUILD_PATH})
+include_directories(${RTL_MODEL_BUILD_ROOT})
 
 # Set a list of sources
 set(TESTBENCH_SRC bench/soc.cpp)
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
 add_executable(${PROJECT_NAME} ${TESTBENCH_SRC})
 add_dependencies(${PROJECT_NAME} Vmodel)
 
