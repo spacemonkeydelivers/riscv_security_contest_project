@@ -14,36 +14,7 @@
 #include <rtlsim/Vsoc_soc.h>
 #include <rtlsim/Vsoc_wb_cpu_bus.h>
 
-class RV_SOC
-{
-public:
-    enum class MemOpcode
-    {
-        READB = 0,
-        READBU = 1,
-        READH = 2,
-        READHU = 3,
-        READW = 4,
-        WRITEB = 5,
-        WRITEH = 6,
-        WRITEW = 7
-    };
-
-    static const unsigned wordSize = 4;
-
-    void tick(unsigned num = 1);
-    RV_SOC(const char* trace = nullptr);
-    ~RV_SOC();
-
-    void dumpRam(unsigned start = 0, unsigned size = wordSize);
-    void reset();
-
-    uint32_t doMemOp(unsigned address, MemOpcode opcode, uint32_t value = 0);
-private:
-    Vsoc*          m_soc     {nullptr};
-    uint64_t       m_tickCnt {0};
-    VerilatedVcdC* m_trace   {nullptr};
-};
+#include "soc.h"
 
 RV_SOC::RV_SOC(const char* trace)
 {
@@ -139,29 +110,3 @@ uint32_t RV_SOC::doMemOp(unsigned address, MemOpcode opcode, uint32_t value)
     return result;
 }
 
-int main(int argc, char **argv)
-{
-    Verilated::commandArgs(argc, argv);
-
-    RV_SOC rv_soc("trace.vcd");
-
-    rv_soc.tick(10);
-    rv_soc.reset();
-    rv_soc.tick(20);
-    rv_soc.reset();
-    rv_soc.tick(20);
-
-    rv_soc.dumpRam(0, 20);
-    rv_soc.doMemOp(0x10, RV_SOC::MemOpcode::READB);
-    rv_soc.doMemOp(0x11, RV_SOC::MemOpcode::WRITEB);
-    rv_soc.dumpRam(0, 20);
-
-    printf("\n");
-    rv_soc.doMemOp(0x0, RV_SOC::MemOpcode::WRITEB, 0x11335577);
-    rv_soc.doMemOp(0x4, RV_SOC::MemOpcode::WRITEH, 0x22446688);
-    rv_soc.doMemOp(0x8, RV_SOC::MemOpcode::WRITEW, 0xAABBAABB);
-    rv_soc.doMemOp(0xc, RV_SOC::MemOpcode::WRITEB, 0x065560);
-    rv_soc.dumpRam(0, 20);
-
-    return 0;
-}
