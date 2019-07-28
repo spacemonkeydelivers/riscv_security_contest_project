@@ -4,6 +4,14 @@ cmake_minimum_required(VERSION 2.8.3)
 # Project's name
 project(riscv_soc)
 
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install CACHE PATH "..." FORCE)
+endif()
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
+find_package(Python2 COMPONENTS Interpreter Development)
+find_package(Boost COMPONENTS python)
+
 # Set the output folder where your program will be created
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
@@ -92,14 +100,17 @@ add_custom_target(
 )
 
 # Set a list of sources
-set(TESTBENCH_SRC bench/soc.cpp)
+set(TESTBENCH_SRC bench/soc.cpp bench/ui.cpp)
 
 add_library(bench SHARED ${TESTBENCH_SRC})
-add_dependencies(bench Vmodel)
 target_include_directories(bench PUBLIC
     ${RTL_MODEL_BUILD_ROOT}
+    ${Python2_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
 )
 target_link_libraries(bench
+    ${Boost_LIBRARIES}
+    ${Python2_LIBRARIES}
     ${VERILOG_OUTPUT_LIB}
     ${VERILATOR_LIBRARY}
 )
@@ -111,3 +122,9 @@ target_link_libraries(test_basic
 target_include_directories(test_basic PUBLIC
     ${CMAKE_SOURCE_DIR}
 )
+
+install(TARGETS test_basic DESTINATION share/tests)
+install(TARGETS bench LIBRARY DESTINATION lib)
+install(TARGETS verilated LIBRARY DESTINATION lib)
+
+
