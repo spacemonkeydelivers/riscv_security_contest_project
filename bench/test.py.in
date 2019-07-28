@@ -1,0 +1,49 @@
+#!@Python2_EXECUTABLE@
+import glob, os
+import sys
+# The true way would be to set this one to CMAKE_INSTALL_PREFIX, but
+# BINARY dir is more convinient for users
+sys.path.append('@CMAKE_BINARY_DIR@/lib')
+import libbench
+
+test_dir = "@CMAKE_SOURCE_DIR@/tests"
+test_list = []
+for file in os.listdir(test_dir):
+  if file.endswith(".py"):
+    test_list.append(file)
+
+
+import argparse
+
+parser = argparse.ArgumentParser(
+    description='Test launcher for RISCV softcore SEC contest.')
+# TODO: implement regexps
+parser.add_argument('--test', dest='test_name',
+                    default=None,
+                    help='which tests to run. Comma-separated')
+parser.add_argument('--list', dest='list', action='store_true',
+                    default=False,
+                    help='list available tests')
+args = parser.parse_args()
+
+def list_tests():
+  print test_list
+
+if not len(sys.argv) > 1:
+  parser.print_help(sys.stderr)
+  sys.exit(1)
+
+if args.list is True:
+  list_tests()
+
+if args.test_name:
+  for test in args.test_name.split(','):
+    if test in test_list:
+      print 'trying to launch [' + test + '] test'
+      #TODO: this is not SECURE. Just a quick-and-dirty demostration
+      #A proper way would be to import from these files
+      execfile(os.path.join(test_dir, test))
+    else:
+      print 'Error! [' + test + '] is not found in test list!'
+      sys.exit(2)
+
