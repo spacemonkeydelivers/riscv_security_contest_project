@@ -14,6 +14,7 @@ module decoder(
 	output reg[6:0] O_funct7,
 	output reg[5:0] O_branchmask
 	);
+   /*verilator public_module*/ 
 
 	reg[31:0] instr;
 

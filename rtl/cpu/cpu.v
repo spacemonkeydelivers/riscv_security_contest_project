@@ -23,7 +23,8 @@ module cpu
 	    output WE_O
     );
    
-   /*verilator public_module*/
+    /*verilator public_module*/
+    /*verilator no_inline_module*/
 
     wire clk, reset;
     assign clk = CLK_I;

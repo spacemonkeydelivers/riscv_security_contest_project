@@ -46,14 +46,26 @@ class RiscVSoc:
             print("Writing 0x{0:08x} to 0x{1:08x}".format(value, address * self._word_size))
         self._soc.writeWord(address, value)
 
-    def pc():
-        pass
+    def pc(self):
+        return self._soc.PC()
 
+    def read_register(self, num):
+        if self._debug:
+            print("Reading 0x{0:08x} from {1:02d} register".format(self._soc.readReg(num), num))
+        return self._soc.readReg(num)
 
+    def write_register(self, num, value):
+        if self._debug:
+            print("Writing 0x{0:08x} to {1:02d} register".format(value, num))
+        self._soc.writeReg(num, value)
+
+    def print_register_file(self):
+        for num in range(self._soc.regFileSize()):
+            print("Register {0:02d} has value of 0x{1:08x}".format(num, self._soc.readReg(num)))
 
 soc = RiscVSoc('memtest_trace.vcd', True)
 soc.load_data_to_ram("/tmp/rv_mem.txt")
 soc.print_ram()
 soc.tick(100)
-
-
+soc.print_register_file()
+print(hex(soc.pc()))
