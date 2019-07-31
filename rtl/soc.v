@@ -7,9 +7,13 @@ module soc
    input wire rst_i
 );
    /*verilator no_inline_module*/
+
    localparam WB_DATA_WIDTH = 32;
    localparam WB_ADDR_WIDTH = 32;
    localparam WB_SEL_WIDTH  = 4;
+
+   localparam CPU_RESET_ADDR = 32'h0;
+   localparam CPU_EXCEPTION_ADDR = 32'h00AA_1155;
    
    // cpu interface
    wire [WB_ADDR_WIDTH - 1:0] wb_cpu_addr;
@@ -151,15 +155,14 @@ module soc
    reg [2:0] cpu_op = 0;
    wire cpu_busy;
 
-   wb_cpu_bus
-   cpu_bus0
+   cpu
+   #(
+      .VECTOR_RESET (CPU_RESET_ADDR),
+      .VECTOR_EXCEPTION (CPU_EXCEPTION_ADDR)
+   )
+   cpu0
    (
-      .I_en (cpu_en),
-      .I_op (cpu_op),
-      .I_addr (cpu_addr),
-      .I_data (cpu_data_in),
-      .O_data (cpu_data_out),
-      .O_busy (cpu_busy),
+      .INTERRUPT_I (timer_irq),
       .CLK_I (clk_i),
       .ACK_I (wb_cpu_ack),
       .DAT_I (wb_cpu_data_in),

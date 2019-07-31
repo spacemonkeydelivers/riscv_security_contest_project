@@ -1,4 +1,4 @@
-`include "cpu/busdefs.v"
+`include "cpu/busdefs.vh"
 
 module wb_cpu_bus(
 		input I_en,
@@ -77,6 +77,7 @@ module wb_cpu_bus(
 
 		if(I_en)
       begin
+         busy <= 0;
 			// if enabled, act
 			WE_O <= write;
          SEL_O <= mem_sel;
