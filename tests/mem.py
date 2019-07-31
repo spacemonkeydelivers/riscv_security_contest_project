@@ -1,7 +1,6 @@
-print 'MemoryTest!'
+print('MemoryTest!')
 
 print('creating soc')
-soc = libbench.RV_SOC('bla')
+soc = libbench.RV_SOC('memtest_trace.vcd')
 soc.tick(10)
 soc.reset()
-print('it`s alive!')
