@@ -27,6 +27,8 @@ RV_SOC::RV_SOC(const char* trace)
         m_soc->trace(m_trace, 99);
         m_trace->open(trace);
     }
+    m_ramSize = sizeof(m_soc->soc->ram0->ram0->mem) / wordSize;
+    reset();
 }
 
 RV_SOC::~RV_SOC()
@@ -71,15 +73,16 @@ void RV_SOC::tick(unsigned num)
     }
 }
 
-void RV_SOC::dumpRam(unsigned start, unsigned size)
+void RV_SOC::writeWord(unsigned address, uint32_t val)
 {
-    unsigned ramSize = sizeof(m_soc->soc->ram0->ram0->mem);
-    assert(start < ramSize / wordSize);
-    assert(start + size < ramSize / wordSize);
-    for (unsigned i = start; i < start + size; i++)
-    {
-        printf("0x%08x : 0x%08x\n", i, m_soc->soc->ram0->ram0->mem[i]);
-    }
+    assert(address < m_ramSize);
+    m_soc->soc->ram0->ram0->mem[address] = val;
+}
+
+uint32_t RV_SOC::readWord(unsigned address)
+{
+    assert(address < m_ramSize);
+    return m_soc->soc->ram0->ram0->mem[address];
 }
 
 void RV_SOC::reset()
@@ -90,23 +93,12 @@ void RV_SOC::reset()
     tick();
 }
 
-uint32_t RV_SOC::doMemOp(unsigned address, MemOpcode opcode, uint32_t value)
+uint64_t RV_SOC::getRamSize() const
 {
-    unsigned ramSize = sizeof(m_soc->soc->ram0->ram0->mem);
-    assert(address < ramSize / wordSize);
-    bool writeMem = (opcode == MemOpcode::WRITEB) || (opcode == MemOpcode::WRITEH) || (opcode == MemOpcode::WRITEW);
-    if (!writeMem)
-        assert(!value);
-    m_soc->soc->cpu_bus0->I_en = true;
-    m_soc->soc->cpu_bus0->I_op = static_cast<char>(opcode);
-    m_soc->soc->cpu_bus0->I_addr = address;
-    m_soc->soc->cpu_bus0->I_data = value;
-    tick(2);
-    uint32_t result = m_soc->soc->cpu_bus0->O_data;
-    if (!writeMem)
-        printf("Opcode 0x%x : data 0x%x\n", static_cast<char>(opcode), result);
-    m_soc->soc->cpu_bus0->I_en = false;
-    m_soc->soc->cpu_bus0->I_data = 0;
-    return result;
+    return m_ramSize;
 }
-
+    
+uint64_t RV_SOC::getWordSize() const
+{
+    return wordSize;
+}
