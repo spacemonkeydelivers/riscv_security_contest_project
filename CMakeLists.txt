@@ -16,7 +16,7 @@ find_package(Boost COMPONENTS python)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 
-set(VERILATOR_FLAGS "--trace --trace-params --trace-structs -Wall -Wno-UNDRIVEN -Wno-UNUSED -Wno-WIDTH --MMD -CFLAGS -g -CFLAGS -fpic --public")
+set(VERILATOR_FLAGS "--trace --trace-params --trace-structs -Wall -Wno-UNDRIVEN -Wno-UNUSED -Wno-WIDTH --MMD -CFLAGS -g -CFLAGS -fpic --public -Wno-MODDUP")
 set(VERILATOR_FLAGS_POST "-Wno-lint")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -g")
 
@@ -129,9 +129,9 @@ install(TARGETS verilated LIBRARY DESTINATION lib)
 
 
 # test environment (Python UI)
-configure_file(bench/test.py.in tmp/test.py)
+configure_file(bench/test.py.in tmp/run_tests.py)
 file(
-    COPY ${CMAKE_BINARY_DIR}/tmp/test.py
+    COPY ${CMAKE_BINARY_DIR}/tmp/run_tests.py
     DESTINATION ${CMAKE_BINARY_DIR}
     FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
