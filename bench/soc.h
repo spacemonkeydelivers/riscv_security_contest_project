@@ -21,15 +21,21 @@ public:
     void writeWord(unsigned address, uint32_t val);
     uint32_t readWord(unsigned address);
 
+    void writeReg(unsigned num, uint32_t val);
+    uint32_t readReg(unsigned num);
+
     uint64_t getRamSize() const;
     uint64_t getWordSize() const;
+    uint32_t getPC() const;
+    uint32_t getRegFileSize() const;
 
 private:
-    Vsoc*          m_soc     {nullptr};
-    uint64_t       m_tickCnt {0};
-    VerilatedVcdC* m_trace   {nullptr};
+    Vsoc*          m_soc         {nullptr};
+    uint64_t       m_tickCnt     {0};
+    VerilatedVcdC* m_trace       {nullptr};
 
-    uint64_t       m_ramSize {0};
+    uint64_t       m_ramSize     {0};
+    uint64_t       m_regFileSize {0};
 };
 
 #endif //D_SOC___INCLUDE_HEADER_GUARD__

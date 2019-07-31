@@ -13,6 +13,8 @@
 #include <rtlsim/Vsoc_wb_ram_generic__pi2.h>
 #include <rtlsim/Vsoc_soc.h>
 #include <rtlsim/Vsoc_wb_cpu_bus.h>
+#include <rtlsim/Vsoc_registers.h>
+#include <rtlsim/Vsoc_cpu__VBaa1155.h>
 
 #include "soc.h"
 
@@ -28,6 +30,7 @@ RV_SOC::RV_SOC(const char* trace)
         m_trace->open(trace);
     }
     m_ramSize = sizeof(m_soc->soc->ram0->ram0->mem) / wordSize;
+    m_regFileSize = sizeof(m_soc->soc->cpu0->reg_inst->regfile) / wordSize;
     reset();
 }
 
@@ -101,4 +104,26 @@ uint64_t RV_SOC::getRamSize() const
 uint64_t RV_SOC::getWordSize() const
 {
     return wordSize;
+}
+
+void RV_SOC::writeReg(unsigned num, uint32_t val)
+{
+    assert(num < m_regFileSize);
+    m_soc->soc->cpu0->reg_inst->regfile[num] = val;
+}
+
+uint32_t RV_SOC::readReg(unsigned num)
+{
+    assert(num < m_regFileSize);
+    return m_soc->soc->cpu0->reg_inst->regfile[num];
+}
+
+uint32_t RV_SOC::getPC() const
+{
+    return m_soc->soc->cpu0->pc;
+}
+
+uint32_t RV_SOC::getRegFileSize() const
+{
+    return m_regFileSize;
 }

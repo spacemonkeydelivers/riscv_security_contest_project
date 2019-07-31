@@ -12,6 +12,8 @@ module alu(
 	output reg O_lt,
 	output reg O_ltu,
 	output reg O_eq);
+   
+   /*verilator public_module*/ 
 	
 	reg[31:0] result, sum, myor, myxor, myand;
 	reg[32:0] sub; // additional bit for underflow detection

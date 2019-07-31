@@ -9,6 +9,7 @@ module registers(
 		output reg [31:0] O_regval1,
 		output reg [31:0] O_regval2
 		);
+   /*verilator public_module*/ 
 	
 	reg [31:0] regfile [31:0];
 

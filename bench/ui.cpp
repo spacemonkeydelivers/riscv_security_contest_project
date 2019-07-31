@@ -13,6 +13,10 @@ BOOST_PYTHON_MODULE(libbench)
         .def("writeWord", &RV_SOC::writeWord)
         .def("readWord", &RV_SOC::readWord)
         .def("ramSize", &RV_SOC::getRamSize)
+        .def("regFileSize", &RV_SOC::getRegFileSize)
+        .def("writeReg", &RV_SOC::writeReg)
+        .def("readReg", &RV_SOC::readReg)
+        .def("PC", &RV_SOC::getPC)
         .def("wordSize", &RV_SOC::getWordSize);
                                     ;
 }
