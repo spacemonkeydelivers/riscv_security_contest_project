@@ -27,7 +27,7 @@ module wb_timer
    reg ack = 0;
    assign wb_ack_o = ack;
    // if timer is running
-   reg timer_started = 0;
+   wire  timer_started = (threshold_time != 0);
    // contains current time
    reg [WB_DATA_WIDTH - 1:0] current_time = 0;
    // contains threshold tome
@@ -43,7 +43,6 @@ module wb_timer
          irq <= 0;
          current_time <= 0;
          threshold_time <= 0;
-         timer_started <= 0;
       end
       else
       begin
@@ -58,7 +57,6 @@ module wb_timer
             if (wb_we_i)
             begin
                threshold_time <= wb_data_i;
-               timer_started <= 1;
             end
             else
             begin
