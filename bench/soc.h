@@ -9,17 +9,6 @@ class VerilatedVcdC;
 class RV_SOC
 {
 public:
-    enum class MemOpcode
-    {
-        READB = 0,
-        READBU = 1,
-        READH = 2,
-        READHU = 3,
-        READW = 4,
-        WRITEB = 5,
-        WRITEH = 6,
-        WRITEW = 7
-    };
 
     static const unsigned wordSize = 4;
 
@@ -27,14 +16,20 @@ public:
     RV_SOC(const char* trace = nullptr);
     ~RV_SOC();
 
-    void dumpRam(unsigned start = 0, unsigned size = wordSize);
     void reset();
 
-    uint32_t doMemOp(unsigned address, MemOpcode opcode, uint32_t value = 0);
+    void writeWord(unsigned address, uint32_t val);
+    uint32_t readWord(unsigned address);
+
+    uint64_t getRamSize() const;
+    uint64_t getWordSize() const;
+
 private:
     Vsoc*          m_soc     {nullptr};
     uint64_t       m_tickCnt {0};
     VerilatedVcdC* m_trace   {nullptr};
+
+    uint64_t       m_ramSize {0};
 };
 
 #endif //D_SOC___INCLUDE_HEADER_GUARD__
