@@ -6,9 +6,9 @@ import sys
 sys.path.append('@CMAKE_BINARY_DIR@/lib')
 import libbench
 
-test_dir = "@CMAKE_SOURCE_DIR@/tests"
+TEST_DIR = "@CMAKE_SOURCE_DIR@/tests"
 test_list = []
-for file in os.listdir(test_dir):
+for file in os.listdir(TEST_DIR):
   if file.endswith(".py"):
     test_list.append(file)
 
@@ -39,10 +39,12 @@ if args.list is True:
 if args.test_name:
   for test in args.test_name.split(','):
     if test in test_list:
-      print 'trying to launch [' + test + '] test'
       #TODO: this is not SECURE. Just a quick-and-dirty demostration
       #A proper way would be to import from these files
-      execfile(os.path.join(test_dir, test))
+      import sys
+      import os
+      LIB_FILES = TEST_DIR + '/../bench/python/lib'
+      execfile(os.path.join(TEST_DIR, test))
     else:
       print 'Error! [' + test + '] is not found in test list!'
       sys.exit(2)
