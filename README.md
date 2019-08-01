@@ -1,3 +1,9 @@
+
+# Zephyr builds and OVP/RTL models
+
+Please refer to our [wiki](https://git.yggdrasill.ga/riscv_softcore_security_contest/riscv_core/wikis/home)
+for information regarding build zephyr and a subsequent OVP/RTL boot procedures.
+
 # riscv_core
 
 **1. How to build & use:**
@@ -25,8 +31,3 @@
     3.3. Writing 0 to the timer address space stops the timer   
     3.4. Any read to the timer address space resets the current timer value  
     **TODO: add test for working with timer and test CPU's IRQ**  
-
-# Zephyr builds and OVP/RTL models
-
-Please refer to our [wiki](https://git.yggdrasill.ga/riscv_softcore_security_contest/riscv_core/wikis/home)
-for information regarding build zephyr and a subsequent OVP/RTL boot procedures.
