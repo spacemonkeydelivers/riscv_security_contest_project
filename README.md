@@ -20,7 +20,13 @@
 
 **3. How to work with timer**  
     3.1. On reset timer is not started  
-    3.2. Any write to the timer address space sets the timer threshold to the written value and starts the timer  
+    3.2. Any write to the timer address space sets the timer threshold to the
+    written value and starts the timer  
     3.3. Writing 0 to the timer address space stops the timer   
     3.4. Any read to the timer address space resets the current timer value  
     **TODO: add test for working with timer and test CPU's IRQ**  
+
+# Zephyr builds and OVP/RTL models
+
+Please refer to our [wiki](https://git.yggdrasill.ga/riscv_softcore_security_contest/riscv_core/wikis/home)
+for information regarding build zephyr and a subsequent OVP/RTL boot procedures.
