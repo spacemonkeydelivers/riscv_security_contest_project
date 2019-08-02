@@ -1,4 +1,4 @@
-#include "lib/basic.S"
+#include "lib/defines.S"
 
 .global __start
 

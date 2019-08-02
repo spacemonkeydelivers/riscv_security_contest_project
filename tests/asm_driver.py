@@ -4,7 +4,7 @@ import subprocess
 
 import benchlibs.soc as soc_lib
 
-def run(libbench):
+def build_test_image():
   asm_file = os.environ['TESTS_DIR'] + '/asm/' + sys.argv[2]
   tools_dir = os.environ['TOOLS_DIR']
   cmd = '(echo \'<% input_asm="{}"; bench="{}" %>\' && cat \'{}\') | erb > Makefile'.format(
@@ -23,6 +23,10 @@ def run(libbench):
   if ret != 0:
     raise 'could not create test image'
   sys.stdout.flush()
+
+def run(libbench):
+
+  build_test_image()
 
   soc = soc_lib.RiscVSoc(libbench, 'memtest_trace.vcd', True)
   # prepare execution environment
