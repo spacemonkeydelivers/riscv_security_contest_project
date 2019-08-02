@@ -1,4 +1,3 @@
-
 # Zephyr builds and OVP/RTL models
 
 Please refer to our [wiki](https://git.yggdrasill.ga/riscv_softcore_security_contest/riscv_core/wikis/home)
@@ -31,3 +30,10 @@ for information regarding build zephyr and a subsequent OVP/RTL boot procedures.
     3.3. Writing 0 to the timer address space stops the timer   
     3.4. Any read to the timer address space resets the current timer value  
     **TODO: add test for working with timer and test CPU's IRQ**  
+    
+**4. Using converter from asm to hex**  
+```
+    4.1. set path to PATH=$PATH:/tank/work/dev/toolchains/riscv32-newlib-gcc/bin/  
+    4.2. run python3 bench/compile_asm.py --toolchain riscv32-unknown-elf- --input tests/asm/byte_test.s --output-dir /tmp/ --linker bench/soc.ld --tmp-dir /tmp  
+    4.3. use /tmp/test_byte.hex as hex input for tests
+```
