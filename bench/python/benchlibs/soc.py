@@ -28,7 +28,7 @@ class RiscVSoc:
                     word = int("".join(b[k:k+4][::-1]), 16)
                     self._soc.writeWord(offset, word)
                     if self._debug:
-                        print("Writing 0x{0:08x} to offset 0x{0:08x}".format(word, offset))
+                        print("Writing 0x{0:08x} to address 0x{1:08x}".format(word, offset * 4))
                     offset += 1
 
     def print_ram(self, start_addr = 0, num_words = 8):
