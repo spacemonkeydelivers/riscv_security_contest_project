@@ -1,5 +1,6 @@
 test_add(basic_mem              basic/mem.py)
 test_add(basic_soc              basic/soc.py)
+test_add(basim_timer            basic/timer.py)
 # NOTE: arg1 and arg2 are not used in THIS test.
 # Just a demo to show how to pass arguments
 test_add(basic_unaligned_store  basic/store_byte_issue.py
