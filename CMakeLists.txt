@@ -1,6 +1,8 @@
 # Specify the minimum version for CMake
 cmake_minimum_required(VERSION 2.8.3)
 
+enable_testing()
+
 # Project's name
 project(riscv_soc)
 
@@ -115,23 +117,28 @@ target_link_libraries(bench
     ${VERILATOR_LIBRARY}
 )
 
-add_executable(test_basic tests/basic_1.cpp)
-target_link_libraries(test_basic
-    bench
-)
-target_include_directories(test_basic PUBLIC
-    ${CMAKE_SOURCE_DIR}
-)
-
-install(TARGETS test_basic DESTINATION share/tests)
+#install(TARGETS test_basic DESTINATION share/tests)
 install(TARGETS bench LIBRARY DESTINATION lib)
 install(TARGETS verilated LIBRARY DESTINATION lib)
 
 
 # test environment (Python UI)
-configure_file(bench/test.py.in tmp/run_tests.py)
+configure_file(bench/python/runner.py.in tmp/runner.py)
 file(
-    COPY ${CMAKE_BINARY_DIR}/tmp/run_tests.py
-    DESTINATION ${CMAKE_BINARY_DIR}
-    FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+    COPY ${CMAKE_BINARY_DIR}/tmp/runner.py
+    DESTINATION ${CMAKE_BINARY_DIR}/tests
+    FILE_PERMISSIONS
+    OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
+set(TEST_RUNNER ${CMAKE_BINARY_DIR}/tests/runner.py)
+function(test_add name src)
+
+    set(TEST_DIR "${CMAKE_BINARY_DIR}/tests/${name}")
+    # This is a hack. Stupid cmake won't create working directories if not exist
+    file(MAKE_DIRECTORY "${TEST_DIR}")
+    add_test(NAME "${name}"
+             COMMAND "${TEST_RUNNER}" "${src}" ${ARGN}
+             WORKING_DIRECTORY "${TEST_DIR}")
+endfunction()
+include(tests/TestLists.txt)
+
