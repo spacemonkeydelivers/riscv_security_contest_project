@@ -15,21 +15,21 @@ class RiscVSoc:
         return self._soc.ramSize()
 
     def load_data_to_ram(self, path_to_image, offset_in_words = 0):
-        data = map(lambda x: int(x.strip(), 16), open(path_to_image, "r").readlines())
-        if self._debug:
-            print("Read {0} words".format(len(data)))
-        words_left = self.get_soc_ram_size() - offset_in_words
-        words_to_write = len(data)
-        if len(data) > words_left:
-            words_to_write = words_left
-            if self._debug:
-                print("Read too many words.")
-        if self._debug:
-            print("Writing data starting from 0x{0:08x} words {1}".format(offset_in_words * self._word_size, words_to_write))
-        for i in range(words_to_write):
-            if self._debug:
-                print("Writing 0x{0:08x} to 0x{1:08x}".format(data[i], (i + offset_in_words) * self._word_size))
-            self._soc.writeWord(i + offset_in_words, data[i])
+        data = map(lambda x: x.strip(), open(path_to_image, "r").readlines())
+        offset = 0
+        for line in data:
+            if line[0] == '@':
+                offset = int(line[1:], 16)
+                if self._debug:
+                    print("Changing offset while loading to RAM to: 0x{0:08x}".format(offset))
+            else:
+                b = line.split()
+                for k in range(0, len(b), 4):
+                    word = int("".join(b[k:k+4][::-1]), 16)
+                    self._soc.writeWord(offset, word)
+                    if self._debug:
+                        print("Writing 0x{0:08x} to offset 0x{0:08x}".format(word, offset))
+                    offset += 1
 
     def print_ram(self, start_addr = 0, num_words = 8):
         for addr in xrange(start_addr, start_addr + num_words):
