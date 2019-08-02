@@ -105,6 +105,7 @@ add_custom_target(
 set(TESTBENCH_SRC bench/soc.cpp bench/ui.cpp)
 
 add_library(bench SHARED ${TESTBENCH_SRC})
+add_dependencies(bench Vmodel)
 target_include_directories(bench PUBLIC
     ${RTL_MODEL_BUILD_ROOT}
     ${Python2_INCLUDE_DIRS}
