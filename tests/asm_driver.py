@@ -34,7 +34,6 @@ def run(libbench):
   soc.print_ram(0x100 / 4, 1)
   # TODO: re-implement this function. add error reporting (exception)
   soc.load_data_to_ram("test.v")
-  raise "refactor!"
   soc.tick(50)
   # expected value at 0x100 address after the sequence is 0x55555555
   # real value at 0x100 address is 0x00000055
