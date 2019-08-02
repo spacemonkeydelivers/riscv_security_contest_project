@@ -110,7 +110,7 @@ class CompileAsm:
         out_file = open(self._output_file, 'a')
         for i in range(num_words):
             w = self._bin_data[4*i : 4*i+4]
-            out_file.write("%02x%02x%02x%02x" % (w[3], w[2], w[1], w[0]))
+            out_file.write("%02x%02x%02x%02x\n" % (w[3], w[2], w[1], w[0]))
         out_file.close()
 
     def __cleanup(self):
