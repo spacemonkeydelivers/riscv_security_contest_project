@@ -142,6 +142,7 @@ module soc
       .wb_sel_i (wb_ram_sel),
       .wb_we_i (wb_ram_we),
       .wb_cyc_i (wb_ram_cyc),
+      .wb_ack_o (wb_ram_ack),
       .wb_dat_o (wb_ram_data_out)
    );
    // TODO: wb_ram_stb ???
