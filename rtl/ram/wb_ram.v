@@ -37,8 +37,12 @@ module wb_ram
    input wire [3:0] 	wb_sel_i,
    input wire 		wb_we_i,
    input wire 		wb_cyc_i,
+   output wire  	wb_ack_o,
 
    output wire [dw-1:0] wb_dat_o);
+
+   reg ack = 0;
+   assign wb_ack_o = ack;
 
    wire ram_we = wb_we_i & wb_cyc_i;
 
@@ -52,5 +56,14 @@ module wb_ram
       .waddr(wb_adr_i[aw-1:2]),
       .raddr (wb_adr_i[aw-1:2]),
       .dout (wb_dat_o));
+
+   always @ (posedge wb_clk_i)
+   begin
+      ack <= 0;
+      if (wb_cyc_i)
+      begin
+         ack <= 1;
+      end
+   end
 
 endmodule
