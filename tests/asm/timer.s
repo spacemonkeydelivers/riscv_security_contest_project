@@ -4,6 +4,8 @@
 
 .section .reset, "awx"
 __start:
+addi a3, zero, 1
+csrw mstatus, a3
 mv sp, zero
 lui sp, 0x40000
 addi a0, zero, 10
@@ -15,5 +17,9 @@ mv zero, zero
 mv zero, zero
 mv zero, zero
 lb a0, 0(sp)
+sb zero, 1(sp)
+mv zero, zero
+mv zero, zero
+mv zero, zero
 
 FAILED 1

@@ -53,7 +53,6 @@ module wb_timer
          end
          if (wb_cyc_i)
          begin
-            ack <= 1;
             if (wb_we_i)
             begin
                threshold_time <= wb_data_i;
@@ -63,7 +62,7 @@ module wb_timer
                current_time <= 0;
             end
          end
-         ack <= 0;
+         ack <= wb_cyc_i;
       end
    end
 endmodule
