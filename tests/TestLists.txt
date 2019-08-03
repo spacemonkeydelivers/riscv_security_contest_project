@@ -6,5 +6,6 @@ test_add(basic_unaligned_store  basic/store_byte_issue.py
          --arg1 BLA --args2 BLABLA)
 
 test_add(asm_timer  asm_driver.py timer.s)
+test_add(asm_stld  asm_driver.py st_ld.s)
 
 
