@@ -31,6 +31,7 @@ RV_SOC::RV_SOC(const char* trace)
     }
     m_ramSize = sizeof(m_soc->soc->ram0->ram0->mem) / wordSize;
     m_regFileSize = sizeof(m_soc->soc->cpu0->reg_inst->regfile) / wordSize;
+    clearRam();
     reset();
 }
 
@@ -126,4 +127,12 @@ uint32_t RV_SOC::getPC() const
 uint32_t RV_SOC::getRegFileSize() const
 {
     return m_regFileSize;
+}
+
+void RV_SOC::clearRam()
+{
+    for (unsigned i = 0; i < m_ramSize; i++)
+    {
+        writeWord(i, 0);
+    }
 }

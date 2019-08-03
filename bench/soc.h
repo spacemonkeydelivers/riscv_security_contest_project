@@ -29,6 +29,8 @@ public:
     uint32_t getPC() const;
     uint32_t getRegFileSize() const;
 
+    void clearRam();
+
 private:
     Vsoc*          m_soc         {nullptr};
     uint64_t       m_tickCnt     {0};
