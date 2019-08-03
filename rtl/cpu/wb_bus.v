@@ -29,9 +29,6 @@ module wb_cpu_bus(
 	reg busy = 0;
 	assign O_busy = busy;
 
-	reg[2:0] addrcnt = 0, ackcnt = 0, byte_target = 0;
-	wire[2:0] addrcnt_next, ackcnt_next;
-
    reg [3:0] mem_sel;
 	
 	wire[31:0] busaddr;
@@ -66,19 +63,18 @@ module wb_cpu_bus(
 		mysign = signextend && ((mem_sel == 4'b0011) ? DAT_I[15] : DAT_I[7]);
 	end
 
+	reg ack_rcvd = 0;
 
 	always @(posedge CLK_I) begin
-		busy <= I_en;
-		CYC_O <= I_en;
-
 		WE_O <= 0;
       SEL_O <= 0;
-		STB_O <= I_en;
+      WE_O <= write;
+      busy <= I_en;
 
 		if(I_en)
       begin
-         busy <= 0;
-			// if enabled, act
+         CYC_O <= 1;
+         STB_O <= 1;
 			WE_O <= write;
          SEL_O <= mem_sel;
          ADR_O <= busaddr;
@@ -92,6 +88,20 @@ module wb_cpu_bus(
          if(mem_sel[3])
             DAT_O[31:24] <= I_data[31:24];
 		end
+
+      if (ACK_I)
+      begin
+         CYC_O <= 0;
+         STB_O <= 0;
+         ack_rcvd <= 1;
+         WE_O <= 0;
+      end
+
+      if (ack_rcvd)
+      begin
+         busy <= 0;
+         ack_rcvd <= 0;
+      end
      
       case (mem_sel)
          4'b1111: begin
