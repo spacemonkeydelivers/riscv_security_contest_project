@@ -8,6 +8,10 @@ INSTALL_HEADERS=stdbool.h stdint.h stdlib.h string.h unistd.h soc/traps.h
 
 all: $(LIBNAME).a
 
+tests: $(LIBNAME).a $(TOP)/tests/basic.c
+	$(CC) $(CFLAGS) -static -L. -lc $(TOP)/tests/basic.c -o test_basic \
+		-T$(TOP)/share/soc.ld -I$(TOP)/include
+
 install: $(LIBNAME).a $(addprefix $(TOP)/include/,$(INSTALL_HEADERS))
 	mkdir -p $(INSTALL_DIR)/lib/
 	mkdir -p $(INSTALL_DIR)/include/
@@ -22,13 +26,13 @@ generated/esf.h: $(TOP)/src/internals/esf.h.erb
 isr.o: $(TOP)/src/asm/isr.S generated/esf.h
 	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -I. -o $@ -c $<
 
+boot.o: $(TOP)/src/asm/boot.S generated/esf.h
+	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -I. -o $@ -c $<
+
 os.o: $(TOP)/src/internals/os.c generated/esf.h
 	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -I. -o $@ -c $<
 
 config.o: $(TOP)/src/asm/config.S
-	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -o $@ -c $<
-
-boot.o: $(TOP)/src/asm/boot.S
 	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -o $@ -c $<
 
 libc-start.o: $(TOP)/src/libc-start.c

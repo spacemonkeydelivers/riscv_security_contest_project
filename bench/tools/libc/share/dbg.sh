@@ -4,5 +4,5 @@ make \
     TOP=/home/ecco/sec/riscv_core/bench/tools/libc \
     CFLAGS='-march=rv32im -ffreestanding -nostdinc -nodefaultlibs -nostdlib -Os -Wall -Werror -Wextra' \
     -f /home/ecco/sec/riscv_core/bench/tools/libc/Makefile \
-    all
+    all tests
 

@@ -7,8 +7,6 @@
         WARNING-WARNING-WARNING
 */
 
-#include <stdint.h>
-
 <%
   gprs = [
     :sp, :ra, :gp, :tp,
@@ -24,6 +22,9 @@
 %>
 
 #ifndef __ASSEMBLER__
+
+#include <stdint.h>
+
 struct s_esf_frame {
 <% esf_contents.each do |item| %>
   uint32_t <%= item %>; 
@@ -40,7 +41,7 @@ struct s_esf_frame {
 #ifdef __ASSEMBLER__
 #define __D_INITIALIZE_REGISTER_FILE \
 <% gprs.each do |item| %>
-  mv <%= item %>, 0 ; \
+  mv <%= item %>, zero ; \
 <% end %>
 
 #define __D_PUSH_GPR2ESF \
