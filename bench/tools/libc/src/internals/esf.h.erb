@@ -1,6 +1,14 @@
 #ifndef __INCLUDE_GUARD_RISCV_ESF__
 #define __INCLUDE_GUARD_RISCV_ESF__
 
+/*
+        WARNING-WARNING-WARNING
+  This file is auto-generated. Do not edit.
+        WARNING-WARNING-WARNING
+*/
+
+#include <stdint.h>
+
 <%
   gprs = [
     :sp, :ra, :gp, :tp,
@@ -14,6 +22,38 @@
 
   esf_contents = gprs + csrs
 %>
+
+#ifndef __ASSEMBLER__
+struct s_esf_frame {
+<% esf_contents.each do |item| %>
+  uint32_t <%= item %>; 
+<% end %>
+};
+#endif // __ASSEMBLER__
+
+<% esf_contents.each_with_index do |item, idx| %>
+#define __ESF_OFFSET_OF_<%= item %> 0x<%= ((idx * 4).to_s 16) %> 
+<% end %>
+
+#define __ESF_STRUCTURE_SIZE <%= ((esf_contents.length * 4).to_s) %> 
+
+#ifdef __ASSEMBLER__
+#define __D_INITIALIZE_REGISTER_FILE \
+<% gprs.each do |item| %>
+  mv <%= item %>, 0 ; \
+<% end %>
+
+#define __D_PUSH_GPR2ESF \
+<% gprs.each do |item| %>
+  sw <%= item %>, __ESF_OFFSET_OF_<%=item %>(sp) ; \
+<% end %>
+
+#define __D_POP_ESF2GPR \
+<% gprs.reverse.each do |item| %>
+  lw <%= item %>, __ESF_OFFSET_OF_<%=item %>(sp) ; \
+<% end %>
+
+#endif //__ASSEMBLER__
 
 #endif /* end of include guard: __INCLUDE_GUARD_RISCV_ESF__ */
 
