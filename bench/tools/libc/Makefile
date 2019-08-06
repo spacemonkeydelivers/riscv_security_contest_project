@@ -4,21 +4,32 @@ OBJ_FILES=boot.o isr.o config.o \
 	libc-start.o \
 	stdlib.o unistd.o string.o
 LIBNAME=libc
-INSTALL_HEADERS=stdbool.h stdint.h stdlib.h string.h unistd.h soc/traps.h
+INSTALL_HEADERS=stdbool.h stdint.h stdlib.h string.h unistd.h
+INSTALL_SOC_HEADERS=traps.h
+INSTALL_SHARE_CONTENT=soc.ld
 
-all: $(LIBNAME).a
+I_HEADERS     := $(addprefix $(TOP)/include/,$(INSTALL_HEADERS))
+I_SOC_HEADERS := $(addprefix $(TOP)/include/soc/,$(INSTALL_SOC_HEADERS))
+I_SHARE       := $(addprefix $(TOP)/share/,$(INSTALL_SHARE_CONTENT))
+I_STRUCTURE   := $(addprefix $(INSTALL_DIR)/,lib include include/soc share)
+DEPS_INSTALL := $(LIBNAME).a
+DEPS_INSTALL += $(I_HEADERS)
+DEPS_INSTALL += $(I_SOC_HEADERS)
+DEPS_INSTALL += $(I_SHARE)
+
+install: $(LIBNAME).a $(addprefix $(TOP)/include/,$(INSTALL_HEADERS))
+	echo "$(I_STRUCTURE)"
+	install -d $(I_STRUCTURE)
+	install -m 644 $(LIBNAME).a $(INSTALL_DIR)/lib
+	install -m 644 $(I_HEADERS) $(INSTALL_DIR)/include
+	install -m 644 $(I_SOC_HEADERS) $(INSTALL_DIR)/include/soc
+	install -m 644 $(I_SHARE) $(INSTALL_DIR)/share
 
 tests: $(LIBNAME).a $(TOP)/tests/basic.c
 	$(CC) $(CFLAGS) -static -L. -lc $(TOP)/tests/basic.c -o test_basic \
 		-T$(TOP)/share/soc.ld -I$(TOP)/include
 
-install: $(LIBNAME).a $(addprefix $(TOP)/include/,$(INSTALL_HEADERS))
-	mkdir -p $(INSTALL_DIR)/lib/
-	mkdir -p $(INSTALL_DIR)/include/
-	mkdir -p $(INSTALL_DIR)/share/
-	cp $(LIBNAME).a $(INSTALL_DIR)/lib/
-	cp $(addprefix $(TOP)/include/,$(INSTALL_HEADERS)) $(INSTALL_DIR)/include/
-	cp -r $(TOP)/share/soc.ld $(INSTALL_DIR)/share/
+all: $(LIBNAME).a
 
 generated/esf.h: $(TOP)/src/internals/esf.h.erb
 	mkdir -p generated && erb -T 1 $(TOP)/src/internals/esf.h.erb >generated/esf.h
