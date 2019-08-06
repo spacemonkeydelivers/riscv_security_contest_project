@@ -12,6 +12,7 @@ TESTS_DIR = "@CMAKE_SOURCE_DIR@/tests"
 THE_TEST = os.path.join(TESTS_DIR, sys.argv[1])
 
 os.environ['TOOLS_DIR'] = '@CMAKE_SOURCE_DIR@/bench/tools'
+os.environ['TOOLS_DISTRIB'] = '@CMAKE_BINARY_DIR@/disrib/tools'
 os.environ['TESTS_DIR'] = TESTS_DIR
 sys.path.append("@CMAKE_SOURCE_DIR@/bench/python")
 

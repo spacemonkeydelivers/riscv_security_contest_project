@@ -1,23 +1,26 @@
 #  /riscv32-unknown-elf-gcc -nostartfiles -march=rv32imc  -mabi=ilp32 -T ../riscv_core/bench/soc.ld ../riscv_core/tests/asm/timer.s
 #
+
+TOOLS_DISTRIB  = <%= tools_distrib %>
+
+LIBC_PATH   = <%= tools_distrib %>/lib
+LIBC_INCLUDES = <%= tools_distrib %>/include
+
 TOOLCHAIN  = /tank/work/dev/toolchains/riscv32-newlib-gcc/bin
 CC         = $(TOOLCHAIN)/riscv32-unknown-elf-gcc
 OBJCOPY    = $(TOOLCHAIN)/riscv32-unknown-elf-objcopy
-CFLAGS     = -O0 -std=c11 -ffreestanding -w -nostdinc -nostdlib -nodefaultlibs -nostartfiles -march=rv32imc  -mabi=ilp32
+CFLAGS     = -O0 -std=c11 -ffreestanding -w -nostdinc -nostdlib -nodefaultlibs -nostartfiles -march=rv32imc -mabi=ilp32
 LDFLAGS    = -nostdlib -nodefaultlibs -nostartfiles
-LDSCRIPT   = <%= bench %>/asm_tests.ld
+LDSCRIPT   = <%= tools_distrib %>/share/soc.ld
 
-SRC  = <%= input_asm %>
+SRC  = <%= input_c %>
 
 .PHONY : all
 
 all: test.elf test.v
 
-test.elf: asm_pre.s
-	$(CC) -Xlinker -T$(LDSCRIPT) $(CFLAGS) asm_pre.s -o test.elf
-
-asm_pre.s: $(SRC)
-	$(CC) -x c -E $(CFLAGS) $(SRC) -o asm_pre.s
+test.elf: $(SRC)
+	$(CC) $(CFLAGS) $(SRC) -I$(LIBC_INCLUDES) -static -L$(LIBC_PATH) -lc -Xlinker -T$(LDSCRIPT) -o test.elf
 
 test.v: test.elf
 	$(OBJCOPY) --target verilog test.elf test.v

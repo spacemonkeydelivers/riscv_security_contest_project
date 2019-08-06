@@ -1,14 +1,16 @@
 import sys
 import os
 import subprocess
+import glob
 
 import benchlibs.soc as soc_lib
 
-def build_test_image():
+def generate_make_asm():
+
   asm_file = os.environ['TESTS_DIR'] + '/asm/' + sys.argv[2]
   tools_dir = os.environ['TOOLS_DIR']
   cmd = '(echo \'<% input_asm="{}"; bench="{}" %>\' && cat \'{}\') | erb > Makefile'.format(
-        asm_file, tools_dir, tools_dir + '/Makefile.erb')
+        asm_file, tools_dir, tools_dir + '/misc/Makefile_asm.erb')
 
   print('running <{}>'.format(cmd))
   sys.stdout.flush()
@@ -16,6 +18,32 @@ def build_test_image():
   if ret != 0:
     raise 'could not generate makefile'
   sys.stdout.flush()
+
+def generate_make_c():
+  tools_dir = os.environ['TOOLS_DIR']
+  tools_distr = os.environ['TOOLS_DISTRIB']
+  c_root = os.path.join(os.environ['TESTS_DIR'], sys.argv[2])
+  pattern = os.path.join(c_root, '*.c')
+  print('searching for c files as <{}>'.format(pattern))
+  c_list = ' '.join(glob.glob(pattern))
+  print('found results: {}'.format(c_list))
+  sys.stdout.flush()
+
+  cmd = '(echo \'<% input_c="{}"; tools_distrib="{}" %>\' && cat \'{}\') | erb > Makefile'.format(
+        c_list, tools_distr, tools_dir + '/misc/Makefile_c.erb')
+  print('running <{}>'.format(cmd))
+  sys.stdout.flush()
+  ret = os.system(cmd)
+  if ret != 0:
+    raise 'could not generate makefile'
+  sys.stdout.flush()
+
+def build_test_image():
+
+  if sys.argv[2].split("/")[0] == "c":
+    generate_make_c()
+  else:
+    generate_make_asm()
 
   print('running make...')
   sys.stdout.flush()
