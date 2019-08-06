@@ -4,7 +4,9 @@ module soc
 )
 (
    input wire clk_i,
-   input wire rst_i
+   input wire rst_i,
+   input wire uart_rx_i,
+   output wire uart_tx_o
 );
    /*verilator no_inline_module*/
 
@@ -174,6 +176,42 @@ module soc
       .CYC_O (wb_cpu_cyc),
       .STB_O (wb_cpu_stb),
       .WE_O (wb_cpu_we)
+   );
+
+   wire uart_stall;
+   wire uart_cts;
+   wire uart_rts;
+   wire uart_rx_int;
+   wire uart_tx_int;
+   wire uart_rx_fifo_int;
+   wire uart_tx_fifo_int;
+
+   wbuart
+   #(
+      .INITIAL_SETUP(31'd25),
+      .LGFLEN(4),
+      .HARDWARE_FLOW_CONTROL_PRESENT(0)
+   )
+   uart0
+   (
+      .i_clk(clk_i),
+      .i_rst(rst_i),
+      .i_wb_cyc(wb_uart_cyc),
+      .i_wb_stb(wb_uart_stb),
+      .i_wb_we(wb_uart_we),
+      .i_wb_addr(wb_uart_addr),
+      .i_wb_data(wb_uart_data_in),
+      .o_wb_ack(wb_uart_ack),
+      .o_wb_stall(uart_stall),
+      .o_wb_data(wb_uart_data_out),
+      .i_uart_rx(uart_rx_i),
+      .o_uart_tx(uart_tx_o),
+      .i_cts_n(uart_cts),
+      .o_rts_n(uart_rts),
+      .o_uart_rx_int(uart_rx_int),
+      .o_uart_tx_int(uart_tx_int),
+      .o_uart_rxfifo_int(uart_rx_fifo_int),
+      .o_uart_txfifo_int(uart_tx_fifo_int)
    );
 
 endmodule

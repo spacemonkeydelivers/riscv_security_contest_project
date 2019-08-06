@@ -30,6 +30,11 @@ public:
     uint32_t getRegFileSize() const;
 
     void clearRam();
+    
+    bool validUartTxTransaction() const;
+    bool validUartRxTransaction() const;
+    bool validUartTransaction() const;
+    uint8_t getUartTxData();
 
 private:
     Vsoc*          m_soc         {nullptr};
@@ -38,6 +43,9 @@ private:
 
     uint64_t       m_ramSize     {0};
     uint64_t       m_regFileSize {0};
+
+    uint64_t       UART_TX_ADDR  {0x3};
+    uint64_t       UART_RX_ADDR  {0x2};
 };
 
 #endif //D_SOC___INCLUDE_HEADER_GUARD__

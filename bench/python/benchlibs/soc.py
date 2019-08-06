@@ -4,9 +4,24 @@ class RiscVSoc:
         self._soc = libbench.RV_SOC(path_to_vcd)
         self._debug = debug
         self._word_size = self._soc.wordSize()
+        self._on_tick_callbacks = []
+
+    def register_tick_callback(self, callback):
+        if self._debug:
+            print("Registering on tick callback")
+        self._on_tick_callbacks.append(callback)
 
     def tick(self, ticks):
-        self._soc.tick(ticks)
+        for t in range(ticks):
+            self._soc.tick(1)
+            for c in self._on_tick_callbacks:
+#                if self._debug:
+#                    print("Calling on tick callback")
+                c()
+
+    def print_uart_tx(self):
+        if self._soc.uartTxValid():
+            print(str(chr(self._soc.readTxByte())))
 
     def reset(self):
         self._soc.reset()
