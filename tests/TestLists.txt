@@ -8,4 +8,6 @@ test_add(basic_unaligned_store  basic/store_byte_issue.py
 test_add(asm_timer  asm_driver.py timer.s)
 test_add(asm_stld  asm_driver.py st_ld.s)
 
+test_add(c_basic asm_driver.py c/basic)
+
 
