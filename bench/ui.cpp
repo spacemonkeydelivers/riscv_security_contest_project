@@ -17,6 +17,8 @@ BOOST_PYTHON_MODULE(libbench)
         .def("writeReg", &RV_SOC::writeReg)
         .def("readReg", &RV_SOC::readReg)
         .def("PC", &RV_SOC::getPC)
+        .def("readTxByte", &RV_SOC::getUartTxData)
+        .def("uartTxValid", &RV_SOC::validUartTxTransaction)
         .def("wordSize", &RV_SOC::getWordSize);
                                     ;
 }

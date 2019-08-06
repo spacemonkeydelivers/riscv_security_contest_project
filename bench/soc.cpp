@@ -15,6 +15,8 @@
 #include <rtlsim/Vsoc_wb_cpu_bus.h>
 #include <rtlsim/Vsoc_registers.h>
 #include <rtlsim/Vsoc_cpu__VBaa1155.h>
+#include <rtlsim/Vsoc_wbuart__H0.h>
+#include <rtlsim/Vsoc_wb_mux.h>
 
 #include "soc.h"
 
@@ -135,4 +137,29 @@ void RV_SOC::clearRam()
     {
         writeWord(i, 0);
     }
+}
+    
+bool RV_SOC::validUartTransaction() const
+{
+    bool valid = (m_soc->soc->uart0->i_wb_cyc == m_soc->soc->uart0->o_wb_ack) && m_soc->soc->uart0->i_wb_cyc;
+    return valid;
+}
+
+bool RV_SOC::validUartTxTransaction() const
+{
+    bool valid = validUartTransaction() && (m_soc->soc->uart0->i_wb_addr == UART_TX_ADDR);
+    return valid;
+}
+
+bool RV_SOC::validUartRxTransaction() const
+{
+    bool valid = validUartTransaction() && (m_soc->soc->uart0->i_wb_addr == UART_RX_ADDR);
+    return valid;
+}
+
+uint8_t RV_SOC::getUartTxData()
+{
+    assert(validUartTxTransaction());
+    uint8_t data = (m_soc->soc->uart0->i_wb_data & 0xFF);
+    return data;
 }
