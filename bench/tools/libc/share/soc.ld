@@ -1,5 +1,6 @@
 SECTIONS
 {
+    STACK_SIZE = 4096;
     _start = 0;
     ENTRY(_start)
     /* BIOS mapping */
@@ -14,7 +15,7 @@ SECTIONS
         *(.__system.data)
     }
     /* User code mapping */
-    .text 0x400000 : AT(0x400000) {
+    .text : {
         *(.text)
     }
     .data : {
@@ -27,11 +28,13 @@ SECTIONS
         *(.bss)
     }
     /* Stack code mapping */
-    .__application_stack 0x7ffff000 : AT(0x7ffff000) {
+    .application_stack : {
         begin = .;
         *(.__application_stack);
-        . = begin + 4096;
+        . = begin + STACK_SIZE;
     }
+    __APP_STACK_TOP = ((. + 15) & ( ~ 15 )) ;
+    /* TODO: add assert for available memory */
 }
 
 
