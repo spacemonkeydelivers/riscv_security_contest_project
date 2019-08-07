@@ -33,8 +33,10 @@ SECTIONS
         *(.__application_stack);
         . = begin + STACK_SIZE;
     }
+    __SOC_MEM_SIZE  = DEFINED(__SOC_MEM_SIZE) ? __SOC_MEM_SIZE : 8192 ;
     __APP_STACK_TOP = ((. + 15) & ( ~ 15 )) ;
     /* TODO: add assert for available memory */
+    ASSERT(__APP_STACK_TOP <= __SOC_MEM_SIZE, "not enough memory")
 }
 
 
