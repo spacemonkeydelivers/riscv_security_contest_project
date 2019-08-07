@@ -24,12 +24,10 @@ class RiscVSoc:
     def print_uart_tx(self):
         if self._soc.uartTxValid():
             sys.stdout.write((str(chr(self._soc.readTxByte()))))
-            sys.stdout.flush()
 
     def print_pc(self):
         if self._soc.pcValid():
             print("PC: 0x{0:08x}".format(self._soc.PC()))
-            sys.stdout.flush()
 
     def reset(self):
         self._soc.reset()
