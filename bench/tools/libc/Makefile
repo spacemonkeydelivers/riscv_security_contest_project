@@ -17,7 +17,7 @@ DEPS_INSTALL += $(I_HEADERS)
 DEPS_INSTALL += $(I_SOC_HEADERS)
 DEPS_INSTALL += $(I_SHARE)
 
-install: $(LIBNAME).a $(addprefix $(TOP)/include/,$(INSTALL_HEADERS))
+install: $(DEPS_INSTALL)
 	echo "$(I_STRUCTURE)"
 	install -d $(I_STRUCTURE)
 	install -m 644 $(LIBNAME).a $(INSTALL_DIR)/lib
