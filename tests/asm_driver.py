@@ -81,18 +81,14 @@ def run(libbench):
 
   driver = build_test_image(soc)
 
+  soc.load_data_to_ram("test.v")
   if driver == None:
     print "could not detect custom driver, using standard procedure"
     # prepare execution environment
     # Issue is with sb instruction, 
-    soc.print_ram(0x100 / 4, 1)
     # TODO: re-implement this function. add error reporting (exception)
-    soc.load_data_to_ram("test.v")
     soc.tick(100)
-    # expected value at 0x100 address after the sequence is 0x55555555
-    # real value at 0x100 address is 0x00000055
-    soc.print_ram(0x100 / 4, 1)
   else:
-    print "custom driver detect, control transfered"
+    print "custom driver detected, control transfered"
     driver.run(soc)
 
