@@ -134,6 +134,7 @@ uint32_t RV_SOC::readReg(unsigned num)
 
 uint32_t RV_SOC::getPC() const
 {
+    assert(validPc());
     return m_soc->soc->cpu0->pc;
 }
 
@@ -173,4 +174,10 @@ uint8_t RV_SOC::getUartTxData()
     assert(validUartTxTransaction());
     uint8_t data = (m_soc->soc->uart0->i_wb_data & 0xFF);
     return data;
+}
+    
+bool RV_SOC::validPc() const
+{
+    bool valid = (m_soc->soc->cpu0->state == 1) && (m_soc->soc->cpu0->bus_inst->CYC_O) && (m_soc->soc->cpu0->bus_inst->ACK_I);
+    return valid;
 }

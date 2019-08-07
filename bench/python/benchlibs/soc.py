@@ -1,3 +1,5 @@
+import sys
+
 #TODO: logger instead of prints?
 class RiscVSoc:
     def __init__(self, libbench, path_to_vcd, debug = False):
@@ -22,6 +24,12 @@ class RiscVSoc:
     def print_uart_tx(self):
         if self._soc.uartTxValid():
             print(str(chr(self._soc.readTxByte())))
+            sys.stdout.flush()
+
+    def print_pc(self):
+        if self._soc.pcValid():
+            print("PC: 0x{0:08x}".format(self._soc.PC()))
+            sys.stdout.flush()
 
     def reset(self):
         self._soc.reset()

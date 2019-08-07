@@ -36,6 +36,8 @@ public:
     bool validUartTransaction() const;
     uint8_t getUartTxData();
 
+    bool validPc() const;
+
 private:
     Vsoc*          m_soc         {nullptr};
     uint64_t       m_tickCnt     {0};
