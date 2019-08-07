@@ -1,4 +1,4 @@
-#!@Python2_EXECUTABLE@ -B
+#!@Python2_EXECUTABLE@ -uB
 
 # A proper way would be to set this one to CMAKE_INSTALL_PREFIX, but
 # BINARY dir is more convinient for users
