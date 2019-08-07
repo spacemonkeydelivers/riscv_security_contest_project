@@ -63,6 +63,11 @@ int __int_serve(struct s_esf_frame* frame, int n) {
     }
     return 0;
 }
+__attribute__((section(".__system.os")))
+void _putchar(char character) {
+    (void)character;
+    // TODO: implement me
+}
 
 __attribute__((section(".__system.init")))
 void __soc_init(const void* context)

@@ -2,8 +2,12 @@
 #define __INCLUDE_GUARD_RISCV_STDINT__
 
 // TODO: size_t does not belong here.
-typedef unsigned int       size_t;
+typedef unsigned size_t;
+typedef signed   intptr_t;
+typedef unsigned uintptr_t;
 
+
+// TODO: this header is buggy as the values are taken from x86
 typedef signed char        int8_t;
 typedef signed short       int16_t;
 typedef signed int         int32_t;
@@ -17,7 +21,6 @@ typedef signed short       int_fast16_t;
 typedef signed int         int_fast32_t;
 typedef signed long long   int_fast64_t;
 typedef signed long long   intmax_t;
-typedef signed long long   intptr_t;
 
 typedef unsigned char      uint8_t;
 typedef unsigned short     uint16_t;
@@ -32,7 +35,6 @@ typedef unsigned short     uint_fast16_t;
 typedef unsigned int       uint_fast32_t;
 typedef unsigned long long uint_fast64_t;
 typedef unsigned long long uintmax_t;
-typedef unsigned long long uintptr_t;
 
 #define INT8_MIN        0x80
 #define INT16_MIN       0x8000

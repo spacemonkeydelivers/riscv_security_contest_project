@@ -1,10 +1,10 @@
 INCLUDE=$(TOP)/include
 OBJ_FILES=boot.o isr.o config.o \
 	os.o \
-	libc-start.o \
+	libc-start.o printf.o \
 	stdlib.o unistd.o string.o
 LIBNAME=libc
-INSTALL_HEADERS=stdbool.h stdint.h stdlib.h string.h unistd.h
+INSTALL_HEADERS=stdarg.h stdbool.h stddef.h stdint.h stdio.h stdlib.h string.h unistd.h
 INSTALL_SOC_HEADERS=traps.h
 INSTALL_SHARE_CONTENT=soc.ld
 
@@ -47,6 +47,10 @@ config.o: $(TOP)/src/asm/config.S
 
 libc-start.o: $(TOP)/src/libc-start.c
 	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -o $@ -c $<
+
+printf.o: $(TOP)/src/printf/printf.c
+	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) \
+		-DPRINTF_DISABLE_SUPPORT_LONG_LONG -DPRINTF_DISABLE_SUPPORT_FLOAT -o $@ -c $<
 
 stdlib.o: $(TOP)/src/stdlib.c
 	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -o $@ -c $<
