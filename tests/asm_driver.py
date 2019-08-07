@@ -2,6 +2,7 @@ import sys
 import os
 import subprocess
 import glob
+import imp
 
 import benchlibs.soc as soc_lib
 
@@ -18,6 +19,13 @@ def generate_make_asm(soc):
   if ret != 0:
     raise 'could not generate makefile'
   sys.stdout.flush()
+
+  driver = None
+  # try to detect custom driver fot this test
+  driver_path = asm_file + ".py"
+  if os.path.isfile(driver_path):
+    driver = imp.load_source("custom_driver", driver_path)
+  return driver
 
 def generate_make_c(soc):
   ram_size = soc.get_soc_ram_size()
@@ -43,12 +51,15 @@ def generate_make_c(soc):
     raise 'could not generate makefile'
   sys.stdout.flush()
 
+  driver = None
+  return driver
+
 def build_test_image(soc):
 
   if sys.argv[2].split("/")[0] == "c":
-    generate_make_c(soc)
+    driver = generate_make_c(soc)
   else:
-    generate_make_asm(soc)
+    driver = generate_make_asm(soc)
 
   print('running make...')
   sys.stdout.flush()
@@ -57,19 +68,28 @@ def build_test_image(soc):
     raise 'could not create test image'
   sys.stdout.flush()
 
+  return driver
+
+
+
 def run(libbench):
 
   soc = soc_lib.RiscVSoc(libbench, 'memtest_trace.vcd', True)
 
-  build_test_image(soc)
+  driver = build_test_image(soc)
 
-  # prepare execution environment
-  # Issue is with sb instruction, 
-  soc.print_ram(0x100 / 4, 1)
-  # TODO: re-implement this function. add error reporting (exception)
-  soc.load_data_to_ram("test.v")
-  soc.tick(100)
-  # expected value at 0x100 address after the sequence is 0x55555555
-  # real value at 0x100 address is 0x00000055
-  soc.print_ram(0x100 / 4, 1)
+  if driver == None:
+    print "could not detect custom driver, using standard procedure"
+    # prepare execution environment
+    # Issue is with sb instruction, 
+    soc.print_ram(0x100 / 4, 1)
+    # TODO: re-implement this function. add error reporting (exception)
+    soc.load_data_to_ram("test.v")
+    soc.tick(100)
+    # expected value at 0x100 address after the sequence is 0x55555555
+    # real value at 0x100 address is 0x00000055
+    soc.print_ram(0x100 / 4, 1)
+  else:
+    print "custom driver detect, control transfered"
+    driver.run(soc)
 
