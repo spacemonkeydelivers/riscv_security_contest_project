@@ -34,7 +34,7 @@ class RiscVSoc:
         offset = 0
         for line in data:
             if line[0] == '@':
-                offset = int(line[1:], 16)
+                offset = int(line[1:], 16) / 4
                 if self._debug:
                     print("Changing offset while loading to RAM to: 0x{0:08x}".format(offset))
             else:
