@@ -23,7 +23,7 @@ class RiscVSoc:
 
     def print_uart_tx(self):
         if self._soc.uartTxValid():
-            print(str(chr(self._soc.readTxByte())))
+            sys.stdout.write((str(chr(self._soc.readTxByte()))))
             sys.stdout.flush()
 
     def print_pc(self):
