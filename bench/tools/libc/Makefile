@@ -18,16 +18,15 @@ DEPS_INSTALL += $(I_SOC_HEADERS)
 DEPS_INSTALL += $(I_SHARE)
 
 install: $(DEPS_INSTALL)
-	echo "$(I_STRUCTURE)"
 	install -d $(I_STRUCTURE)
 	install -m 644 $(LIBNAME).a $(INSTALL_DIR)/lib
 	install -m 644 $(I_HEADERS) $(INSTALL_DIR)/include
 	install -m 644 $(I_SOC_HEADERS) $(INSTALL_DIR)/include/soc
 	install -m 644 $(I_SHARE) $(INSTALL_DIR)/share
 
-tests: $(LIBNAME).a $(TOP)/tests/basic.c
-	$(CC) $(CFLAGS) -static -L. -lc $(TOP)/tests/basic.c -o test_basic \
-		-T$(TOP)/share/soc.ld -I$(TOP)/include
+test_program: $(LIBNAME).a $(TOP)/tests/basic.c
+	$(CC) $(CFLAGS) $(TOP)/tests/basic.c -static -L. -lc \
+		-T$(TOP)/share/soc.ld -I$(TOP)/include -o test_program
 
 all: $(LIBNAME).a
 
