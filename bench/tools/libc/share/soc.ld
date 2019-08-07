@@ -25,7 +25,9 @@ SECTIONS
         *(.rodata)
     }
     .bss : {
+        __bss_start = .;
         *(.bss)
+        __bss_end = .;
     }
     /* Stack code mapping */
     .application_stack : {

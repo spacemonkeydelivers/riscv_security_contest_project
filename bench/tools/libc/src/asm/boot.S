@@ -4,6 +4,9 @@
 .section ".reset", "ax"
 _start:
     __D_INITIALIZE_REGISTER_FILE
+    la t1, __bss_start
+    # TODO: fill .bss with zeroes
+    la t2, __bss_end
     la sp, __APP_STACK_TOP
     la t1, __isr_wrapper
     csrw mtvec, t1
