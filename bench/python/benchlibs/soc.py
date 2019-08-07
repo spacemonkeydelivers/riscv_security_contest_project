@@ -27,7 +27,7 @@ class RiscVSoc:
         self._soc.reset()
 
     def get_soc_ram_size(self):
-        return self._soc.ramSize()
+        return self._soc.ramSize() * 4
 
     def load_data_to_ram(self, path_to_image, offset_in_words = 0):
         data = map(lambda x: x.strip(), open(path_to_image, "r").readlines())

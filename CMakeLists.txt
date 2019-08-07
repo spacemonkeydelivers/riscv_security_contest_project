@@ -73,17 +73,26 @@ file(GLOB_RECURSE RTL_SRC_FILES
 
 set(VERILOG_OUTPUT_LIB "${RTL_MODEL_BUILD_PATH}/V${MODULE_NAME}__ALL.a")
 
+set(SOC_RAM_SIZE 8192)
 if (NOT DEFINED MEM_FILE)
     set(MEM_FILE "/tmp/zeroes8k.txt")
 endif()
 
 message(STATUS "MEM_FILE: '${MEM_FILE}'")
 
+# TODO: make sure that we consume the output of this command
+add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/mem_img.txt
+    COMMAND dd if=/dev/zero of=mem_img.txt bs=1 count=${SOC_RAM_SIZE}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    VERBATIM
+)
 add_custom_command(
     OUTPUT ${VERILOG_OUTPUT_LIB}
-    DEPENDS ${RTL_SRC_FILES}
+    DEPENDS ${RTL_SRC_FILES} ${CMAKE_BINARY_DIR}/mem_img.txt
     COMMAND ${VERILATOR_BIN} ${VERILATOR_ARGS_LIST}
         -GFIRMWARE_FILE="${MEM_FILE}"
+        -GSOC_RAM_SIZE=${SOC_RAM_SIZE}
         -Wall
         -cc
         -Mdir ${RTL_MODEL_BUILD_PATH}

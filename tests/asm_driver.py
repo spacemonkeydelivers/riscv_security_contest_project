@@ -5,7 +5,7 @@ import glob
 
 import benchlibs.soc as soc_lib
 
-def generate_make_asm():
+def generate_make_asm(soc):
 
   asm_file = os.environ['TESTS_DIR'] + '/asm/' + sys.argv[2]
   tools_dir = os.environ['TOOLS_DIR']
@@ -19,7 +19,9 @@ def generate_make_asm():
     raise 'could not generate makefile'
   sys.stdout.flush()
 
-def generate_make_c():
+def generate_make_c(soc):
+  ram_size = soc.get_soc_ram_size()
+
   tools_dir = os.environ['TOOLS_DIR']
   tools_distr = os.environ['TOOLS_DISTRIB']
   c_root = os.path.join(os.environ['TESTS_DIR'], sys.argv[2])
@@ -29,8 +31,11 @@ def generate_make_c():
   print('found results: {}'.format(c_list))
   sys.stdout.flush()
 
-  cmd = '(echo \'<% input_c="{}"; tools_distrib="{}" %>\' && cat \'{}\') | erb > Makefile'.format(
-        c_list, tools_distr, tools_dir + '/misc/Makefile_c.erb')
+  cmd = ''.join([
+          '(echo \'<% input_c="{}"; tools_distrib="{}"; ram_size={} %>\' && cat \'{}\') ',
+          '| erb > Makefile'
+        ]).format(
+        c_list, tools_distr, ram_size, tools_dir + '/misc/Makefile_c.erb')
   print('running <{}>'.format(cmd))
   sys.stdout.flush()
   ret = os.system(cmd)
@@ -38,12 +43,12 @@ def generate_make_c():
     raise 'could not generate makefile'
   sys.stdout.flush()
 
-def build_test_image():
+def build_test_image(soc):
 
   if sys.argv[2].split("/")[0] == "c":
-    generate_make_c()
+    generate_make_c(soc)
   else:
-    generate_make_asm()
+    generate_make_asm(soc)
 
   print('running make...')
   sys.stdout.flush()
@@ -54,9 +59,10 @@ def build_test_image():
 
 def run(libbench):
 
-  build_test_image()
-
   soc = soc_lib.RiscVSoc(libbench, 'memtest_trace.vcd', True)
+
+  build_test_image(soc)
+
   # prepare execution environment
   # Issue is with sb instruction, 
   soc.print_ram(0x100 / 4, 1)
