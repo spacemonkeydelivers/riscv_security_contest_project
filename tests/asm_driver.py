@@ -14,11 +14,9 @@ def generate_make_asm(soc):
         asm_file, tools_dir, tools_dir + '/misc/Makefile_asm.erb')
 
   print('running <{}>'.format(cmd))
-  sys.stdout.flush()
   ret = os.system(cmd)
   if ret != 0:
     raise 'could not generate makefile'
-  sys.stdout.flush()
 
   driver = None
   # try to detect custom driver fot this test
@@ -37,7 +35,6 @@ def generate_make_c(soc):
   print('searching for c files as <{}>'.format(pattern))
   c_list = ' '.join(glob.glob(pattern))
   print('found results: {}'.format(c_list))
-  sys.stdout.flush()
 
   cmd = ''.join([
           '(echo \'<% input_c="{}"; tools_distrib="{}"; ram_size={} %>\' && cat \'{}\') ',
@@ -45,11 +42,9 @@ def generate_make_c(soc):
         ]).format(
         c_list, tools_distr, ram_size, tools_dir + '/misc/Makefile_c.erb')
   print('running <{}>'.format(cmd))
-  sys.stdout.flush()
   ret = os.system(cmd)
   if ret != 0:
     raise 'could not generate makefile'
-  sys.stdout.flush()
 
   driver = None
   driver_path = os.path.join(c_root, "driver.py")
@@ -65,11 +60,9 @@ def build_test_image(soc):
     driver = generate_make_asm(soc)
 
   print('running make...')
-  sys.stdout.flush()
   ret = os.system('make VERBOSE=1')
   if ret != 0:
     raise 'could not create test image'
-  sys.stdout.flush()
 
   return driver
 
