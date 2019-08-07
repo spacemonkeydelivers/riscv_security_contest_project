@@ -66,7 +66,8 @@ int __int_serve(struct s_esf_frame* frame, int n) {
 __attribute__((section(".__system.os")))
 void _putchar(char character) {
     (void)character;
-    // TODO: implement me
+    volatile char* dst = (volatile char*)0x80000003;
+    *dst = character;
 }
 
 __attribute__((section(".__system.init")))
