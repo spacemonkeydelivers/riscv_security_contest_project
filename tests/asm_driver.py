@@ -52,6 +52,9 @@ def generate_make_c(soc):
   sys.stdout.flush()
 
   driver = None
+  driver_path = os.path.join(c_root, "driver.py")
+  if os.path.isfile(driver_path):
+    driver = imp.load_source("custom_driver", driver_path)
   return driver
 
 def build_test_image(soc):
