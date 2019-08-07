@@ -2,6 +2,8 @@
 #include <string>
 #include <cassert>
 #include <cstdio>
+#include <stdexcept>
+#include <iostream>
 
 // verilator headers
 #include <verilated.h>
@@ -16,7 +18,6 @@
 #include <rtlsim/Vsoc_registers.h>
 #include <rtlsim/Vsoc_cpu__VBaa1155.h>
 #include <rtlsim/Vsoc_wbuart__H0.h>
-#include <rtlsim/Vsoc_wb_mux.h>
 
 #include "soc.h"
 
@@ -81,13 +82,23 @@ void RV_SOC::tick(unsigned num)
 
 void RV_SOC::writeWord(unsigned address, uint32_t val)
 {
-    assert(address < m_ramSize);
+    if (address >= m_ramSize) {
+        std::cerr << "writeWord: address " << std::dec << (address * 4) <<
+            " (w_idx = 0x" <<  std::hex << address << ") is out of range " <<
+            "[RamSize = " << std::dec << m_ramSize * 4 << " bytes]" << std::endl;
+        throw std::out_of_range("write: the specified address is out of range");
+    }
     m_soc->soc->ram0->ram0->mem[address] = val;
 }
 
 uint32_t RV_SOC::readWord(unsigned address)
 {
-    assert(address < m_ramSize);
+    if (address >= m_ramSize) {
+        std::cerr << "readWord: address " << std::dec << (address * 4) <<
+            " (w_idx = 0x" << std::hex << address << ") is out of range" <<
+            "[RamSize = " << std::dec << m_ramSize * 4 << " bytes]" << std::endl;
+        throw std::out_of_range("read: the specified address is out of range");
+    }
     return m_soc->soc->ram0->ram0->mem[address];
 }
 
