@@ -44,7 +44,7 @@ class RiscVSoc:
 
         self._stall_cnt = self._stall_cnt + 1
 
-    def go(self, limit):
+    def go(self, limit, expect_failure = False):
 
         iterations = 0
         while (self._stall_cnt < 20):
@@ -65,9 +65,14 @@ class RiscVSoc:
         print("hart does not make forward progress for too long. Assume test exit")
         status = self.read_register(1) # exit status is in ra
 
-        if status != 0:
-            msg = "exit code <{}> indicates failure".format(status)
-            raise RuntimeError(msg)
+        if expect_failure:
+          if status == 0:
+              msg = "exit code <{}> indicates success, while tests expects failure".format(status)
+              raise RuntimeError(msg)
+        else:
+          if status != 0:
+              msg = "exit code <{}> indicates failure".format(status)
+              raise RuntimeError(msg)
 
         print("exit code indicates success, test passed")
 

@@ -3,6 +3,7 @@ import os
 import subprocess
 import glob
 import imp
+import re
 
 import benchlibs.soc as soc_lib
 
@@ -79,13 +80,21 @@ def run(libbench):
 
   if driver == None:
     print "could not detect custom driver, using standard procedure"
+
+    expect_failure = False
+    for arg in sys.argv:
+        m = re.search('--driver_arg=(.*)', arg)
+        if m:
+            found = m.group(1)
+            if found == "--expect-failure":
+                expect_failure = True
+
     # prepare execution environment
     # BUG: Issue is with sb instruction, 
     # TODO: re-implement this function. add error reporting (exception)
-
     # soc.register_tick_callback(soc.print_pc)
     soc.register_tick_callback(soc.print_uart_tx)
-    soc.go(10 ** 5)
+    soc.go(10 ** 5, expect_failure = expect_failure)
   else:
     print "custom driver detected, control transfered"
     driver.run(soc)
