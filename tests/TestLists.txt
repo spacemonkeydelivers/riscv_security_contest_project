@@ -11,4 +11,14 @@ test_add(asm_uart  asm_driver.py uart.s)
 
 test_add(c_basic asm_driver.py c/basic)
 
+test_add(c_libc_exit_S      asm_driver.py c/libc/exit_succ)
+test_add(c_libc_exit_F      asm_driver.py c/libc/exit_fail
+         --driver_arg=--expect-failure)
+test_add(c_libc_main_ret_S  asm_driver.py c/libc/main_ret_succ)
+test_add(c_libc_main_ret_F  asm_driver.py c/libc/main_ret_fail
+         --driver_arg=--expect-failure)
+test_add(c_libc_printf4     asm_driver.py c/libc/printf4)
+test_add(c_libc_printf5     asm_driver.py c/libc/printf5)
+test_add(c_libc_printf_int  asm_driver.py c/libc/printf_int)
+
 
