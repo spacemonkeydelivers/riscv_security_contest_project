@@ -17,5 +17,10 @@ _start:
     la a0, main
     call __libc_start_main
 
+    mv ra, a0
+1:
+    j 1b
+    wfi
+
 .section ".__application_stack", "a", @nobits
 
