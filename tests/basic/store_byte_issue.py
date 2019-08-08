@@ -17,7 +17,12 @@ def run(libbench):
   # sb a0, 3(sp)
   soc.write_word_ram(5, 0x00a101a3)
   soc.tick(30)
+
+  data = soc.read_word_ram(0x100 /4)
   # expected value at 0x100 address after the sequence is 0x55555555
   # real value at 0x100 address is 0x00000055
-  soc.print_ram(0x100 / 4, 1)
+  expected = 0x55555555
+  if (data != expected):
+    msg = "got 0x{0:08x}, expected 0x{1:08x}".format(data, expected)
+    raise Exception(msg)
 
