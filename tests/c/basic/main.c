@@ -14,6 +14,5 @@
 int main ()
 {
     printf("test function: %s", "test");
-    exit(0);
     return 0;
 }

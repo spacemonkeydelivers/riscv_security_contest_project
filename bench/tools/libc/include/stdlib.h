@@ -1,6 +1,9 @@
 #ifndef __INCLUDE_GUARD_RISCV_STDLIB__
 #define __INCLUDE_GUARD_RISCV_STDLIB__
 
+#define EXIT_SUCCESS 0
+#define EXIT_FAILURE 1
+
 void exit(int status) __attribute__ ((noreturn));
 
 static inline int abs(int val) {
