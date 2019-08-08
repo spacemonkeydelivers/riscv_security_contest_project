@@ -74,13 +74,18 @@ def run(libbench):
 
   driver = build_test_image(soc)
 
+  soc.setDebug(False)
   soc.load_data_to_ram("test.v")
+
   if driver == None:
     print "could not detect custom driver, using standard procedure"
     # prepare execution environment
-    # Issue is with sb instruction, 
+    # BUG: Issue is with sb instruction, 
     # TODO: re-implement this function. add error reporting (exception)
-    soc.tick(100)
+
+    # soc.register_tick_callback(soc.print_pc)
+    soc.register_tick_callback(soc.print_uart_tx)
+    soc.go(10 ** 5)
   else:
     print "custom driver detected, control transfered"
     driver.run(soc)

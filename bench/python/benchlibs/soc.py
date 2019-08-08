@@ -1,4 +1,6 @@
 import sys
+import collections
+from collections import deque
 
 #TODO: logger instead of prints?
 class RiscVSoc:
@@ -8,10 +10,66 @@ class RiscVSoc:
         self._word_size = self._soc.wordSize()
         self._on_tick_callbacks = []
 
+        self._prev_pc = None
+        self._stall_cnt = 0
+        self._pc_history = collections.deque(10 * [None], 10)
+
+    def setDebug(self, debug):
+        self._debug = debug
+
     def register_tick_callback(self, callback):
         if self._debug:
             print("Registering on tick callback")
         self._on_tick_callbacks.append(callback)
+
+    def go_step(self):
+        if self._soc.pcValid():
+            self._prev_pc = self._soc.PC()
+
+        self.tick(1)
+
+        if self._soc.pcValid():
+            new_pc  = self._soc.PC()
+
+            if (self._prev_pc == None):
+                self._prev_pc = 0
+
+            # print ("PC: 0x{0:08x} -> 0x{0:08x}".format(self._prev_pc, new_pc))
+
+            if new_pc != self._prev_pc:
+                self._stall_cnt = 0
+                self._prev_pc = new_pc
+                self._pc_history.append(new_pc)
+
+
+        self._stall_cnt = self._stall_cnt + 1
+
+    def go(self, limit):
+
+        iterations = 0
+        while (self._stall_cnt < 20):
+            self.go_step()
+
+            iterations = iterations + 1
+
+            if (limit != None) and (iterations >= limit):
+                print("\nlast known PC values:")
+                for pc in self._pc_history:
+                    if pc != None:
+                      print("- 0x{0:08x}".format(pc))
+                    else:
+                      print("- n/a")
+                msg = "simulation takes too long (more than {} steps)".format(limit)
+                raise StopIteration(msg)
+
+        print("hart does not make forward progress for too long. Assume test exit")
+        status = self.read_register(1) # exit status is in ra
+
+        if status != 0:
+            msg = "exit code <{}> indicates failure".format(status)
+            raise RuntimeError(msg)
+
+        print("exit code indicates success, test passed")
 
     def tick(self, ticks):
         for t in range(ticks):
