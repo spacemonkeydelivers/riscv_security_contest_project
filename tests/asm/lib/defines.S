@@ -1,4 +1,3 @@
-
 #define TARGET "RTL"
 
 .ifdef __test_exit
@@ -7,6 +6,9 @@
 
 .macro __test_exit status:req, target
   // TODO: implement a proper test exit sequence
+  li ra, \status
+1:
+  j 1b
   wfi
 .endm
 
@@ -23,6 +25,9 @@
 .endif
 
 .macro FAILED status:req
+  .ifeq \status
+    .error "FAILED status must be non-zero"
+  .endif
    __test_exit \status, TARGET
 .endm
 

@@ -3,6 +3,25 @@
 Please refer to our [wiki](https://git.yggdrasill.ga/riscv_softcore_security_contest/riscv_core/wikis/home)
 for information regarding build zephyr and a subsequent OVP/RTL boot procedures.
 
+# Testing
+
+The current "test exit" sequence looks as follows:
+
+```
+li ra, exit_code # any write to ra will do
+1:
+j 1b
+wfi
+```
+When test bench detects that hart does not make forward progress it assumes that
+the test is finished and exit code is taken from ra. Non-zero value indicates
+failure.
+
+## TODO:
+
+make this exit sequence compatible with complience tests. That is we should
+eventually switch to ecall/scall.
+
 # riscv_core
 
 **1. How to build & use:**
