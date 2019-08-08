@@ -13,9 +13,9 @@ li ra, exit_code # any write to ra will do
 j 1b
 wfi
 ```
-When test bench detects that hart does not make forward progress it assumes that
-the test is finished and exit code is taken from ra. Non-zero value indicates
-failure.
+When test bench detects that hart does not change PC for too long it assumes
+that the test is finished. The "exit code" is taken from ra. Non-zero value
+indicates failure.
 
 ## TODO:
 
