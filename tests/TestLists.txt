@@ -24,3 +24,7 @@ test_add(c_libc_printf5     asm_driver.py c/libc/printf5)
 test_add(c_libc_printf_int  asm_driver.py c/libc/printf_int)
 
 test_add(compliance_rv32i_add  asm_driver.py compliance/rv32i/src/I-ADD-01.S)
+
+test_add(asm_csrr_vendorid  asm_driver.py asm/csrr_vendor.s)
+test_add(asm_csrw_vendorid  asm_driver.py asm/csrw_vendor.s)
+test_add(asm_csre_missing_csr asm_driver.py asm/csrr_missing.s)
