@@ -61,6 +61,11 @@
 
 	`define FUNC_ECALL_EBREAK	3'b000
 	`define FUNC_CSRRW			3'b001
+	`define FUNC_CSRRS			3'b010
+	`define FUNC_CSRRC			3'b011
+	`define FUNC_CSRRWI			3'b101
+	`define FUNC_CSRRSI			3'b110
+	`define FUNC_CSRRCI			3'b111
 
 	// imm[11:0] of SYSTEM-opcode encodes function
 	`define SYSTEM_ECALL	12'b000000000000

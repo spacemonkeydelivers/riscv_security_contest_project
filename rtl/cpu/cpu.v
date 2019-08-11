@@ -168,28 +168,77 @@ module cpu
     end
 
     // Muxer for MSRs
-    wire[1:0] mux_msr_sel;
+    wire[11:0] mux_msr_sel;
     reg[31:0] msr_data;
-    assign mux_msr_sel = dec_imm[1:0];
+    assign mux_msr_sel = dec_imm[11:0];
     wire[31:0] mcause32;
     assign mcause32 = {mcause[4], {27{1'b0}}, mcause[3:0]};
     wire[31:0] mstatus32;
     assign mstatus32 = {{29{1'b0}}, INTERRUPT_I, meie_prev, meie};
 
-    localparam MSR_MSTATUS = 2'b00;
-    localparam MSR_CAUSE   = 2'b01;
-    localparam MSR_EPC     = 2'b10;
-    localparam MSR_EVECT   = 2'b11;
+    wire[31:0] vendor_id;
+    assign vendor_id = 32'hC001_F001;
+    wire[31:0] arch_id;
+    assign arch_id = 32'hBAAD_A555;
+    wire[31:0] imp_id;
+    assign imp_id = 32'hC000_10FF;
+    wire[31:0] hart_id;
+    assign hart_id = 0;
+
+    reg csr_exists;
+    wire csr_ro;
+
+    localparam MSR_MVENDORID = 12'hF11;
+    localparam MSR_MARCHID   = 12'hF12;
+    localparam MSR_MIMPID    = 12'hF13;
+    localparam MSR_MHARTID   = 12'hF14;
+    
+    localparam MSR_MSTATUS    = 12'h300;
+    localparam MSR_MISA       = 12'h301;
+    localparam MSR_MEDELEG    = 12'h302;
+    localparam MSR_MIDELEG    = 12'h303;
+    localparam MSR_MIE        = 12'h304;
+    localparam MSR_MTVEC      = 12'h305;
+    localparam MSR_MCOUNTEREN = 12'h306;
+
+    localparam MSR_MSCRATCH   = 12'h340;
+    localparam MSR_MEPC       = 12'h341;
+    localparam MSR_MCAUSE     = 12'h342;
+    localparam MSR_MTVAL      = 12'h343;
+    localparam MSR_MIP        = 12'h344;
 
     always @(*) begin
         case(mux_msr_sel)
-            MSR_MSTATUS: msr_data = mstatus32;
-            MSR_CAUSE:   msr_data = mcause32;
-            MSR_EPC:     msr_data = epc;
+            MSR_MVENDORID: msr_data = vendor_id;
+            MSR_MARCHID:   msr_data = arch_id;
+            MSR_MIMPID:    msr_data = imp_id;
+            MSR_MHARTID:   msr_data = hart_id;
+
+            MSR_MSTATUS:   msr_data = mstatus32;
+            MSR_MCAUSE:    msr_data = mcause32;
+            MSR_MEPC:      msr_data = epc;
+
+            MSR_MTVEC:     msr_data = evect;
             default:     msr_data = evect;
         endcase
     end
 
+    always @(*) begin
+        case(mux_msr_sel)
+            MSR_MVENDORID: csr_exists = 1;
+            MSR_MARCHID:   csr_exists = 1;
+            MSR_MIMPID:    csr_exists = 1;
+            MSR_MHARTID:   csr_exists = 1;
+            
+            MSR_MSTATUS:   csr_exists = 1;
+            MSR_MCAUSE:    csr_exists = 1;
+            MSR_MEPC:      csr_exists = 1;
+
+            MSR_MTVEC:     csr_exists = 1;
+            default:     csr_exists = 0;
+        endcase
+    end
+    assign csr_ro = (mux_msr_sel[11:10] == 2'b11);
 
     // Muxer for register data input
     localparam MUX_REGINPUT_ALU = 0;
@@ -217,6 +266,7 @@ module cpu
     localparam STATE_SYSTEM         = 9;
     localparam STATE_CSRRW1         = 10;
     localparam STATE_CSRRW2         = 11;
+    localparam STATE_CSRRS1         = 12;
 
 
     reg[3:0] state, prevstate = STATE_RESET, nextstate = STATE_RESET;
@@ -473,6 +523,10 @@ module cpu
                         nextstate <= STATE_CSRRW1;
                     end
 
+                    `FUNC_CSRRS: begin
+                        nextstate <= STATE_CSRRS1;
+                    end
+
                     // unsupported SYSTEM instruction
                     default: mcause <= CAUSE_INVALID_INSTRUCTION;
                 endcase
@@ -497,18 +551,34 @@ module cpu
             STATE_CSRRW2: begin
                 // update MSRs with value of rs1
                 if(!dec_imm[11]) begin // denotes a writable non-standard machine-mode MSR
-                    case(dec_imm[1:0])
-                        MSR_CAUSE: mcause <= {reg_val1[31], reg_val1[3:0]};
-                        MSR_EPC:   epc <= reg_val1;
+                    case(dec_imm[11:0])
+                        MSR_MCAUSE: mcause <= {reg_val1[31], reg_val1[3:0]};
+                        MSR_MEPC:   epc <= reg_val1;
                         MSR_MSTATUS: begin
                             meie <= reg_val1[0];
                             meie_prev <= reg_val1[1];
                         end
-                        MSR_EVECT: evect <= reg_val1;
+                        MSR_MTVEC: evect <= reg_val1;
                     endcase
                 end
                 // advance to next instruction
-                nextstate <= STATE_FETCH;
+                if (csr_ro) begin
+                   nextstate <= STATE_TRAP1;
+                end else begin
+                   nextstate <= STATE_FETCH;
+                end
+            end
+            
+            STATE_CSRRS1: begin
+                if (csr_exists) begin
+                   nextstate <= STATE_FETCH;
+                   mux_reg_input_sel <= MUX_REGINPUT_MSR;
+                   reg_we <= 1;
+                end 
+                else begin
+                   nextstate <= STATE_TRAP1;
+                   mcause <= CAUSE_INVALID_INSTRUCTION;
+                end
             end
 
         endcase
