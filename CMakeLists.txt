@@ -80,7 +80,6 @@ endif()
 if (NOT DEFINED MEM_FILE)
     set(MEM_FILE "/tmp/zeroes8k.txt")
 endif()
-message(${SOC_RAM_SIZE} RAM SIZE)
 
 # TODO: make sure that we consume the output of this command
 add_custom_command(
