@@ -187,6 +187,7 @@ module cpu
 
     reg csr_exists;
     wire csr_ro;
+    reg csr_source;
 
     localparam MSR_MVENDORID = 12'hF11;
     localparam MSR_MARCHID   = 12'hF12;
@@ -521,6 +522,13 @@ module cpu
                     `FUNC_CSRRW: begin
                         // handle csrrw here
                         nextstate <= STATE_CSRRW1;
+                        csr_source = 1;
+                    end
+
+                    `FUNC_CSRRWI: begin
+                        // handle csrrw here
+                        nextstate <= STATE_CSRRW1;
+                        csr_source = 0;
                     end
 
                     `FUNC_CSRRS: begin
@@ -542,10 +550,14 @@ module cpu
             end
 
             STATE_CSRRW1: begin
-                // write MSR-value to register
-                mux_reg_input_sel <= MUX_REGINPUT_MSR;
-                reg_we <= 1;
-                nextstate <= STATE_CSRRW2;
+                if (csr_exists) begin
+                    // write MSR-value to register
+                    mux_reg_input_sel <= MUX_REGINPUT_MSR;
+                    reg_we <= 1;
+                    nextstate <= STATE_CSRRW2;
+                end else begin
+                    nextstate <= STATE_TRAP1;
+                end
             end
 
             STATE_CSRRW2: begin
@@ -555,8 +567,8 @@ module cpu
                         MSR_MCAUSE: mcause <= {reg_val1[31], reg_val1[3:0]};
                         MSR_MEPC:   epc <= reg_val1;
                         MSR_MSTATUS: begin
-                            meie <= reg_val1[0];
-                            meie_prev <= reg_val1[1];
+                            meie <= csr_source ? reg_val1[0] : dec_rs1;
+                            meie_prev <= csr_source ? reg_val1[1] : dec_rs1;
                         end
                         MSR_MTVEC: evect <= reg_val1;
                     endcase
