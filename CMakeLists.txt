@@ -73,12 +73,14 @@ file(GLOB_RECURSE RTL_SRC_FILES
 
 set(VERILOG_OUTPUT_LIB "${RTL_MODEL_BUILD_PATH}/V${MODULE_NAME}__ALL.a")
 
-set(SOC_RAM_SIZE 8192)
+if (NOT DEFINED SOC_RAM_SIZE)
+    set(SOC_RAM_SIZE 8192)
+endif()
+
 if (NOT DEFINED MEM_FILE)
     set(MEM_FILE "/tmp/zeroes8k.txt")
 endif()
-
-message(STATUS "MEM_FILE: '${MEM_FILE}'")
+message(${SOC_RAM_SIZE} RAM SIZE)
 
 # TODO: make sure that we consume the output of this command
 add_custom_command(
