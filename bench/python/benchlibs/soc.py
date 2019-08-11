@@ -47,7 +47,7 @@ class RiscVSoc:
     def go(self, limit, expect_failure = False):
 
         iterations = 0
-        while (self._stall_cnt < 20):
+        while (self._stall_cnt < 50):
             self.go_step()
 
             iterations = iterations + 1
