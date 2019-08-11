@@ -172,7 +172,7 @@ bool RV_SOC::validUartRxTransaction() const
 uint8_t RV_SOC::getUartTxData()
 {
     assert(validUartTxTransaction());
-    uint8_t data = (m_soc->soc->uart0->i_wb_data & 0xFF);
+    uint8_t data = ((m_soc->soc->uart0->i_wb_data >> 24) & 0xFF);
     return data;
 }
     
