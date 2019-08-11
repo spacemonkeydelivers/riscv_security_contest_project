@@ -23,8 +23,13 @@ test_add(c_libc_printf4     asm_driver.py c/libc/printf4)
 test_add(c_libc_printf5     asm_driver.py c/libc/printf5)
 test_add(c_libc_printf_int  asm_driver.py c/libc/printf_int)
 
-test_add(compliance_rv32i_add  asm_driver.py compliance/rv32i/src/I-ADD-01.S)
-
 test_add(asm_csrr_vendorid  asm_driver.py asm/csrr_vendor.s)
 test_add(asm_csrw_vendorid  asm_driver.py asm/csrw_vendor.s)
 test_add(asm_csre_missing_csr asm_driver.py asm/csrr_missing.s)
+
+set(COMPLIANCE_SOURCES_ROOT ${CMAKE_SOURCE_DIR}/tests/compliance/rv32i/src)
+file(GLOB COMPLIANCE_TESTS "${COMPLIANCE_SOURCES_ROOT}/*.S")
+foreach(file ${COMPLIANCE_TESTS})
+    get_filename_component(NAME "${file}" NAME)
+    test_add(compliance_${NAME} asm_driver.py compliance/rv32i/src/${NAME})
+endforeach()
