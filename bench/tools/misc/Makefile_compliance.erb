@@ -3,6 +3,8 @@ CC         = $(TOOLCHAIN)/riscv32-unknown-elf-gcc
 OBJCOPY    = $(TOOLCHAIN)/riscv32-unknown-elf-objcopy
 INCLUDE    = <%= includes %>
 CFLAGS     = -march=rv32i  -mabi=ilp32 -O0 -std=c11 -ffreestanding -w -nostdinc -nostdlib -nodefaultlibs -nostartfiles -I${INCLUDE}
+CFLAGS     += -DCOMPLIANCE_IO_ISSUE_14
+
 LDFLAGS    = -nostdlib -nodefaultlibs -nostartfiles
 LDSCRIPT   = <%= bench %>/misc/compliance.ld
 
