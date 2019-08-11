@@ -169,6 +169,10 @@
     jal FN_WriteStr;                                                    \
     LOCAL_IO_POP(_SP)
 
+#ifdef COMPLIANCE_IO_ISSUE_14
+#define RVTEST_IO_WRITE_STR(_SP, _STR)
+#endif  // COMPLIANCE_IO_ISSUE_14
+
 // generate assertion listing
 #define LOCAL_CHECK() RVTEST_IO_CHECK()
 #define RVTEST_IO_CHECK()                                               \
