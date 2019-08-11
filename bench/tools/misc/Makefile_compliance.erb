@@ -1,0 +1,22 @@
+TOOLCHAIN  = /tank/work/dev/toolchains/riscv32-newlib-gcc/bin
+CC         = $(TOOLCHAIN)/riscv32-unknown-elf-gcc
+OBJCOPY    = $(TOOLCHAIN)/riscv32-unknown-elf-objcopy
+INCLUDE    = <%= includes %>
+CFLAGS     = -march=rv32i  -mabi=ilp32 -O0 -std=c11 -ffreestanding -w -nostdinc -nostdlib -nodefaultlibs -nostartfiles -I${INCLUDE}
+LDFLAGS    = -nostdlib -nodefaultlibs -nostartfiles
+LDSCRIPT   = <%= bench %>/misc/compliance.ld
+
+SRC  = <%= input_asm %>
+
+.PHONY : all
+
+all: test.elf test.v
+
+test.elf: asm_pre.s
+	$(CC) -Xlinker -T$(LDSCRIPT) $(CFLAGS) asm_pre.s -o test.elf
+
+asm_pre.s: $(SRC)
+	$(CC) -E $(CFLAGS) $(SRC) -o asm_pre.s
+
+test.v: test.elf
+	$(OBJCOPY) --target verilog test.elf test.v
