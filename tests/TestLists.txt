@@ -5,11 +5,11 @@ test_add(store_byte_issue       basic/store_byte_issue.py)
 # NOTE: arg1 and arg2 are not used in THIS test.
 # Just a demo to show how to pass arguments
 
-test_add(asm_timer asm_driver.py timer.s)
-test_add(asm_uart  asm_driver.py uart.s)
+test_add(asm_timer asm_driver.py asm/timer.s)
+test_add(asm_uart  asm_driver.py asm/uart.s)
 
-test_add(asm_sb  asm_driver.py sb.s)
-test_add(asm_lb  asm_driver.py lb.s)
+test_add(asm_sb  asm_driver.py asm/sb.s)
+test_add(asm_lb  asm_driver.py asm/lb.s)
 
 test_add(c_basic asm_driver.py c/basic)
 
@@ -23,4 +23,4 @@ test_add(c_libc_printf4     asm_driver.py c/libc/printf4)
 test_add(c_libc_printf5     asm_driver.py c/libc/printf5)
 test_add(c_libc_printf_int  asm_driver.py c/libc/printf_int)
 
-
+test_add(compliance_rv32i_add  asm_driver.py compliance/rv32i/src/I-ADD-01.S)
