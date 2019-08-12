@@ -114,11 +114,27 @@ add_custom_target(
     WORKING_DIRECTORY "${RTL_MODEL_BUILD_PATH}"
 )
 
+set(SOC_ENUMS "${RTL_MODEL_BUILD_PATH}/soc_enums.h")
+add_custom_command(
+    OUTPUT "${SOC_ENUMS}"
+    COMMAND ${Python2_EXECUTABLE}
+            ${CMAKE_SOURCE_DIR}/bench/tools/build/gen_enums.py
+            ${CMAKE_SOURCE_DIR} > "${SOC_ENUMS}"
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    DEPENDS ${CMAKE_SOURCE_DIR}/bench/tools/build/gen_enums.py
+            ${CMAKE_SOURCE_DIR}/rtl/cpu/cpu.v
+    VERBATIM
+)
+add_custom_target(
+    soc_enums ALL
+    DEPENDS "${SOC_ENUMS}"
+)
+
 # Set a list of sources
 set(TESTBENCH_SRC bench/soc.cpp bench/ui.cpp)
 
 add_library(bench SHARED ${TESTBENCH_SRC})
-add_dependencies(bench Vmodel)
+add_dependencies(bench Vmodel soc_enums)
 target_include_directories(bench PUBLIC
     ${RTL_MODEL_BUILD_ROOT}
     ${Python2_INCLUDE_DIRS}

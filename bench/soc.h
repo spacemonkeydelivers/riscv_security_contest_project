@@ -3,6 +3,9 @@
 
 #include <cstdint>
 
+
+#include <rtlsim/soc_enums.h>
+
 class Vsoc;
 class VerilatedVcdC;
 
@@ -37,6 +40,8 @@ public:
     uint8_t getUartTxData();
 
     bool validPc() const;
+
+    en_state cpu_state() const;
 
 private:
     Vsoc*          m_soc         {nullptr};

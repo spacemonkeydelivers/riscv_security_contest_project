@@ -1,12 +1,20 @@
 #include <boost/python.hpp>
+#include <boost/python/enum.hpp>
+
 
 #include <iostream>
+
+#include <rtlsim/soc_enums.h>
 
 #include "soc.h"
 
 BOOST_PYTHON_MODULE(libbench)
 {
     using namespace boost::python;
+
+#define D_GENERATE_SOC_ENUMS
+    #include <rtlsim/soc_enums.h>
+
     class_<RV_SOC>("RV_SOC", init<const char*>())
         .def("tick", &RV_SOC::tick)
         .def("reset", &RV_SOC::reset)
@@ -20,7 +28,7 @@ BOOST_PYTHON_MODULE(libbench)
         .def("readTxByte", &RV_SOC::getUartTxData)
         .def("uartTxValid", &RV_SOC::validUartTxTransaction)
         .def("pcValid", &RV_SOC::validPc)
+        .def("cpuState", &RV_SOC::cpu_state)
         .def("wordSize", &RV_SOC::getWordSize);
-                                    ;
 }
 
