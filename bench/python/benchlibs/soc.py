@@ -6,6 +6,7 @@ from collections import deque
 class RiscVSoc:
     def __init__(self, libbench, path_to_vcd, debug = False):
         self._soc = libbench.RV_SOC(path_to_vcd)
+        self._bench = libbench
         self._debug = debug
         self._word_size = self._soc.wordSize()
         self._on_tick_callbacks = []
@@ -13,6 +14,37 @@ class RiscVSoc:
         self._prev_pc = None
         self._stall_cnt = 0
         self._pc_history = collections.deque(10 * [None], 10)
+
+        self._last_state = None # for debug only
+        self._fwd_state = None # NONE, FETCH or EXEC
+        self._fwd_cntr = 0
+        self._braindead_threshold = 40
+
+    def checkFWD(self):
+        state = self._soc.cpuState()
+
+        if (state == self._bench.en_state.FETCH) and (
+            self._fwd_state == self._bench.en_state.EXEC):
+
+          self._fwd_cntr = 0
+          self._fwd_state = state
+          # print('exec -> fetch')
+        elif (state == self._bench.en_state.EXEC) and (
+            self._fwd_state == self._bench.en_state.FETCH):
+          self._fwd_cntr = 0
+          self._fwd_state = state
+          # print('fetch -> exec')
+        else:
+          if (state == self._bench.en_state.FETCH):
+            self._fwd_state = state
+          self._fwd_cntr = self._fwd_cntr + 1
+
+        if (self._fwd_cntr > self._braindead_threshold):
+           raise RuntimeError(
+               "soc is braindead (not fetch -> exec transition detected for {} ticks)".format(braindead_threshold)
+            )
+        self._last_state = state
+        # print(state)
 
     def setDebug(self, debug):
         self._debug = debug
@@ -26,6 +58,7 @@ class RiscVSoc:
         if self._soc.pcValid():
             self._prev_pc = self._soc.PC()
 
+        self.checkFWD()
         self.tick(1)
 
         if self._soc.pcValid():
