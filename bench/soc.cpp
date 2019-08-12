@@ -181,3 +181,8 @@ bool RV_SOC::validPc() const
     bool valid = (m_soc->soc->cpu0->state == 1) && (m_soc->soc->cpu0->bus_inst->CYC_O) && (m_soc->soc->cpu0->bus_inst->ACK_I);
     return valid;
 }
+
+en_state RV_SOC::cpu_state() const
+{
+    return (en_state)(int)m_soc->soc->cpu0->state;
+}
