@@ -117,8 +117,7 @@ def run(libbench):
     # prepare execution environment
     # BUG: Issue is with sb instruction, 
     # TODO: re-implement this function. add error reporting (exception)
-    # soc.register_tick_callback(soc.print_pc)
-    soc.register_tick_callback(soc.print_uart_tx)
+    #soc.register_tick_callback(soc.print_pc)
     soc.go(10 ** 5, expect_failure = expect_failure)
   else:
     print "custom driver detected, control transfered"

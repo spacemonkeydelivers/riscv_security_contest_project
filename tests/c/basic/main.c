@@ -13,6 +13,6 @@
 
 int main ()
 {
-    printf("test function: %s", "test");
+    printf("test function: %s\n", "test");
     return 0;
 }
