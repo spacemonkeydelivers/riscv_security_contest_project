@@ -14,9 +14,6 @@ SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 find_package(Python2 COMPONENTS Interpreter Development)
 find_package(Boost COMPONENTS python)
 
-set(SUBPROJECT_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/disrib/tools")
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/bench/tools")
-
 # Set the output folder where your program will be created
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
@@ -151,6 +148,8 @@ target_link_libraries(bench
 install(TARGETS bench LIBRARY DESTINATION lib)
 install(TARGETS verilated LIBRARY DESTINATION lib)
 
+set(SUBPROJECT_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/disrib/tools")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/bench/tools")
 
 # test environment (Python UI)
 configure_file(bench/python/runner.py.in tmp/runner.py)
