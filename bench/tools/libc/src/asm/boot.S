@@ -12,6 +12,11 @@ _start:
     csrw mtvec, t1
     li a0, 0 # TODO: we have no context defined (for now)
     call __soc_init
+    # enable external interrupts
+    li s0, 1
+    csrw mstatus, s0
+
+    # setup main app stack
     mv s0, zero
     la sp, __APP_STACK_TOP
     la a0, main
