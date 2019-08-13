@@ -148,7 +148,7 @@ target_link_libraries(bench
 install(TARGETS bench LIBRARY DESTINATION lib)
 install(TARGETS verilated LIBRARY DESTINATION lib)
 
-set(SUBPROJECT_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/disrib/tools")
+set(SUBPROJECT_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/distrib/tools")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/bench/tools")
 
 # test environment (Python UI)
