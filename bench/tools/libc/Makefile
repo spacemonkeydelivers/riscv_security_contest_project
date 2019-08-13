@@ -5,7 +5,7 @@ OBJ_FILES=boot.o isr.o config.o \
 	stdlib.o unistd.o string.o
 LIBNAME=libc
 INSTALL_HEADERS=stdarg.h stdbool.h stddef.h stdint.h stdio.h stdlib.h string.h unistd.h
-INSTALL_SOC_HEADERS=traps.h
+INSTALL_SOC_HEADERS=traps.h timer.h
 INSTALL_SHARE_CONTENT=soc.ld
 
 I_HEADERS     := $(addprefix $(TOP)/include/,$(INSTALL_HEADERS))
