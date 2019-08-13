@@ -18,7 +18,8 @@ class RiscVSoc:
         self._last_state = None # for debug only
         self._fwd_state = None # NONE, FETCH or EXEC
         self._fwd_cntr = 0
-        self._braindead_threshold = 40
+        self._braindead_threshold = 50
+        self._stall_threshold = self._braindead_threshold / 2 * 3
 
     def checkFWD(self):
         state = self._soc.cpuState()
@@ -41,7 +42,7 @@ class RiscVSoc:
 
         if (self._fwd_cntr > self._braindead_threshold):
            raise RuntimeError(
-               "soc is braindead (not fetch -> exec transition detected for {} ticks)".format(braindead_threshold)
+               "soc is braindead (not fetch -> exec transition detected for {} ticks)".format(self._braindead_threshold)
             )
         self._last_state = state
         # print(state)
@@ -80,7 +81,7 @@ class RiscVSoc:
     def go(self, limit, expect_failure = False):
 
         iterations = 0
-        while (self._stall_cnt < 50):
+        while (self._stall_cnt < self._stall_threshold):
             self.go_step()
 
             iterations = iterations + 1
