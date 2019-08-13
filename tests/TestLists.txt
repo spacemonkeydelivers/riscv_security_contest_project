@@ -1,37 +1,31 @@
-test_add(basic_mem              basic/mem.py)
-test_add(basic_soc              basic/soc.py)
-test_add(store_byte_issue       basic/store_byte_issue.py)
+test_add(basic_mem         basic/mem.py)
+test_add(basic_soc         basic/soc.py)
+test_add(store_byte_issue  basic/store_byte_issue.py)
 
-# NOTE: arg1 and arg2 are not used in THIS test.
-# Just a demo to show how to pass arguments
+test_add(asm_timer asm/timer.s)
+test_add(asm_uart  asm/uart.s)
+test_add(asm_sb    asm/sb.s)
+test_add(asm_lb    asm/lb.s)
 
-test_add(asm_timer asm_driver.py asm/timer.s)
-test_add(asm_uart  asm_driver.py asm/uart.s)
+test_add(asm_csrr_vendorid      asm/csrr_vendor.s)
+test_add(asm_csrw_vendorid      asm/csrw_vendor.s)
+test_add(asm_csre_missing_csr   asm/csrr_missing.s)
 
-test_add(asm_sb  asm_driver.py asm/sb.s)
-test_add(asm_lb  asm_driver.py asm/lb.s)
+test_add(c_basic             c/basic)
 
-test_add(c_basic asm_driver.py c/basic)
+test_add(c_libc_exit_S       c/libc/exit_succ)
+test_add(c_libc_exit_F       c/libc/exit_fail --driver_arg=--expect-failure)
+test_add(c_libc_main_ret_S   c/libc/main_ret_succ)
+test_add(c_libc_main_ret_F   c/libc/main_ret_fail --driver_arg=--expect-failure)
+test_add(c_libc_printf4      c/libc/printf4)
+test_add(c_libc_printf5      c/libc/printf5)
+test_add(c_libc_printf_int   c/libc/printf_int)
 
-test_add(c_libc_exit_S      asm_driver.py c/libc/exit_succ)
-test_add(c_libc_exit_F      asm_driver.py c/libc/exit_fail
-         --driver_arg=--expect-failure)
-test_add(c_libc_main_ret_S  asm_driver.py c/libc/main_ret_succ)
-test_add(c_libc_main_ret_F  asm_driver.py c/libc/main_ret_fail
-         --driver_arg=--expect-failure)
-test_add(c_libc_printf4     asm_driver.py c/libc/printf4)
-test_add(c_libc_printf5     asm_driver.py c/libc/printf5)
-test_add(c_libc_printf_int  asm_driver.py c/libc/printf_int)
-
-test_add(c_isr_route_timer_base  asm_driver.py c/libc/isr_route_timer_base)
-
-test_add(asm_csrr_vendorid  asm_driver.py asm/csrr_vendor.s)
-test_add(asm_csrw_vendorid  asm_driver.py asm/csrw_vendor.s)
-test_add(asm_csre_missing_csr asm_driver.py asm/csrr_missing.s)
+test_add(c_isr_route_timer_base   c/libc/isr_route_timer_base)
 
 set(COMPLIANCE_SOURCES_ROOT ${CMAKE_SOURCE_DIR}/tests/compliance/rv32i/src)
 file(GLOB COMPLIANCE_TESTS "${COMPLIANCE_SOURCES_ROOT}/*.S")
 foreach(file ${COMPLIANCE_TESTS})
     get_filename_component(NAME "${file}" NAME)
-    test_add(compliance_${NAME} asm_driver.py compliance/rv32i/src/${NAME})
+    test_add(compliance_${NAME}  compliance/rv32i/src/${NAME})
 endforeach()

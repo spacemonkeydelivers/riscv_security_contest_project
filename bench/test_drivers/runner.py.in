@@ -1,0 +1,29 @@
+#!@Python2_EXECUTABLE@ -uB
+
+# A proper way would be to set this one to CMAKE_INSTALL_PREFIX, but
+# BINARY dir is more convinient for users
+import sys
+import os
+sys.path.append('@CMAKE_BINARY_DIR@/lib')
+
+import libbench
+TESTS_DIR = "@CMAKE_SOURCE_DIR@/tests"
+
+# THE_TEST = os.path.join(TESTS_DIR, sys.argv[1])
+
+os.environ['TOOLS_DIR'] = '@CMAKE_SOURCE_DIR@/bench/tools'
+os.environ['TOOLS_DISTRIB'] = '@CMAKE_BINARY_DIR@/distrib/tools'
+os.environ['TESTS_DIR'] = TESTS_DIR
+sys.path.append("@CMAKE_SOURCE_DIR@/bench/rtl/python")
+
+if sys.argv[1].endswith(".py"):
+  TEST_DRIVER = os.path.join(TESTS_DIR, sys.argv[1])
+else:
+  TEST_DRIVER = "@CMAKE_SOURCE_DIR@/bench/test_drivers/default.py"
+
+print('loading <{}> for {}'.format(TEST_DRIVER, sys.argv[1]))
+import imp
+
+PYTHONDONTWRITEBYTECODE=True
+test = imp.load_source("the_test", TEST_DRIVER)
+test.run(libbench)
