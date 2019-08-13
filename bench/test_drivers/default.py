@@ -9,7 +9,7 @@ import benchlibs.soc as soc_lib
 
 def generate_make_compliance(soc):
 
-  asm_file = os.environ['TESTS_DIR'] + '/' + sys.argv[2]
+  asm_file = os.environ['TESTS_DIR'] + '/' + sys.argv[1]
   include_dir = os.environ['TESTS_DIR'] + '/compliance/include/'
   tools_dir = os.environ['TOOLS_DIR']
   cmd = '(echo \'<% input_asm="{}"; bench="{}"; includes="{}" %>\' && cat \'{}\') | erb > Makefile'.format(
@@ -29,7 +29,7 @@ def generate_make_compliance(soc):
 
 def generate_make_asm(soc):
 
-  asm_file = os.environ['TESTS_DIR'] + '/' + sys.argv[2]
+  asm_file = os.environ['TESTS_DIR'] + '/' + sys.argv[1]
   tools_dir = os.environ['TOOLS_DIR']
   cmd = '(echo \'<% input_asm="{}"; bench="{}" %>\' && cat \'{}\') | erb > Makefile'.format(
         asm_file, tools_dir, tools_dir + '/misc/Makefile_asm.erb')
@@ -51,7 +51,7 @@ def generate_make_c(soc):
 
   tools_dir = os.environ['TOOLS_DIR']
   tools_distr = os.environ['TOOLS_DISTRIB']
-  c_root = os.path.join(os.environ['TESTS_DIR'], sys.argv[2])
+  c_root = os.path.join(os.environ['TESTS_DIR'], sys.argv[1])
   pattern = os.path.join(c_root, '*.c')
   print('searching for c files as <{}>'.format(pattern))
   c_list = ' '.join(glob.glob(pattern))
@@ -74,7 +74,7 @@ def generate_make_c(soc):
   return driver
 
 def build_test_image(soc):
-  test_type = sys.argv[2].split("/")[0]
+  test_type = sys.argv[1].split("/")[0]
 
   if test_type == "c":
     driver = generate_make_c(soc)
