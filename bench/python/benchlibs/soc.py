@@ -21,6 +21,21 @@ class RiscVSoc:
         self._braindead_threshold = 50
         self._stall_threshold = self._braindead_threshold / 2 * 3
 
+        self._uart = None
+        import atexit
+        atexit.register(self.printIO)
+
+    def printIO(self):
+
+        if self._uart == None:
+            print("no uart output was detected")
+            return
+
+        print('...---...---...---...---')
+        print('Behold! The UART(output) log follows:')
+        print(open('io.txt', 'r').read())
+        print('...---...---...---...---')
+
     def checkFWD(self):
         state = self._soc.cpuState()
 
@@ -113,6 +128,7 @@ class RiscVSoc:
     def tick(self, ticks):
         for t in range(ticks):
             self._soc.tick(1)
+            self.print_uart_tx()
             for c in self._on_tick_callbacks:
 #                if self._debug:
 #                    print("Calling on tick callback")
@@ -120,7 +136,12 @@ class RiscVSoc:
 
     def print_uart_tx(self):
         if self._soc.uartTxValid():
-            sys.stdout.write((str(chr(self._soc.readTxByte()))))
+            character = str(chr(self._soc.readTxByte()))
+
+            if self._uart == None:
+                self._uart = open("io.txt", "w", 0)
+
+            self._uart.write(character)
 
     def print_pc(self):
         if self._soc.pcValid():
