@@ -1,7 +1,8 @@
 #include <generated/esf.h>
 # temporary include till we have a proper implementation
-#include <rtlsim/soc_enums.h>
 #include <soc/traps.h>
+
+#include <platform/soc_enums.h>
 
 .global __isr_wrapper
 
