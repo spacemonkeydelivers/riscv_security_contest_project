@@ -1,0 +1,15 @@
+stages:
+  - build
+  - test
+
+build_project:
+  stage: build
+  script:
+    - mkdir build
+    - cd build
+    - cmake ../
+
+test_project:
+  stage: test
+  script:
+    - ctest 
