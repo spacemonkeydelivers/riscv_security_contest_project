@@ -12,9 +12,10 @@ build_project:
   artifacts:
     paths:
       - build/
+    expire_in: 1 day
 
 test_project:
   stage: test
   script:
     - cd build/
-    - ctest 
+    - ctest -R "compliance_I-ADDI-01.S|compliance_I-BLTU-01.S|asm_sb"
