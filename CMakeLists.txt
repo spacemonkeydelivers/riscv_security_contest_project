@@ -38,15 +38,15 @@ set(VERILATOR_FLAGS "${VERILATOR_FLAGS} -CFLAGS -g -CFLAGS -fpic")
 set(VERILATOR_FLAGS_POST "-Wno-lint")
 
 # This produce "verilated" library, consumed by RTL simulator
-include(cmake/VerilatorLibrary.txt)
+include(cmake/VerilatorLibrary.cmake)
 # Produces RTL simulator, testbench and platform_headers
 # NOTE: any interaction with RTL simulator should go through testbench and platform_headers
-include(cmake/VerilatedRTL.txt)
+include(cmake/VerilatedRTL.cmake)
 
 # tools expect that platform headers are available
 set(SUBPROJECT_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/distrib/tools")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/bench/tools")
 
-include(cmake/TestRunners.txt)
+include(cmake/TestRunners.cmake)
 include(tests/TestLists.txt)
 
