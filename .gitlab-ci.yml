@@ -8,8 +8,13 @@ build_project:
     - mkdir build
     - cd build
     - cmake ../
+    - make
+  artifacts:
+    paths:
+      - build/
 
 test_project:
   stage: test
   script:
+    - cd build/
     - ctest 
