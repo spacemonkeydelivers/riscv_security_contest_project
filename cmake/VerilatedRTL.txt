@@ -93,7 +93,7 @@ target_link_libraries(bench
     ${Boost_LIBRARIES}
     ${Python2_LIBRARIES}
     ${VERILOG_OUTPUT_LIB}
-    verilated
+    ${VERILATOR_LIBRARY}
 )
 install(TARGETS bench LIBRARY DESTINATION lib)
 
