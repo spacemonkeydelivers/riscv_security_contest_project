@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-#include <rtlsim/soc_enums.h>
+#include <platform/soc_enums.h>
 
 #include "soc.h"
 
@@ -13,7 +13,7 @@ BOOST_PYTHON_MODULE(libbench)
     using namespace boost::python;
 
 #define D_GENERATE_SOC_ENUMS
-    #include <rtlsim/soc_enums.h>
+    #include <platform/soc_enums.h>
 
     class_<RV_SOC>("RV_SOC", init<const char*>())
         .def("tick", &RV_SOC::tick)

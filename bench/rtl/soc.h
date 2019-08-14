@@ -4,7 +4,7 @@
 #include <cstdint>
 
 
-#include <rtlsim/soc_enums.h>
+#include <platform/soc_enums.h>
 
 class Vsoc;
 class VerilatedVcdC;

@@ -9,11 +9,11 @@ endif()
 
 set(TOOLCHAIN "/tank/work/dev/toolchains/riscv32-newlib-gcc")
 set(FLAGS "-march=rv32im -ffreestanding -nostdinc -nodefaultlibs -nostdlib -Os -Wall -Werror -Wextra")
-set(FLAGS "${FLAGS} -I${RTL_MODEL_BUILD_ROOT}")
+set(FLAGS "${FLAGS} -I${PLATFORM_FILES_ROOT}/include")
 ExternalProject_Add(
     libc
     CONFIGURE_COMMAND ""
-    DEPENDS soc_enums
+    DEPENDS platform_headers
     SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libc"
     BUILD_ALWAYS True
     BUILD_COMMAND make
