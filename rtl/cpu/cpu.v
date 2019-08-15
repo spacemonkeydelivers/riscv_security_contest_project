@@ -39,6 +39,7 @@ module cpu
      // machine cause register, mcause[4] denotes interrupt, mcause[3:0] encodes exception code
     reg[4:0] mcause = 0;
 
+    localparam CAUSE_INSTRUCTION_MISALIGNED = 5'b00000;
     localparam CAUSE_EXTERNAL_INTERRUPT     = 5'b11011;
     localparam CAUSE_INVALID_INSTRUCTION    = 5'b00010;
     localparam CAUSE_BREAK                  = 5'b00011;
@@ -292,6 +293,8 @@ module cpu
         state = busy ? prevstate : nextstate;
     end
 
+    wire addr_misaligned = (nextpc_from_alu ? alu_dataout : pcnext) & 2'b11;
+
     always @(negedge clk) begin
 
         alu_en <= 0;
@@ -335,7 +338,13 @@ module cpu
                 bus_en <= 1;
                 bus_op <= `BUSOP_READW;
                 mux_bus_addr_sel <= MUX_BUSADDR_PC;
-                nextstate <= STATE_DECODE;
+                if (addr_misaligned) begin
+                   nextstate <= STATE_TRAP1;
+                   mcause <= CAUSE_INSTRUCTION_MISALIGNED;
+                end
+                else begin
+                   nextstate <= STATE_DECODE;
+                end
             end
 
             STATE_DECODE: begin
@@ -568,6 +577,7 @@ module cpu
                 meie <= 0;
                 epc <= pc;
                 pcnext <= evect;
+                nextpc_from_alu <= 0;
 
                 nextstate <= STATE_FETCH;
             end
