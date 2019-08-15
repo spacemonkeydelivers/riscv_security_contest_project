@@ -5,6 +5,20 @@ for information regarding build zephyr and a subsequent OVP/RTL boot procedures.
 
 # Testing
 
+## Running
+
+To run test use the following command
+
+```
+ctest -R "expr_to_match_test_name"
+```
+
+If you want to run with **tracing** enable, use the following command:
+
+```
+ DBG="+trace" ctest -R lb -V
+```
+
 The current "test exit" sequence looks as follows:
 
 ```

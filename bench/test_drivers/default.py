@@ -6,6 +6,7 @@ import imp
 import re
 
 import benchlibs.soc as soc_lib
+import benchlibs.debug as debug
 
 def generate_make_compliance(soc):
 
@@ -114,11 +115,12 @@ def run(libbench):
             if found == "--expect-failure":
                 expect_failure = True
 
-    # prepare execution environment
-    # BUG: Issue is with sb instruction, 
-    # TODO: re-implement this function. add error reporting (exception)
-    #soc.register_tick_callback(soc.print_pc)
-    soc.go(10 ** 5, expect_failure = expect_failure)
+    dbg = debug.Debugger(libbench, soc)
+    if sys.stdout.isatty():
+      print('TTY session detected! starting debugger')
+      dbg.repl()
+    else:
+      soc.go(10 ** 5, expect_failure = expect_failure)
   else:
     print "custom driver detected, control transfered"
     driver.run(soc)

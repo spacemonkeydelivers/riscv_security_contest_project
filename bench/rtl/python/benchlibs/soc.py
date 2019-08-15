@@ -70,6 +70,12 @@ class RiscVSoc:
             print("Registering on tick callback")
         self._on_tick_callbacks.append(callback)
 
+    def unregister_tick_callback(self, callback):
+        if self._debug:
+            print("UNregistering on tick callback")
+        if callback in self._on_tick_callbacks:
+            self._on_tick_callbacks.remove(callback)
+
     def go_step(self):
         if self._soc.pcValid():
             self._prev_pc = self._soc.PC()
