@@ -31,19 +31,15 @@ module cpu
     assign reset = RST_I;
 
     // MSRS
-    reg[31:0] pc, pcnext, epc;
+    reg[31:0] pc, pcnext;
     reg nextpc_from_alu, writeback_from_alu, writeback_from_bus;
-    reg[31:0] evect = VECTOR_EXCEPTION;
-     // current and previous machine-mode external interrupt enable
-    reg meie = 0, meie_prev = 0;
-     // machine cause register, mcause[4] denotes interrupt, mcause[3:0] encodes exception code
-    reg[4:0] mcause = 0;
 
-    localparam CAUSE_INSTRUCTION_MISALIGNED = 5'b00000;
-    localparam CAUSE_EXTERNAL_INTERRUPT     = 5'b11011;
-    localparam CAUSE_INVALID_INSTRUCTION    = 5'b00010;
-    localparam CAUSE_BREAK                  = 5'b00011;
-    localparam CAUSE_ECALL                  = 5'b01011;
+    localparam CAUSE_INSTRUCTION_MISALIGNED = 32'h80000000;
+    localparam CAUSE_EXTERNAL_INTERRUPT     = 32'h8000000b;
+    localparam CAUSE_INVALID_INSTRUCTION    = 32'h00000002;
+    localparam CAUSE_NONE                   = 32'h00000000;
+    localparam CAUSE_BREAK                  = 32'h00000003;
+    localparam CAUSE_ECALL                  = 32'h0000000b;
 
     // ALU instance
     reg alu_en = 0;
@@ -172,10 +168,6 @@ module cpu
     wire[11:0] mux_msr_sel;
     reg[31:0] msr_data;
     assign mux_msr_sel = dec_imm[11:0];
-    wire[31:0] mcause32;
-    assign mcause32 = {mcause[4], {27{1'b0}}, mcause[3:0]};
-    wire[31:0] mstatus32;
-    assign mstatus32 = {{29{1'b0}}, INTERRUPT_I, meie_prev, meie};
 
     wire[31:0] vendor_id;
     assign vendor_id = 32'hC001_F001;
@@ -190,7 +182,6 @@ module cpu
 
     reg csr_exists;
     wire csr_ro;
-    reg csr_source;
 
     localparam MSR_MVENDORID = 12'hF11;
     localparam MSR_MARCHID   = 12'hF12;
@@ -211,21 +202,54 @@ module cpu
     localparam MSR_MTVAL      = 12'h343;
     localparam MSR_MIP        = 12'h344;
 
+    enum {
+       M_VENDOR_ID,
+       M_ARCH_ID,
+       M_IMP_ID,
+       M_HART_ID,
+       M_STATUS,
+       M_ISA,
+       M_EDEKEG,
+       M_IDELEG,
+       M_IE,
+       M_TVEC,
+       M_COUNTEREN,
+       M_SCRATCH,
+       M_EPC,
+       M_CAUSE,
+       M_TVAL,
+       M_IP,
+       M_LAST
+    } 
+    csr_names;
+    
+    reg [31:0] csr [0:16];
+    reg [4:0]  csr_index;
+
     always @(*) begin
-        case(mux_msr_sel)
-            MSR_MVENDORID: msr_data = vendor_id;
-            MSR_MARCHID:   msr_data = arch_id;
-            MSR_MIMPID:    msr_data = imp_id;
-            MSR_MHARTID:   msr_data = hart_id;
+       case (mux_msr_sel)
+          MSR_MVENDORID:  csr_index = M_VENDOR_ID;
+          MSR_MARCHID:    csr_index = M_ARCH_ID;
+          MSR_MIMPID:     csr_index = M_IMP_ID;
+          MSR_MHARTID:    csr_index = M_HART_ID;
+          MSR_MSTATUS:    csr_index = M_STATUS;
+          MSR_MISA:       csr_index = M_ISA;
+          MSR_MEDELEG:    csr_index = M_EDEKEG;
+          MSR_MIDELEG:    csr_index = M_IDELEG;
+          MSR_MIE:        csr_index = M_IE;
+          MSR_MTVEC:      csr_index = M_TVEC;
+          MSR_MCOUNTEREN: csr_index = M_COUNTEREN;
+          MSR_MSCRATCH:   csr_index = M_SCRATCH;
+          MSR_MEPC:       csr_index = M_EPC;
+          MSR_MCAUSE:     csr_index = M_CAUSE;
+          MSR_MTVAL:      csr_index = M_TVAL;
+          MSR_MIP:        csr_index = M_IP;
+          default:        csr_index = M_LAST;
+       endcase
+    end
 
-            MSR_MSTATUS:   msr_data = mstatus32;
-            MSR_MCAUSE:    msr_data = mcause32;
-            MSR_MEPC:      msr_data = epc;
-
-            MSR_MTVEC:     msr_data = evect;
-            MSR_MSCRATCH:  msr_data = scratch;
-            default:       msr_data = evect;
-        endcase
+    always @(*) begin
+        msr_data = csr[csr_index];
     end
 
     always @(*) begin
@@ -244,7 +268,7 @@ module cpu
             default:       csr_exists = 0;
         endcase
     end
-    assign csr_ro = (mux_msr_sel[11:10] == 2'b11);
+    assign csr_ro = (mux_msr_sel[11:10] == 2'b11) && ((`FUNC_CSRRW == dec_funct3) || (`FUNC_CSRRWI) == dec_funct3);
 
     // Muxer for register data input
     localparam MUX_REGINPUT_ALU = 0;
@@ -270,12 +294,8 @@ module cpu
     localparam STATE_BRANCH2        = 7;
     localparam STATE_TRAP1          = 8;
     localparam STATE_SYSTEM         = 9;
-    localparam STATE_CSRRW1         = 10;
-    localparam STATE_CSRRW2         = 11;
-    localparam STATE_CSRRS1         = 12;
-    localparam STATE_CSRRS2         = 13;
-    localparam STATE_CSRRC1         = 14;
-    localparam STATE_CSRRC2         = 15;
+    localparam STATE_CSR1           = 10;
+    localparam STATE_CSR2           = 11;
 
 
     reg[3:0] state, prevstate = STATE_RESET, nextstate = STATE_RESET;
@@ -294,6 +314,19 @@ module cpu
     end
 
     wire addr_misaligned = (nextpc_from_alu ? alu_dataout : pcnext) & 2'b11;
+
+    reg [31:0] csr_to_write;
+    always @(*) begin
+      case (dec_funct3)
+         `FUNC_CSRRW:   csr_to_write = (reg_val1);
+         `FUNC_CSRRWI:  csr_to_write = ({27'b0, dec_rs1});
+         `FUNC_CSRRS:   csr_to_write = (csr[csr_index] | reg_val1);
+         `FUNC_CSRRSI:  csr_to_write = (csr[csr_index] | {27'b0, dec_rs1});
+         `FUNC_CSRRC:   csr_to_write = (csr[csr_index] & ~reg_val1);
+         `FUNC_CSRRCI:  csr_to_write = (csr[csr_index] & ~({27'b0, dec_rs1}));
+         default:       csr_to_write = 0;
+      endcase
+    end
 
     always @(negedge clk) begin
 
@@ -315,9 +348,9 @@ module cpu
         case(state)
             STATE_RESET: begin
                 pcnext <= VECTOR_RESET;
-                meie <= 0; // disable machine-mode external interrupt
+                csr[M_STATUS][3] <= 0; // disable machine-mode external interrupt
                 nextstate <= STATE_FETCH;
-                evect <= VECTOR_EXCEPTION;
+                csr[M_TVEC] <= VECTOR_EXCEPTION;
                 nextpc_from_alu <= 0;
                 writeback_from_alu <= 0;
                 writeback_from_bus <= 0;
@@ -340,7 +373,7 @@ module cpu
                 mux_bus_addr_sel <= MUX_BUSADDR_PC;
                 if (addr_misaligned) begin
                    nextstate <= STATE_TRAP1;
-                   mcause <= CAUSE_INSTRUCTION_MISALIGNED;
+                   csr[M_CAUSE] <= CAUSE_INSTRUCTION_MISALIGNED;
                 end
                 else begin
                    nextstate <= STATE_DECODE;
@@ -364,8 +397,8 @@ module cpu
 
                 // checking for interrupt here because no bus operations are active here
                 // TODO: find a proper place that doesn't let an instruction fetch go to waste
-                if(meie & INTERRUPT_I) begin
-                    mcause <= CAUSE_EXTERNAL_INTERRUPT;
+                if(csr[M_STATUS][3] & INTERRUPT_I) begin
+                    csr[M_CAUSE] <= CAUSE_EXTERNAL_INTERRUPT;
                     nextstate <= STATE_TRAP1;
                 end
 
@@ -523,89 +556,73 @@ module cpu
                     `FUNC_ECALL_EBREAK: begin
                         // handle ecall, ebreak and mret here
                         case(dec_imm[11:0])
-                            `SYSTEM_ECALL: mcause <= CAUSE_ECALL;
-                            `SYSTEM_EBREAK: mcause <= CAUSE_BREAK;
+                            `SYSTEM_ECALL:  csr[M_CAUSE] <= CAUSE_ECALL;
+                            `SYSTEM_EBREAK: csr[M_CAUSE] <= CAUSE_BREAK;
                             `SYSTEM_MRET: begin
-                                meie <= meie_prev;
-                                pcnext <= epc;
-                                mcause <= 0;
+                                csr[M_STATUS][3] <= csr[M_STATUS][7];
+                                pcnext <= csr[M_EPC];
+                                csr[M_CAUSE] <= CAUSE_NONE;
                                 nextstate <= STATE_FETCH;
                             end
-                            default: mcause <= CAUSE_INVALID_INSTRUCTION;
+                            default: csr[M_CAUSE] <= CAUSE_INVALID_INSTRUCTION;
                         endcase
                     end
 
                     `FUNC_CSRRW: begin
                         // handle csrrw here
-                        nextstate <= STATE_CSRRW1;
-                        csr_source = 1;
+                        nextstate <= STATE_CSR1;
                     end
 
                     `FUNC_CSRRWI: begin
                         // handle csrrw here
-                        nextstate <= STATE_CSRRW1;
-                        csr_source = 0;
+                        nextstate <= STATE_CSR1;
                     end
 
                     `FUNC_CSRRSI: begin
-                        nextstate <= STATE_CSRRS1;
-                        csr_source = 0;
+                        nextstate <= STATE_CSR1;
                     end
 
                     `FUNC_CSRRS: begin
-                        nextstate <= STATE_CSRRS1;
-                        csr_source = 1;
+                        nextstate <= STATE_CSR1;
                     end
 
                     `FUNC_CSRRCI: begin
-                        nextstate <= STATE_CSRRC1;
-                        csr_source = 0;
+                        nextstate <= STATE_CSR1;
                     end
 
                     `FUNC_CSRRC: begin
-                        nextstate <= STATE_CSRRC1;
-                        csr_source = 1;
+                        nextstate <= STATE_CSR1;
                     end
 
                     // unsupported SYSTEM instruction
-                    default: mcause <= CAUSE_INVALID_INSTRUCTION;
+                    default: csr[M_CAUSE] <= CAUSE_INVALID_INSTRUCTION;
                 endcase
             end
 
             STATE_TRAP1: begin
-                meie_prev <= meie;
-                meie <= 0;
-                epc <= pc;
-                pcnext <= evect;
+                csr[M_STATUS][7] <= csr[M_STATUS][3];
+                csr[M_STATUS][3] <= 0;
+                csr[M_EPC] <= pc;
+                pcnext <= csr[M_TVEC];
                 nextpc_from_alu <= 0;
-
                 nextstate <= STATE_FETCH;
             end
 
-            STATE_CSRRW1: begin
+            STATE_CSR1: begin
                 if (csr_exists) begin
                     // write MSR-value to register
                     mux_reg_input_sel <= MUX_REGINPUT_MSR;
                     reg_we <= 1;
-                    nextstate <= STATE_CSRRW2;
+                    nextstate <= STATE_CSR2;
                 end else begin
                     nextstate <= STATE_TRAP1;
                 end
             end
 
-            STATE_CSRRW2: begin
+            STATE_CSR2: begin
                 // update MSRs with value of rs1
                 if(!dec_imm[11]) begin // denotes a writable non-standard machine-mode MSR
-                    case(dec_imm[11:0])
-                        MSR_MCAUSE: mcause <= {reg_val1[31], reg_val1[3:0]};
-                        MSR_MEPC:   epc <= reg_val1;
-                        MSR_MSTATUS: begin
-                            meie <= csr_source ? reg_val1[0] : dec_rs1;
-                            meie_prev <= csr_source ? reg_val1[1] : dec_rs1;
-                        end
-                        MSR_MTVEC: evect <= reg_val1;
-                        MSR_MSCRATCH: scratch <= csr_source ? reg_val1 : {27'b0, dec_rs1};
-                    endcase
+                    csr[csr_index] <= csr_to_write;
                 end
                 // advance to next instruction
                 if (csr_ro) begin
@@ -615,56 +632,6 @@ module cpu
                 end
             end
             
-            STATE_CSRRS1: begin
-                if (csr_exists) begin
-                   nextstate <= STATE_CSRRS2;
-                   mux_reg_input_sel <= MUX_REGINPUT_MSR;
-                   reg_we <= 1;
-                end 
-                else begin
-                   nextstate <= STATE_TRAP1;
-                   mcause <= CAUSE_INVALID_INSTRUCTION;
-                end
-            end
-
-            STATE_CSRRS2: begin
-                if (csr_exists) begin
-                   if(!dec_imm[11]) begin // denotes a writable non-standard machine-mode MSR
-                      case(dec_imm[11:0])
-                         MSR_MEPC:   epc <= epc | reg_val1;
-                         MSR_MTVEC: evect <= evect | reg_val1;
-                         MSR_MSCRATCH: scratch <= scratch | (csr_source ? reg_val1 : {27'b0, dec_rs1});
-                      endcase
-                   end
-                end 
-                nextstate <= STATE_FETCH;
-            end
-
-            STATE_CSRRC1: begin
-                if (csr_exists) begin
-                   nextstate <= STATE_CSRRC2;
-                   mux_reg_input_sel <= MUX_REGINPUT_MSR;
-                   reg_we <= 1;
-                end 
-                else begin
-                   nextstate <= STATE_TRAP1;
-                   mcause <= CAUSE_INVALID_INSTRUCTION;
-                end
-            end
-
-            STATE_CSRRC2: begin
-                if (csr_exists) begin
-                   if(!dec_imm[11]) begin // denotes a writable non-standard machine-mode MSR
-                      case(dec_imm[11:0])
-                         MSR_MEPC:   epc <= epc & ~reg_val1;
-                         MSR_MTVEC: evect <= evect & ~reg_val1;
-                         MSR_MSCRATCH: scratch <= scratch & ~(csr_source ? reg_val1 : {27'b0, dec_rs1});
-                      endcase
-                   end
-                end 
-                nextstate <= STATE_FETCH;
-            end
-
         endcase
 
 
