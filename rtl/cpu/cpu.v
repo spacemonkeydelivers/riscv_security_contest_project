@@ -203,22 +203,22 @@ module cpu
     localparam MSR_MIP        = 12'h344;
 
     enum {
-       M_VENDOR_ID,
-       M_ARCH_ID,
-       M_IMP_ID,
-       M_HART_ID,
-       M_STATUS,
-       M_ISA,
-       M_EDEKEG,
-       M_IDELEG,
-       M_IE,
-       M_TVEC,
-       M_COUNTEREN,
-       M_SCRATCH,
-       M_EPC,
-       M_CAUSE,
-       M_TVAL,
-       M_IP,
+       M_VENDOR_ID = 0,
+       M_ARCH_ID   = 1,
+       M_IMP_ID    = 2,
+       M_HART_ID   = 3,
+       M_STATUS    = 4,
+       M_ISA       = 5,
+       M_EDEKEG    = 6,
+       M_IDELEG    = 7,
+       M_IE        = 8,
+       M_TVEC      = 9,
+       M_COUNTEREN = 10,
+       M_SCRATCH   = 11,
+       M_EPC       = 12,
+       M_CAUSE     = 13,
+       M_TVAL      = 14,
+       M_IP        = 15,
        M_LAST
     } 
     csr_names;
@@ -262,6 +262,8 @@ module cpu
             MSR_MSTATUS:   csr_exists = 1;
             MSR_MCAUSE:    csr_exists = 1;
             MSR_MEPC:      csr_exists = 1;
+            MSR_MISA:      csr_exists = 1;
+            MSR_MTVAL:     csr_exists = 1;
 
             MSR_MTVEC:     csr_exists = 1;
             MSR_MSCRATCH:  csr_exists = 1;
@@ -313,7 +315,7 @@ module cpu
         state = busy ? prevstate : nextstate;
     end
 
-    wire addr_misaligned = pc & 2'b11;
+    wire addr_misaligned = | (pc[1:0] & 2'b11);
 
     reg [31:0] csr_to_write;
     always @(*) begin
@@ -603,6 +605,7 @@ module cpu
                 csr[M_STATUS][7] <= csr[M_STATUS][3];
                 csr[M_STATUS][3] <= 0;
                 csr[M_EPC] <= pc;
+                csr[M_TVAL] <= pc;
                 pcnext <= csr[M_TVEC];
                 nextpc_from_alu <= 0;
                 nextstate <= STATE_FETCH;
