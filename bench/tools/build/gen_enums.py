@@ -18,7 +18,7 @@ def gen_enum(tgt_type, filename, matcher):
     raise Exception("no matches found")
 
   EN_CLASS.append('// Autogenrated from <{}>'.format(input_file))
-  EN_CLASS.append('enum class {} : int {{'.format(tgt_type))
+  EN_CLASS.append('enum class {} : uint {{'.format(tgt_type))
   for item in matched_data:
     EN_CLASS.append('    {} = {}, '.format(item['en_item'], item['item_val']))
   EN_CLASS.append('};')
