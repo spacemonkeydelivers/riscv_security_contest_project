@@ -281,7 +281,7 @@ module cpu
 
 
     // only transition to new state if not busy    
-    always @(*) begin
+    always @(negedge clk) begin
         state = busy ? prevstate : nextstate;
     end
 
