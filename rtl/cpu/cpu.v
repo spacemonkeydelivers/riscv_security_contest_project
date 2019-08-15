@@ -313,7 +313,7 @@ module cpu
         state = busy ? prevstate : nextstate;
     end
 
-    wire addr_misaligned = (nextpc_from_alu ? alu_dataout : pcnext) & 2'b11;
+    wire addr_misaligned = pc & 2'b11;
 
     reg [31:0] csr_to_write;
     always @(*) begin
