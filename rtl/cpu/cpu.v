@@ -273,6 +273,8 @@ module cpu
     localparam STATE_CSRRW2         = 11;
     localparam STATE_CSRRS1         = 12;
     localparam STATE_CSRRS2         = 13;
+    localparam STATE_CSRRC1         = 14;
+    localparam STATE_CSRRC2         = 15;
 
 
     reg[3:0] state, prevstate = STATE_RESET, nextstate = STATE_RESET;
@@ -546,6 +548,16 @@ module cpu
                         csr_source = 1;
                     end
 
+                    `FUNC_CSRRCI: begin
+                        nextstate <= STATE_CSRRC1;
+                        csr_source = 0;
+                    end
+
+                    `FUNC_CSRRC: begin
+                        nextstate <= STATE_CSRRC1;
+                        csr_source = 1;
+                    end
+
                     // unsupported SYSTEM instruction
                     default: mcause <= CAUSE_INVALID_INSTRUCTION;
                 endcase
@@ -612,6 +624,31 @@ module cpu
                          MSR_MEPC:   epc <= epc | reg_val1;
                          MSR_MTVEC: evect <= evect | reg_val1;
                          MSR_MSCRATCH: scratch <= scratch | (csr_source ? reg_val1 : {27'b0, dec_rs1});
+                      endcase
+                   end
+                end 
+                nextstate <= STATE_FETCH;
+            end
+
+            STATE_CSRRC1: begin
+                if (csr_exists) begin
+                   nextstate <= STATE_CSRRC2;
+                   mux_reg_input_sel <= MUX_REGINPUT_MSR;
+                   reg_we <= 1;
+                end 
+                else begin
+                   nextstate <= STATE_TRAP1;
+                   mcause <= CAUSE_INVALID_INSTRUCTION;
+                end
+            end
+
+            STATE_CSRRC2: begin
+                if (csr_exists) begin
+                   if(!dec_imm[11]) begin // denotes a writable non-standard machine-mode MSR
+                      case(dec_imm[11:0])
+                         MSR_MEPC:   epc <= epc & ~reg_val1;
+                         MSR_MTVEC: evect <= evect & ~reg_val1;
+                         MSR_MSCRATCH: scratch <= scratch & ~(csr_source ? reg_val1 : {27'b0, dec_rs1});
                       endcase
                    end
                 end 
