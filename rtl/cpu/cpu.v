@@ -185,6 +185,8 @@ module cpu
     wire[31:0] hart_id;
     assign hart_id = 0;
 
+    reg[31:0] scratch = 0;
+
     reg csr_exists;
     wire csr_ro;
     reg csr_source;
@@ -220,7 +222,8 @@ module cpu
             MSR_MEPC:      msr_data = epc;
 
             MSR_MTVEC:     msr_data = evect;
-            default:     msr_data = evect;
+            MSR_MSCRATCH:  msr_data = scratch;
+            default:       msr_data = evect;
         endcase
     end
 
@@ -236,7 +239,8 @@ module cpu
             MSR_MEPC:      csr_exists = 1;
 
             MSR_MTVEC:     csr_exists = 1;
-            default:     csr_exists = 0;
+            MSR_MSCRATCH:  csr_exists = 1;
+            default:       csr_exists = 0;
         endcase
     end
     assign csr_ro = (mux_msr_sel[11:10] == 2'b11);
@@ -571,6 +575,7 @@ module cpu
                             meie_prev <= csr_source ? reg_val1[1] : dec_rs1;
                         end
                         MSR_MTVEC: evect <= reg_val1;
+                        MSR_MSCRATCH: scratch <= csr_source ? reg_val1 : {27'b0, dec_rs1};
                     endcase
                 end
                 // advance to next instruction
