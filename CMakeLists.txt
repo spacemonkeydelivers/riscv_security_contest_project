@@ -6,7 +6,12 @@ enable_testing()
 # Project's name
 project(riscv_soc)
 
+# DO NOT USE!!!
+option(BUILD_OVP_MODELS "Build OVP VLNV library (Imperas installation is required)" OFF)
+
 set(PLATFORM_FILES_ROOT "${CMAKE_BINARY_DIR}/distrib/platform")
+set(MODELS_FILES_ROOT "${CMAKE_BINARY_DIR}/distrib/models")
+
 # Set the output folder where your program will be created
 set(EXECUTABLE_OUTPUT_PATH ${PLATFORM_FILES_ROOT}/bin)
 set(LIBRARY_OUTPUT_PATH ${PLATFORM_FILES_ROOT}/lib)
@@ -46,6 +51,12 @@ include(cmake/VerilatedRTL.cmake)
 # tools expect that platform headers are available
 set(SUBPROJECT_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/distrib/tools")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/bench/tools")
+
+# OVP
+if (BUILD_OVP_MODELS)
+    set(SUBPROJECT_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/distrib/models/ovp/")
+    add_subdirectory(models/ovp/)
+endif()
 
 include(cmake/TestRunners.cmake)
 include(tests/TestLists.txt)
