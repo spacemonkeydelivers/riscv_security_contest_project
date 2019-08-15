@@ -54,29 +54,34 @@ void RV_SOC::tick(unsigned num)
     assert(m_soc);
     for (unsigned i = 0; i < num; i++)
     {
-        m_tickCnt++;
 
-        m_soc->clk_i = 0;
-        m_soc->eval();
+        if (m_tickCnt == 0) {
 
-        if (m_trace)
-            m_trace->dump(m_tickCnt - 1);
+            m_soc->clk_i = 0;
+            m_soc->eval();
 
-        m_tickCnt++;
+            if (m_trace) {
+                m_trace->dump(m_tickCnt);
+            }
+
+            m_tickCnt++;
+            break;
+        }
+
         m_soc->clk_i = 1;
         m_soc->eval();
-
-        if (m_trace)
+        if (m_trace) {
             m_trace->dump(m_tickCnt);
+        }
+        m_tickCnt++;
 
         m_soc->clk_i = 0;
         m_soc->eval();
-
-        if (m_trace)
-        {
-            m_trace->dump(m_tickCnt + 1);
+        if (m_trace) {
+            m_trace->dump(m_tickCnt);
             m_trace->flush();
         }
+        m_tickCnt++;
     }
 }
 
