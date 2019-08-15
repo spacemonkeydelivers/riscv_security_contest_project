@@ -272,6 +272,7 @@ module cpu
     localparam STATE_CSRRW1         = 10;
     localparam STATE_CSRRW2         = 11;
     localparam STATE_CSRRS1         = 12;
+    localparam STATE_CSRRS2         = 13;
 
 
     reg[3:0] state, prevstate = STATE_RESET, nextstate = STATE_RESET;
@@ -535,8 +536,14 @@ module cpu
                         csr_source = 0;
                     end
 
+                    `FUNC_CSRRSI: begin
+                        nextstate <= STATE_CSRRS1;
+                        csr_source = 0;
+                    end
+
                     `FUNC_CSRRS: begin
                         nextstate <= STATE_CSRRS1;
+                        csr_source = 1;
                     end
 
                     // unsupported SYSTEM instruction
@@ -588,7 +595,7 @@ module cpu
             
             STATE_CSRRS1: begin
                 if (csr_exists) begin
-                   nextstate <= STATE_FETCH;
+                   nextstate <= STATE_CSRRS2;
                    mux_reg_input_sel <= MUX_REGINPUT_MSR;
                    reg_we <= 1;
                 end 
@@ -596,6 +603,19 @@ module cpu
                    nextstate <= STATE_TRAP1;
                    mcause <= CAUSE_INVALID_INSTRUCTION;
                 end
+            end
+
+            STATE_CSRRS2: begin
+                if (csr_exists) begin
+                   if(!dec_imm[11]) begin // denotes a writable non-standard machine-mode MSR
+                      case(dec_imm[11:0])
+                         MSR_MEPC:   epc <= epc | reg_val1;
+                         MSR_MTVEC: evect <= evect | reg_val1;
+                         MSR_MSCRATCH: scratch <= scratch | (csr_source ? reg_val1 : {27'b0, dec_rs1});
+                      endcase
+                   end
+                end 
+                nextstate <= STATE_FETCH;
             end
 
         endcase
