@@ -8,66 +8,32 @@ from prompt_toolkit import prompt
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 
-
-class Print:
-    def __init__(self, benchlib, soc):
-        self._soc = soc
-        self._bench = benchlib
-
-    def help(self):
-        print("\n".join(['"print" command.',
-          'Synopsys: print [regs|cpu.state|pc]'
-          ]))
-
-    def run(self, args):
-        print('Print::run')
-        return None
-
-class Step:
-    def __init__(self, benchlib, soc):
-        self._soc = soc
-        self._bench = benchlib
-
-    def help(self):
-        print("\n".join(['"step" command.',
-          'Synopsys: step [num]'
-          ]))
-
-    def run(self, args):
-        print('Step::run')
-        return None
-
-class Help:
-    def __init__(self, benchlib, soc, debugger):
-        self._soc = soc
-        self._bench = benchlib
-
-    def help(self):
-        self.run([])
-
-    def run(self, args):
-        print("\n".join(['Help::run',
-           'we have the following command supported:',
-           '    - print',
-           '    - step',
-           '    - tick',
-           '    - e[X|x]amine',
-           '    - go',
-           'Please run `help <cmd_name>` for the usage details'
-           ]))
-        return None
+from debugger.cmd_examine import CmdExamine
+from debugger.cmd_go import CmdGo
+from debugger.cmd_help import CmdHelp
+from debugger.cmd_print import CmdPrint
+from debugger.cmd_step import CmdStep
+from debugger.cmd_tick import CmdTick
 
 class Debugger:
+    def register_cmd(cmd):
+        return None
+
     def __init__(self, benchlib, soc):
         self._disasm = disasm_lib.Disassembler(None)
         self._bench  = benchlib
         self._soc    = soc
         self._cmd    = {}
 
-
-        self._cmd['print'] = Print(benchlib, soc)
-        self._cmd['step'] = Step(benchlib, soc)
-        self._cmd['help'] = Help(benchlib, soc, self)
+        commands = [
+            CmdExamine,
+            CmdGo,
+            CmdHelp,
+            CmdPrint,
+            CmdStep,
+            CmdTick
+        ]
+        [self.add_command(cmd) for cmd in commands]
 
         self._trace = {
             'state': None,
@@ -81,6 +47,14 @@ class Debugger:
 
         if '+trace' in DBG:
             self.set_tracing_enabled(True)
+
+    def add_command(self, command):
+        handler = command(self._bench, self._soc, self)
+        for name in handler.names():
+            if self._cmd.has_key(name):
+                raise Exception('command duplication detected')
+            self._cmd[name] = handler
+        return None
 
     def set_tracing_enabled(self, value):
         if value:
