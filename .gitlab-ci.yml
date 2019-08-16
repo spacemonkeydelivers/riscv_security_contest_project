@@ -18,4 +18,4 @@ test_project:
   stage: test
   script:
     - cd build/
-    - ctest -R "compliance_I-ADDI-01.S|compliance_I-BLTU-01.S|asm_sb|asm_csrrw_small|compliance_I-CSRRW-01.S|compliance_I-CSRRWI-01.S|compliance_I-CSRRS-01.S|compliance_I-CSRRSI-01.S|compliance_I-CSRRC-01.S|compliance_I-CSRRCI-01.S|compliance_I-JALR-01.S|compliance_I-MISALIGN_JMP-01.S"
+    - ctest -R "debugger|compliance_I-ADDI-01.S|compliance_I-BLTU-01.S|asm_sb|asm_csrrw_small|compliance_I-CSRRW-01.S|compliance_I-CSRRWI-01.S|compliance_I-CSRRS-01.S|compliance_I-CSRRSI-01.S|compliance_I-CSRRC-01.S|compliance_I-CSRRCI-01.S|compliance_I-JALR-01.S|compliance_I-MISALIGN_JMP-01.S"
