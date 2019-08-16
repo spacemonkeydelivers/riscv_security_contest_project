@@ -102,7 +102,11 @@ class Debugger:
                     history=FileHistory('.history.txt'),
                     auto_suggest=AutoSuggestFromHistory(),
                 )
+            except KeyboardInterrupt:
+                print 'got cntrl+C - terminating debug session'
+                break
             except EOFError:
+                print 'got EOF - terminating debug session'
                 break
 
             input_cmd = [x.strip() for x in user_input.split()]
