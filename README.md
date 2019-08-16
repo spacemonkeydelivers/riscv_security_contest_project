@@ -19,21 +19,14 @@ If you want to run with **tracing** enable, use the following command:
  DBG="+trace" ctest -R lb -V
 ```
 
-The current "test exit" sequence looks as follows:
 
-```
-li ra, exit_code # any write to ra will do
-1:
-j 1b
-wfi
-```
-When test bench detects that hart does not change PC for too long it assumes
-that the test is finished. The "exit code" is taken from ra. Non-zero value
-indicates failure.
+## Debugging
+
+Please refer to this [Debugging infrastructure](https://git.yggdrasill.ga/riscv_softcore_security_contest/riscv_core/wikis/Debug-Infrastructure#the-debugger)
 
 ## TODO:
 
-make this exit sequence compatible with complience tests. That is we should
+make this exit sequence compatible with compliance tests. That is we should
 eventually switch to ecall/scall.
 
 # riscv_core
