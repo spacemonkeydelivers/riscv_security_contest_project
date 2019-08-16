@@ -1,3 +1,7 @@
+add_debugger_test(debugger_sanity debugger/debugger_sanity.s
+                  ${CMAKE_SOURCE_DIR}/tests/debugger/sanity.input
+                  --driver_arg=--repl)
+
 test_add(basic_mem         basic/mem.py)
 test_add(basic_soc         basic/soc.py)
 test_add(store_byte_issue  basic/store_byte_issue.py)

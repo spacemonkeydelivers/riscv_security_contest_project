@@ -83,8 +83,10 @@ def build_test_image(soc):
     driver = generate_make_asm(soc)
   elif test_type == "compliance":
     driver = generate_make_compliance(soc)
+  elif test_type == "debugger":
+    driver = generate_make_asm(soc)
   else:
-    pass
+    raise Exception("unknown test type {}".format(test_type))
 
   print('running make...')
   ret = os.system('make VERBOSE=1')
@@ -108,15 +110,18 @@ def run(libbench):
     print "could not detect custom driver, using standard procedure"
 
     expect_failure = False
+    enforce_repl = False
     for arg in sys.argv:
         m = re.search('--driver_arg=(.*)', arg)
         if m:
             found = m.group(1)
             if found == "--expect-failure":
                 expect_failure = True
+            if found == '--repl':
+                enforce_repl = True
 
     dbg = debug.Debugger(libbench, soc)
-    if sys.stdout.isatty():
+    if sys.stdout.isatty() or enforce_repl:
       print('TTY session detected! starting debugger')
       dbg.set_tracing_enabled(True)
       dbg.repl()
