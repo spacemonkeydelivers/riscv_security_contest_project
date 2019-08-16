@@ -43,6 +43,9 @@ x /ub10 0x0
 x /xb-10 0x4
 x /tb10 0x4
 
+tick 1
+tick
+tick 3
 go pc=0x30
 go
 
