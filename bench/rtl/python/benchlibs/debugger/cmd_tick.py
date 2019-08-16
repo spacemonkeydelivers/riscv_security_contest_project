@@ -7,12 +7,13 @@ class CmdTick:
         return ['tick']
 
     def help(self):
-        self.run([])
-
-    def run(self, args):
         print("\n".join(['"tick" command',
           'Synopsis: tick [TODO]',
           ]))
+
+    def run(self, args):
+        print('Tick::run')
+        print('Error: incorrect <tick> command')
         return None
 
 

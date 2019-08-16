@@ -14,6 +14,7 @@ from debugger.cmd_help import CmdHelp
 from debugger.cmd_print import CmdPrint
 from debugger.cmd_step import CmdStep
 from debugger.cmd_tick import CmdTick
+from debugger.cmd_assign import CmdAssign
 
 class Debugger:
     def register_cmd(cmd):
@@ -26,6 +27,7 @@ class Debugger:
         self._cmd    = {}
 
         commands = [
+            CmdAssign,
             CmdExamine,
             CmdGo,
             CmdHelp,

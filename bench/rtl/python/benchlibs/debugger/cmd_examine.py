@@ -8,11 +8,12 @@ class CmdExamine:
         return ['examine', 'x']
 
     def help(self):
-        self.run([])
+        print("\n".join(['"examine" command',
+          'Synopsis: {examine|x}[/format] addr',
+          ]))
 
     def run(self, args):
-        print("\n".join(['"examine" command',
-          'Synopsis: {examine|x} [TODO]',
-          ]))
+        print('Examine::run')
+        print('Error: incorrect <examine> command')
         return None
 

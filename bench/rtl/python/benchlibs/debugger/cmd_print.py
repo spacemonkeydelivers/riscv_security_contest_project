@@ -13,5 +13,6 @@ class CmdPrint:
 
     def run(self, args):
         print('Print::run')
+        print('Error: incorrect <print> command')
         return None
 
