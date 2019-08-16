@@ -11,7 +11,7 @@ class RiscVSoc:
         self._word_size = self._soc.wordSize()
         self._on_tick_callbacks = []
 
-        self._prev_pc = None
+        self._the_pc = -1
         self._stall_cnt = 0
         self._pc_history = collections.deque(10 * [None], 10)
 
@@ -76,34 +76,27 @@ class RiscVSoc:
         if callback in self._on_tick_callbacks:
             self._on_tick_callbacks.remove(callback)
 
-    def go_step(self):
+    def tick(self):
         if self._soc.pcValid():
-            self._prev_pc = self._soc.PC()
+            self._the_pc = self._soc.PC()
 
         self.checkFWD()
-        self.tick(1)
+        self._tick(1)
 
         if self._soc.pcValid():
             new_pc  = self._soc.PC()
-
-            if (self._prev_pc == None):
-                self._prev_pc = 0
-
-            # print ("PC: 0x{0:08x} -> 0x{0:08x}".format(self._prev_pc, new_pc))
-
-            if new_pc != self._prev_pc:
+            if new_pc != self._the_pc:
                 self._stall_cnt = 0
-                self._prev_pc = new_pc
+                self._the_pc = new_pc
                 self._pc_history.append(new_pc)
-
 
         self._stall_cnt = self._stall_cnt + 1
 
-    def go(self, limit, expect_failure = False):
+    def run(self, limit, expect_failure = False, break_on = None):
 
         iterations = 0
         while (self._stall_cnt < self._stall_threshold):
-            self.go_step()
+            self.tick()
 
             iterations = iterations + 1
 
@@ -116,6 +109,9 @@ class RiscVSoc:
                       print("- n/a")
                 msg = "simulation takes too long (more than {} steps)".format(limit)
                 raise StopIteration(msg)
+
+            if (break_on != None) and (self.pc() == break_on):
+                raise UserWarning("breakpoint reached")
 
         print("hart does not make forward progress for too long. Assume test exit")
         status = self.read_register(1) # exit status is in ra
@@ -131,14 +127,11 @@ class RiscVSoc:
 
         print("exit code indicates success, test passed")
 
-    def tick(self, ticks):
-        for t in range(ticks):
-            self._soc.tick(1)
-            self.print_uart_tx()
-            for c in self._on_tick_callbacks:
-#                if self._debug:
-#                    print("Calling on tick callback")
-                c()
+    def _tick(self, ticks):
+        self._soc.tick(1)
+        self.print_uart_tx()
+        for c in self._on_tick_callbacks:
+            c()
 
     def print_uart_tx(self):
         if self._soc.uartTxValid():
@@ -148,10 +141,6 @@ class RiscVSoc:
                 self._uart = open("io.txt", "w", 0)
 
             self._uart.write(character)
-
-    def print_pc(self):
-        if self._soc.pcValid():
-            print("PC: 0x{0:08x}".format(self._soc.PC()))
 
     def reset(self):
         self._soc.reset()
@@ -191,7 +180,7 @@ class RiscVSoc:
         self._soc.writeWord(address, value)
 
     def pc(self):
-        return self._soc.PC()
+        return self._the_pc
 
     def read_register(self, num):
         if self._debug:

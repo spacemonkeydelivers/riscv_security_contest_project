@@ -118,9 +118,10 @@ def run(libbench):
     dbg = debug.Debugger(libbench, soc)
     if sys.stdout.isatty():
       print('TTY session detected! starting debugger')
+      dbg.set_tracing_enabled(True)
       dbg.repl()
     else:
-      soc.go(10 ** 5, expect_failure = expect_failure)
+      soc.run(10 ** 5, expect_failure = expect_failure)
   else:
     print "custom driver detected, control transfered"
     driver.run(soc)
