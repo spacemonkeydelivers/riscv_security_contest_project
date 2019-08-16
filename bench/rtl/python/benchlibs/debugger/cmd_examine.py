@@ -4,6 +4,7 @@ class CmdExamine:
     def __init__(self, benchlib, soc, debugger):
         self.soc = soc
         self.bench = benchlib
+        self.debugger = debugger
 
     def names(self):
         return ['examine', 'x']
@@ -98,7 +99,11 @@ class CmdExamine:
                   'i': '{0:#010x}: {1}',
                 }
                 for d in data:
-                    print(fmts[out].format(d[0], d[1]))
+                    a = d[0]
+                    d = d[1]
+                    if out == 'i':
+                        d = self.debugger._disasm.display(a)
+                    print(fmts[out].format(a, d))
                 print('_______________________')
                 return None
               except ValueError:
