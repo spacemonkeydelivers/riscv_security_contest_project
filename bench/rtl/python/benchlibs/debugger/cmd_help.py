@@ -1,8 +1,9 @@
 
 class CmdHelp:
     def __init__(self, benchlib, soc, debugger):
-        self._soc = soc
-        self._bench = benchlib
+        self.soc = soc
+        self.bench = benchlib
+        self.debugger = debugger
 
     def names(self):
         return ['help']
@@ -13,12 +14,7 @@ class CmdHelp:
     def run(self, args):
         print("\n".join(['',
            'we have the following command supported:',
-           '    - print',
-           '    - step',
-           '    - tick',
-           '    - e[X|x]amine',
-           '    - go',
-           '    - help',
+           ' - ' + "\n - ".join(self.debugger._cmd.keys()),
            'Please run `<cmd_name> help` for the usage details'
            ]))
         return None
