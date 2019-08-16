@@ -64,18 +64,22 @@ class Debugger:
         else:
             self._soc.unregister_tick_callback(self.tracing_callback)
 
+
+    def print_utrace(self):
+        s = []
+        for k in self._trace['states']:
+            v = self._trace['states'][k]
+            s.append('{}({})'.format(k, v))
+        print('     - {} || tick#{}'.format(','.join(s), self._trace['tick_cnt']))
+
     def tracing_callback(self):
 
         self._trace['tick_cnt'] += 1
         new_state = self._soc._soc.cpuState()
         if new_state == self._bench.en_state.FETCH:
             if (self._trace['state'] != new_state):
-                s = []
 
-                for k in self._trace['states']:
-                    v = self._trace['states'][k]
-                    s.append('{}({})'.format(k, v))
-                print('     - {} || tick#{}'.format(','.join(s), self._trace['tick_cnt']))
+                self.print_utrace()
 
                 self._trace['states'].clear()
                 pc = self._soc.pc()
