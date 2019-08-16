@@ -1,0 +1,48 @@
+help
+print help
+x help
+step help
+tick help
+go help
+help help
+print
+print cpu.state
+print regs
+print pc
+step 1
+step
+print
+print cpu.state
+print regs
+print pc
+print s1
+print s2
+print ra
+print sp
+x /i10 0
+x /u10 4
+x /d10 8
+x /x10 0x0
+x /t10 0x0
+
+x /iw10 0
+x /uw10 4
+x /dw10 8
+x /xw10 0x0
+x /tw10 0x0
+
+x /ih10 0x8
+x /dh10 0x8
+x /uh10 0x0
+x /xh10 0x4
+x /th10 8
+
+x /ib10 0x8
+x /db10 0x8
+x /ub10 0x0
+x /xb-10 0x4
+x /tb10 0x4
+
+go pc=0x30
+go
+
