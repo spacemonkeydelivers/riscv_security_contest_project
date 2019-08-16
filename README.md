@@ -36,8 +36,8 @@ eventually switch to ecall/scall.
     1. mkdir build
     2. cd build
     3. cmake -DSOC_RAM_SIZE=8192 $TRUNK
-    4. make
-    5. ./run_tests.py --test soc.py
+    4. make -j8
+    5. ctest -j8
 ```
 
 **2. SoC memory map**  
