@@ -6,10 +6,11 @@ test_add(basic_mem         basic/mem.py)
 test_add(basic_soc         basic/soc.py)
 test_add(store_byte_issue  basic/store_byte_issue.py)
 
-test_add(asm_timer asm/timer.s)
-test_add(asm_uart  asm/uart.s)
-test_add(asm_sb    asm/sb.s)
-test_add(asm_lb    asm/lb.s)
+test_add(asm_timer      asm/timer.s)
+test_add(asm_uart       asm/uart.s)
+test_add(asm_sb         asm/sb.s)
+test_add(asm_lb         asm/lb.s)
+test_add(asm_sb_ret     asm/sb_ret.s)
 
 test_add(asm_csrr_vendorid      asm/csrr_vendor.s)
 test_add(asm_csrw_vendorid      asm/csrw_vendor.s)
@@ -28,6 +29,7 @@ test_add(c_libc_printf5      c/libc/printf5)
 test_add(c_libc_printf_int   c/libc/printf_int)
 
 test_add(c_isr_route_timer_base   c/libc/isr_route_timer_base)
+test_add(c_isr_route_ialign_base  c/libc/isr_route_ialign_base)
 
 set(COMPLIANCE_SOURCES_ROOT ${CMAKE_SOURCE_DIR}/tests/compliance/rv32i/src)
 file(GLOB COMPLIANCE_TESTS "${COMPLIANCE_SOURCES_ROOT}/*.S")
