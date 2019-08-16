@@ -182,6 +182,9 @@ class RiscVSoc:
     def pc(self):
         return self._the_pc
 
+    def upc(self):
+        return self._soc.PC()
+
     def read_register(self, num):
         if self._debug:
             print("Reading 0x{0:08x} from {1:02d} register".format(self._soc.readReg(num), num))
