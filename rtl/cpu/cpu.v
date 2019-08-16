@@ -34,10 +34,9 @@ module cpu
     reg[31:0] pc, pcnext;
     reg nextpc_from_alu, writeback_from_alu, writeback_from_bus;
 
-    localparam CAUSE_INSTRUCTION_MISALIGNED = 32'h80000000;
+    localparam CAUSE_INSTRUCTION_MISALIGNED = 32'h00000000;
     localparam CAUSE_EXTERNAL_INTERRUPT     = 32'h8000000b;
     localparam CAUSE_INVALID_INSTRUCTION    = 32'h00000002;
-    localparam CAUSE_NONE                   = 32'h00000000;
     localparam CAUSE_BREAK                  = 32'h00000003;
     localparam CAUSE_ECALL                  = 32'h0000000b;
 
@@ -563,7 +562,6 @@ module cpu
                             `SYSTEM_MRET: begin
                                 csr[M_STATUS][3] <= csr[M_STATUS][7];
                                 pcnext <= csr[M_EPC];
-                                csr[M_CAUSE] <= CAUSE_NONE;
                                 nextstate <= STATE_FETCH;
                             end
                             default: csr[M_CAUSE] <= CAUSE_INVALID_INSTRUCTION;
