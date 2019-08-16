@@ -9,7 +9,7 @@ class CmdExamine:
 
     def help(self):
         print("\n".join(['"examine" command',
-          'Synopsis: {examine|x}[/format] addr',
+          'Synopsis: {examine|x} [/format] addr',
           ]))
 
     def run(self, args):
