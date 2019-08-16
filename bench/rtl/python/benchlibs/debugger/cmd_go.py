@@ -9,11 +9,11 @@ class CmdGo:
 
     def help(self):
         print("\n".join(['"go" command',
-          'Synopsis: go [--|pc=addr]',
+          'Synopsis: go [pc=addr]',
           'The command instructs environment to run simulation till the ',
           'specified condition is satisfied.',
           'Possible conditions:',
-          '   <--> - run till "test exit"',
+          '   <> - run till "test exit"',
           '   <pc=addr> - run till current instruction pointer is equal to the addr'
           ]))
 

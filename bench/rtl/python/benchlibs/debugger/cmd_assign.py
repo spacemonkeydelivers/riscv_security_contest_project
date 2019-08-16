@@ -5,12 +5,12 @@ class CmdAssign:
         self._bench = benchlib
 
     def names(self):
-        return ['assign - TODO']
+        return ['NOT IMPLEMENTED: assign']
 
     def help(self):
-        print("\n".join(['"assign" command',
+        print("\n".join(['"assign" command. NOT IMPLEMENTED.',
           'Synopsis: assign variable value',
-          'This command assigns the specified value to a variable'
+          'NOT IMPLEMENTED. This command assigns the specified value to a variable'
           ]))
 
     def run(self, args):
