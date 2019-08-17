@@ -15,27 +15,20 @@ if (NOT DEFINED SOC_RAM_SIZE)
     set(SOC_RAM_SIZE 8192)
 endif()
 
-# TODO: make sure that we consume the output of this command
 add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/mem_img.txt
-    COMMAND dd if=/dev/zero of=mem_img.txt bs=1 count=${SOC_RAM_SIZE}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    VERBATIM
-)
-
-add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/mem_img.hex
-    DEPENDS ${CMAKE_BINARY_DIR}/mem_img.txt
-    COMMAND ${Python3_EXECUTABLE}
+    OUTPUT ${CMAKE_BINARY_DIR}/tmp/mem_img.hex
+    DEPENDS ${CMAKE_SOURCE_DIR}/bench/tools/build/makehex.py
+    COMMAND dd if=/dev/zero of=mem_img.raw bs=1 count=${SOC_RAM_SIZE}
+    COMMAND ${Python2_EXECUTABLE}
             ${CMAKE_SOURCE_DIR}/bench/tools/build/makehex.py
-            ${CMAKE_BINARY_DIR}/mem_img.txt
-            ${CMAKE_BINARY_DIR}/mem_img.hex
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+            ${CMAKE_BINARY_DIR}/tmp/mem_img.raw
+            ${CMAKE_BINARY_DIR}/tmp/mem_img.hex
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tmp
     VERBATIM
 )
 
 if (NOT DEFINED MEM_FILE)
-    set(MEM_FILE ${CMAKE_BINARY_DIR}/mem_img.hex)
+    set(MEM_FILE ${CMAKE_BINARY_DIR}/tmp/mem_img.hex)
 endif()
 
 separate_arguments(VERILATOR_ARGS_LIST
@@ -44,7 +37,7 @@ separate_arguments(VERILATOR_ARGS_POST_LIST
                    WINDOWS_COMMAND "${VERILATOR_FLAGS_POST}")
 add_custom_command(
     OUTPUT ${VERILOG_OUTPUT_LIB}
-    DEPENDS ${RTL_SRC_FILES} ${CMAKE_BINARY_DIR}/mem_img.hex
+    DEPENDS ${RTL_SRC_FILES} ${MEM_FILE}
     COMMAND ${VERILATOR_BIN} ${VERILATOR_ARGS_LIST}
         -GFIRMWARE_FILE="${MEM_FILE}"
         -GSOC_RAM_SIZE=${SOC_RAM_SIZE}
