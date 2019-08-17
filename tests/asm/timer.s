@@ -4,7 +4,7 @@
 
 .section .reset, "awx"
 __start:
-addi a3, zero, 1
+addi a3, zero, 8
 csrw mstatus, a3
 la t1, test_passed
 csrw mtvec, t1
