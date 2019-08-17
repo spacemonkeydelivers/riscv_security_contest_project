@@ -15,10 +15,6 @@ if (NOT DEFINED SOC_RAM_SIZE)
     set(SOC_RAM_SIZE 8192)
 endif()
 
-if (NOT DEFINED MEM_FILE)
-    set(MEM_FILE "/tmp/zeroes8k.txt")
-endif()
-
 # TODO: make sure that we consume the output of this command
 add_custom_command(
     OUTPUT ${CMAKE_BINARY_DIR}/mem_img.txt
@@ -27,13 +23,28 @@ add_custom_command(
     VERBATIM
 )
 
+add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/mem_img.hex
+    DEPENDS ${CMAKE_BINARY_DIR}/mem_img.txt
+    COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_SOURCE_DIR}/bench/tools/build/makehex.py
+            ${CMAKE_BINARY_DIR}/mem_img.txt
+            ${CMAKE_BINARY_DIR}/mem_img.hex
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    VERBATIM
+)
+
+if (NOT DEFINED MEM_FILE)
+    set(MEM_FILE ${CMAKE_BINARY_DIR}/mem_img.hex)
+endif()
+
 separate_arguments(VERILATOR_ARGS_LIST
                    WINDOWS_COMMAND "${VERILATOR_FLAGS} -I${RTL_SRC_PATH}")
 separate_arguments(VERILATOR_ARGS_POST_LIST
                    WINDOWS_COMMAND "${VERILATOR_FLAGS_POST}")
 add_custom_command(
     OUTPUT ${VERILOG_OUTPUT_LIB}
-    DEPENDS ${RTL_SRC_FILES} ${CMAKE_BINARY_DIR}/mem_img.txt
+    DEPENDS ${RTL_SRC_FILES} ${CMAKE_BINARY_DIR}/mem_img.hex
     COMMAND ${VERILATOR_BIN} ${VERILATOR_ARGS_LIST}
         -GFIRMWARE_FILE="${MEM_FILE}"
         -GSOC_RAM_SIZE=${SOC_RAM_SIZE}
