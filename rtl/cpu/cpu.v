@@ -40,6 +40,8 @@ module cpu
     localparam CAUSE_BREAK                  = 32'h00000003;
     localparam CAUSE_ECALL                  = 32'h0000000b;
 
+    localparam VENDOR_ID                    = 32'hC001F001;
+
     // ALU instance
     reg alu_en = 0;
     reg[3:0] alu_op = 0;
@@ -167,17 +169,6 @@ module cpu
     wire[11:0] mux_msr_sel;
     reg[31:0] msr_data;
     assign mux_msr_sel = dec_imm[11:0];
-
-    wire[31:0] vendor_id;
-    assign vendor_id = 32'hC001_F001;
-    wire[31:0] arch_id;
-    assign arch_id = 32'hBAAD_A555;
-    wire[31:0] imp_id;
-    assign imp_id = 32'hC000_10FF;
-    wire[31:0] hart_id;
-    assign hart_id = 0;
-
-    reg[31:0] scratch = 0;
 
     reg csr_exists;
     wire csr_ro;
@@ -352,6 +343,7 @@ module cpu
                 csr[M_STATUS][3] <= 0; // disable machine-mode external interrupt
                 nextstate <= STATE_FETCH;
                 csr[M_TVEC] <= VECTOR_EXCEPTION;
+                csr[M_VENDOR_ID] <= VENDOR_ID;
                 nextpc_from_alu <= 0;
                 writeback_from_alu <= 0;
                 writeback_from_bus <= 0;
