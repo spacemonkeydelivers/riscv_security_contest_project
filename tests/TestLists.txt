@@ -3,7 +3,7 @@ add_debugger_test(debugger_sanity debugger/debugger_sanity.s
                   --driver_arg=--repl)
 
 test_add(basic_mem         basic/mem.py)
-test_add(basic_soc         basic/soc.py)
+test_add(basic_soc         basic/soc.py NIGHTLY)
 test_add(store_byte_issue  basic/store_byte_issue.py)
 
 test_add(asm_timer      asm/timer.s)
@@ -16,24 +16,34 @@ test_add(asm_csrr_vendorid      asm/csrr_vendor.s)
 test_add(asm_csrw_vendorid      asm/csrw_vendor.s)
 test_add(asm_csre_missing_csr   asm/csrr_missing.s)
 test_add(asm_csrrw_small   asm/csrrw_compliance.s)
-test_add(asm_csrrs_small   asm/csrrs_compliance.s)
+test_add(asm_csrrs_small   asm/csrrs_compliance.s NIGHTLY)
 
-test_add(c_basic             c/basic)
+test_add(c_basic             c/basic NIGHTLY)
 
 test_add(c_libc_exit_S       c/libc/exit_succ)
 test_add(c_libc_exit_F       c/libc/exit_fail --driver_arg=--expect-failure)
 test_add(c_libc_main_ret_S   c/libc/main_ret_succ)
 test_add(c_libc_main_ret_F   c/libc/main_ret_fail --driver_arg=--expect-failure)
-test_add(c_libc_printf4      c/libc/printf4)
-test_add(c_libc_printf5      c/libc/printf5)
-test_add(c_libc_printf_int   c/libc/printf_int)
+test_add(c_libc_printf4      c/libc/printf4 NIGHTLY)
+test_add(c_libc_printf5      c/libc/printf5 NIGHTLY)
+test_add(c_libc_printf_int   c/libc/printf_int NIGHTLY)
 
-test_add(c_isr_route_timer_base   c/libc/isr_route_timer_base)
+test_add(c_isr_route_timer_base   c/libc/isr_route_timer_base NIGHTLY)
 test_add(c_isr_route_ialign_base  c/libc/isr_route_ialign_base)
 
 set(COMPLIANCE_SOURCES_ROOT ${CMAKE_SOURCE_DIR}/tests/compliance/rv32i/src)
 file(GLOB COMPLIANCE_TESTS "${COMPLIANCE_SOURCES_ROOT}/*.S")
+# see https://git.yggdrasill.ga/riscv_softcore_security_contest/riscv_core/issues/21
+set(FAILED_TESTS  "compliance_I-ENDIANESS-01.S"
+                  "compliance_I-LB-01.S"
+                  "compliance_I-LH-01.S"
+                  "compliance_I-LHU-01.S"
+    )
 foreach(file ${COMPLIANCE_TESTS})
     get_filename_component(NAME "${file}" NAME)
-    test_add(compliance_${NAME}  compliance/rv32i/src/${NAME})
+    if (compliance_${NAME} IN_LIST FAILED_TESTS)
+        test_add(compliance_${NAME}  compliance/rv32i/src/${NAME} NIGHTLY)
+    else()
+        test_add(compliance_${NAME}  compliance/rv32i/src/${NAME})
+    endif()
 endforeach()
