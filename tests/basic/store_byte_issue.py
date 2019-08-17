@@ -16,7 +16,8 @@ def run(libbench):
   soc.write_word_ram(4, 0x00a10123)
   # sb a0, 3(sp)
   soc.write_word_ram(5, 0x00a101a3)
-  soc.tick(30)
+  for i in range(100):
+    soc.tick()
 
   data = soc.read_word_ram(0x100 /4)
   # expected value at 0x100 address after the sequence is 0x55555555
