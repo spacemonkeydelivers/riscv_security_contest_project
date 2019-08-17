@@ -52,6 +52,11 @@ class Debugger:
         if '+trace' in DBG:
             self.set_tracing_enabled(True)
 
+        for arg in DBG:
+            if '+ticks_to_run' in arg:
+                tick_num = int(arg.split('=')[1])
+                self._soc.set_ticks_to_run(tick_num)
+
     def add_command(self, command):
         handler = command(self._bench, self._soc, self)
         for name in handler.names():
@@ -65,7 +70,6 @@ class Debugger:
             self._soc.register_tick_callback(self.tracing_callback)
         else:
             self._soc.unregister_tick_callback(self.tracing_callback)
-
 
     def print_utrace(self):
         s = []

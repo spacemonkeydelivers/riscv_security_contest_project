@@ -20,6 +20,7 @@ class RiscVSoc:
         self._fwd_cntr = 0
         self._braindead_threshold = 50
         self._stall_threshold = self._braindead_threshold / 2 * 3
+        self._ticks_to_run = 10 ** 5
 
         self._uart = None
         import atexit
@@ -147,6 +148,12 @@ class RiscVSoc:
 
     def get_soc_ram_size(self):
         return self._soc.ramSize() * 4
+
+    def get_ticks_to_run(self):
+        return self._ticks_to_run
+
+    def set_ticks_to_run(self, value):
+        self._ticks_to_run = value
 
     def load_data_to_ram(self, path_to_image, offset_in_words = 0):
         data = map(lambda x: x.strip(), open(path_to_image, "r").readlines())
