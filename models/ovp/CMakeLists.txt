@@ -27,14 +27,8 @@ ExternalProject_Add(
     CONFIGURE_COMMAND "" 
     SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}"
     BUILD_ALWAYS True
-    BUILD_COMMAND echo Load Imperas setup...
-    COMMAND bash -c "source ${IMPERAS_PATH}/bin/setup.sh > /dev/null || true && \
-        echo Setup Imperas && \
-        setupImperas ${IMPERAS_PATH} -m32 && \
-        make \
-            -C ${CMAKE_CURRENT_SOURCE_DIR}/source \
-            -f ${IMPERAS_PATH}/ImperasLib/buildutils/Makefile.library \
-            VLNVSRC=${CMAKE_CURRENT_SOURCE_DIR}/source \
-            VLNVROOT=${MODELS_FILES_ROOT}/ovp"
+    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/buildutils/builder build ${IMPERAS_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/source ${MODELS_FILES_ROOT}/ovp
     INSTALL_COMMAND ""
 )
+
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${MODELS_FILES_ROOT}/ovp")
