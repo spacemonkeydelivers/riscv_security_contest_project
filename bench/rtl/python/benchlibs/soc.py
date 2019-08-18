@@ -180,8 +180,8 @@ class RiscVSoc:
         if (word_index == None):
             raise ValueError("word_index argument must be specified")
         if self._debug:
-            print("Reading 0x{0:08x} from 0x{1:08x}".format(self._soc.readWord(address), address * self._word_size))
-        return self._soc.readWord(address)
+            print("Reading 0x{0:08x} from 0x{1:08x}".format(self._soc.readWord(word_index), word_index * self._word_size))
+        return self._soc.readWord(word_index)
 
     def write_word_ram(self, address, value):
         if self._debug:
