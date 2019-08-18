@@ -1,0 +1,33 @@
+#!/bin/bash
+
+CMD=$1
+IMPERAS_PATH=$2
+SRC=$3
+DST=$4
+
+echo Imeras setup
+
+source "${IMPERAS_PATH}/bin/setup.sh" > /dev/null
+
+setupImperas ${IMPERAS_PATH} -m32
+
+FLAGS="-C ${SRC} -f ${IMPERAS_PATH}/ImperasLib/buildutils/Makefile.library VLNVSRC=${SRC} VLNVROOT=${DST}"
+
+case "$CMD" in
+    build)
+        [ ! -d "${DST}" ] && { echo Creating "${DST}"; mkdir "${DST}"; };
+        echo Building;
+        make $FLAGS all;
+        # Hack to preserve models from Imperas' cleanup on the next step
+        mv ${DST} ${DST}_stash;
+        # To remove temp files
+        make $FLAGS clean;
+        # Turn back files
+        mv ${DST}_stash ${DST};
+        echo Done;;
+    clean)
+        echo Cleaning;
+        [ -d "${DST}" ] && { echo Removing "${DST}"; rm -rf "${DST}"; };
+        make $FLAGS clean;
+        echo Done;;
+esac
