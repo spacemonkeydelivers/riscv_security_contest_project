@@ -22,7 +22,7 @@ bss_init:
     li a0, 0 # TODO: we have no context defined (for now)
     call __soc_init
     # enable external interrupts
-    li s0, 1
+    li s0, 8
     csrw mstatus, s0
 
     # setup main app stack
