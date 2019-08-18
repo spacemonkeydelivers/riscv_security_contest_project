@@ -172,9 +172,9 @@ class RiscVSoc:
                         print("Writing 0x{0:08x} to address 0x{1:08x}".format(word, offset * 4))
                     offset += 1
 
-    def print_ram(self, start_addr = 0, num_words = 8):
-        for addr in xrange(start_addr, start_addr + num_words):
-            print("0x{0:08x} : 0x{1:08x}".format(addr * self._word_size, self._soc.readWord(addr)))
+    def print_ram(self, start_word_index = 0, num_words = 8):
+        for w_idx in xrange(start_word_index, start_word_index + num_words):
+            print("0x{0:08x} : 0x{1:08x}".format(w_idx * self._word_size, self._soc.readWord(w_idx)))
 
     def read_word_ram(self, word_index = None):
         if (word_index == None):
