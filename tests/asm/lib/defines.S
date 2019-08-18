@@ -31,3 +31,4 @@
    __test_exit \status, TARGET
 .endm
 
+#define UART_BASE_ADDR 0x80000003
