@@ -88,6 +88,13 @@
     li          x30, RVTEST_BTB_UART_BASE;                              \
     sb          _R, 3(x30);                                             \
 
+#ifdef COMPLIANCE_IO_ISSUE_14
+#define LOCAL_IO_WRITE_GPR(_R)
+#define LOCAL_IO_WRITE_FPR(_F)
+#define LOCAL_IO_WRITE_DFPR(_V1, _V2)
+#define LOCAL_IO_PUTC(_R)
+#endif  // COMPLIANCE_IO_ISSUE_14
+
 #define RVTEST_IO_INIT
 
 // Assertion violation: file file.c, line 1234: (expr)
