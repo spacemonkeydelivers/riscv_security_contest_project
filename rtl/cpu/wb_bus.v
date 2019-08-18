@@ -36,8 +36,6 @@ module wb_cpu_bus(
 	reg signextend = 0;
 	reg write = 0;
 
-	reg mysign = 0;
-
 	always @(*) begin
 		// determine number of bytes to be processed
 		case(I_op)
@@ -57,10 +55,6 @@ module wb_cpu_bus(
 			`BUSOP_WRITEB, `BUSOP_WRITEH, `BUSOP_WRITEW: write = 1;
 			default: write = 0;
 		endcase
-	end
-
-	always @(*) begin
-		mysign = signextend && ((mem_sel == 4'b0011) ? DAT_I[15] : DAT_I[7]);
 	end
 
 	reg ack_rcvd = 0;
@@ -118,7 +112,14 @@ module wb_cpu_bus(
             buffer <= DAT_I;
          end
          4'b0011: begin
-            buffer <= {{16{mysign}}, DAT_I[15:0]};
+            case (busaddr[1:0])
+                2'b00: begin
+                    buffer <= {{16{DAT_I[15] & signextend}}, DAT_I[15:0]};
+                end
+                default: begin
+                    buffer <= {{16{DAT_I[31] & signextend}}, DAT_I[31:16]};
+                end
+            endcase
          end
          default: begin
 
@@ -126,16 +127,16 @@ module wb_cpu_bus(
             begin
                case (busaddr[1:0])
                    2'b00: begin
-                       buffer <= DAT_I[7:0];
+                       buffer <= {{24{DAT_I[7] & signextend}}, DAT_I[7:0]};
                    end
                    2'b01: begin
-                       buffer <= DAT_I[15:8];
+                       buffer <= {{24{DAT_I[15] & signextend }}, DAT_I[15:8]};
                    end
                    2'b10: begin
-                       buffer <= DAT_I[23:16];
+                       buffer <= {{24{DAT_I[23] & signextend }}, DAT_I[23:16]};
                    end
                    default: begin
-                       buffer <= DAT_I[31:24];
+                       buffer <= {{24{DAT_I[31] & signextend}}, DAT_I[31:24]};
                    end
                endcase
             end

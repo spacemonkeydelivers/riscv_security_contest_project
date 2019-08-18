@@ -33,17 +33,7 @@ test_add(c_isr_route_ialign_base  c/libc/isr_route_ialign_base)
 
 set(COMPLIANCE_SOURCES_ROOT ${CMAKE_SOURCE_DIR}/tests/compliance/rv32i/src)
 file(GLOB COMPLIANCE_TESTS "${COMPLIANCE_SOURCES_ROOT}/*.S")
-# see https://git.yggdrasill.ga/riscv_softcore_security_contest/riscv_core/issues/21
-set(FAILED_TESTS  "compliance_I-ENDIANESS-01.S"
-                  "compliance_I-LB-01.S"
-                  "compliance_I-LH-01.S"
-                  "compliance_I-LHU-01.S"
-    )
 foreach(file ${COMPLIANCE_TESTS})
     get_filename_component(NAME "${file}" NAME)
-    if (compliance_${NAME} IN_LIST FAILED_TESTS)
-        test_add(compliance_${NAME}  compliance/rv32i/src/${NAME} NIGHTLY)
-    else()
-        test_add(compliance_${NAME}  compliance/rv32i/src/${NAME})
-    endif()
+    test_add(compliance_${NAME}  compliance/rv32i/src/${NAME})
 endforeach()
