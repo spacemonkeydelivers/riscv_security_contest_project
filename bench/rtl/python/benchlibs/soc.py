@@ -176,7 +176,9 @@ class RiscVSoc:
         for addr in xrange(start_addr, start_addr + num_words):
             print("0x{0:08x} : 0x{1:08x}".format(addr * self._word_size, self._soc.readWord(addr)))
 
-    def read_word_ram(self, address):
+    def read_word_ram(self, word_index = None):
+        if (word_index == None):
+            raise ValueError("word_index argument must be specified")
         if self._debug:
             print("Reading 0x{0:08x} from 0x{1:08x}".format(self._soc.readWord(address), address * self._word_size))
         return self._soc.readWord(address)

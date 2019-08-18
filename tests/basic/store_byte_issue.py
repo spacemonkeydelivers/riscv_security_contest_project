@@ -19,7 +19,7 @@ def run(libbench):
   for i in range(100):
     soc.tick()
 
-  data = soc.read_word_ram(0x100 /4)
+  data = soc.read_word_ram(word_index = 0x100 /4)
   # expected value at 0x100 address after the sequence is 0x55555555
   # real value at 0x100 address is 0x00000055
   expected = 0x55555555
