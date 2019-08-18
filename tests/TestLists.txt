@@ -8,7 +8,7 @@ test_add(store_byte_issue  basic/store_byte_issue.py)
 
 test_add(asm_timer              asm/timer.s)
 test_add(asm_uart               asm/uart.s)
-test_add(asm_uart_collapse      asm/uart_collapse.s)
+test_add(asm_uart_collapse      asm/uart_collapse.s NIGHTLY)
 test_add(asm_sb                 asm/sb.s)
 test_add(asm_lb                 asm/lb.s)
 test_add(asm_sb_ret             asm/sb_ret.s)
