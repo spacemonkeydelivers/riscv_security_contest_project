@@ -43,7 +43,7 @@ class CmdExamine:
           s_addr = addr + i * 4
           if s_addr < 0:
               continue
-          word = self.soc.read_word_ram(s_addr)
+          word = self.soc.read_word_ram(word_index = s_addr / 4)
           if fmt == 'b':
              a = [ s_addr + 0, s_addr + 1, s_addr + 2, s_addr + 3]
              d = [ word & 0xff, (word >> 8) & 0xff, (word >> 16) & 0xff, (word >> 24) & 0xff]
