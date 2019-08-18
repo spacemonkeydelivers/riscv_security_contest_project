@@ -13,7 +13,7 @@ def generate_make_compliance(soc):
   asm_file = os.environ['TESTS_DIR'] + '/' + sys.argv[1]
   include_dir = os.environ['TESTS_DIR'] + '/compliance/include/'
   tools_dir = os.environ['TOOLS_DIR']
-  cmd = '(echo \'<% input_asm="{}"; bench="{}"; includes="{}" %>\' && cat \'{}\') | erb > Makefile'.format(
+  cmd = '(echo \'<% input_asm="{}"; bench="{}"; includes="{}" %>\' && cat \'{}\') | erb > Makefile.test'.format(
         asm_file, tools_dir, include_dir, tools_dir + '/misc/Makefile_compliance.erb')
 
   print('running <{}>'.format(cmd))
@@ -32,7 +32,7 @@ def generate_make_asm(soc):
 
   asm_file = os.environ['TESTS_DIR'] + '/' + sys.argv[1]
   tools_dir = os.environ['TOOLS_DIR']
-  cmd = '(echo \'<% input_asm="{}"; bench="{}" %>\' && cat \'{}\') | erb > Makefile'.format(
+  cmd = '(echo \'<% input_asm="{}"; bench="{}" %>\' && cat \'{}\') | erb > Makefile.test'.format(
         asm_file, tools_dir, tools_dir + '/misc/Makefile_asm.erb')
 
   print('running <{}>'.format(cmd))
@@ -60,7 +60,7 @@ def generate_make_c(soc):
 
   cmd = ''.join([
           '(echo \'<% input_c="{}"; tools_distrib="{}"; ram_size={} %>\' && cat \'{}\') ',
-          '| erb > Makefile'
+          '| erb > Makefile.test'
         ]).format(
         c_list, tools_distr, ram_size, tools_dir + '/misc/Makefile_c.erb')
   print('running <{}>'.format(cmd))
@@ -89,7 +89,7 @@ def build_test_image(soc):
     raise Exception("unknown test type {}".format(test_type))
 
   print('running make...')
-  ret = os.system('make VERBOSE=1')
+  ret = os.system('make -f Makefile.test VERBOSE=1')
   if ret != 0:
     raise 'could not create test image'
 
