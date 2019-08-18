@@ -374,7 +374,8 @@ module	wbuart(i_clk, i_rst,
 	always @(posedge i_clk) // We'll ACK in two clocks
 		r_wb_ack <= i_wb_stb;
 	always @(posedge i_clk) // Okay, time to set the ACK
-		o_wb_ack <= r_wb_ack;
+//		o_wb_ack <= r_wb_ack;
+		o_wb_ack <= i_wb_stb;
 
 	// Finally, set the return data.  This data must be valid on the same
 	// clock o_wb_ack is high.  On all other clocks, it is irrelelant--since
