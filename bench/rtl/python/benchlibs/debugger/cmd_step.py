@@ -2,6 +2,7 @@ class CmdStep:
     def __init__(self, benchlib, soc, debugger):
         self.soc = soc
         self.bench = benchlib
+        self.debugger = debugger
 
         self.prev_state = None
 
@@ -26,8 +27,7 @@ class CmdStep:
 
     def run(self, args):
         if len(args) == 0:
-            self.stepi()
-            return
+          args = [1]
 
         if len(args) == 1:
             num_str = args[0]
@@ -35,6 +35,9 @@ class CmdStep:
                 num = int(num_str)
                 for i in range(0, num):
                     self.stepi()
+                upc = self.soc.upc()
+                next_insn = self.debugger._disasm.display(upc)
+                print('next: {0}'.format(next_insn))
             except ValueError:
                 print 'Error: could not figure out how many steps required'
             return
