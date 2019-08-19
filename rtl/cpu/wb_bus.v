@@ -41,7 +41,7 @@ module wb_cpu_bus(
 		case(I_op)
 			`BUSOP_READW, `BUSOP_WRITEW: mem_sel = 4'b1111;
 			`BUSOP_READH, `BUSOP_READHU, `BUSOP_WRITEH: mem_sel = 4'b0011;
-			default: mem_sel = (1 << busaddr[1:0]); // mem_sel = 4'b0001;
+			default: mem_sel = 4'b0001; // mem_sel = 4'b0001;
 		endcase
 
 		// determine if sign extension is requested
@@ -67,30 +67,12 @@ module wb_cpu_bus(
 
 		if(I_en)
       begin
-         CYC_O <= 1;
-         STB_O <= 1;
+         CYC_O <= !ack_rcvd;
+         STB_O <= !ack_rcvd;
 			WE_O <= write;
          SEL_O <= mem_sel;
          ADR_O <= busaddr;
-
-         case (mem_sel)
-             4'b1111: begin
-                 DAT_O <= I_data;
-             end
-             4'b0011: begin
-                 DAT_O[15:0] <= I_data[15:0];
-             end
-             default: begin
-                 if(mem_sel[0])
-                     DAT_O[7:0] <= I_data[7:0];
-                 if(mem_sel[1])
-                     DAT_O[15:8] <= I_data[7:0];
-                 if(mem_sel[2])
-                     DAT_O[23:16] <= I_data[7:0];
-                 if(mem_sel[3])
-                     DAT_O[31:24] <= I_data[7:0];
-             end
-         endcase
+         DAT_O <= I_data;
      end
 
       if (ACK_I)
@@ -101,54 +83,22 @@ module wb_cpu_bus(
          WE_O <= 0;
       end
 
-      if (ack_rcvd)
-      begin
-         busy <= 0;
+      if (ack_rcvd) begin
          ack_rcvd <= 0;
+         busy <= 0;
       end
-     
+
       case (mem_sel)
          4'b1111: begin
             buffer <= DAT_I;
          end
          4'b0011: begin
-            case (busaddr[1:0])
-                2'b00: begin
-                    buffer <= {{16{DAT_I[15] & signextend}}, DAT_I[15:0]};
-                end
-                default: begin
-                    buffer <= {{16{DAT_I[31] & signextend}}, DAT_I[31:16]};
-                end
-            endcase
+            buffer <= {{16{DAT_I[15] & signextend}}, DAT_I[15:0]};
          end
-         default: begin
-
-            if (write == 0)
-            begin
-               case (busaddr[1:0])
-                   2'b00: begin
-                       buffer <= {{24{DAT_I[7] & signextend}}, DAT_I[7:0]};
-                   end
-                   2'b01: begin
-                       buffer <= {{24{DAT_I[15] & signextend }}, DAT_I[15:8]};
-                   end
-                   2'b10: begin
-                       buffer <= {{24{DAT_I[23] & signextend }}, DAT_I[23:16]};
-                   end
-                   default: begin
-                       buffer <= {{24{DAT_I[31] & signextend}}, DAT_I[31:24]};
-                   end
-               endcase
-            end
-
-            if (write == 1)
-            begin
-               buffer <= DAT_I[7:0];
-            end
+         4'b0001: begin
+            buffer <= {{24{DAT_I[7] & signextend}}, DAT_I[7:0]};
          end
       endcase
    end
-
-
 
 endmodule
