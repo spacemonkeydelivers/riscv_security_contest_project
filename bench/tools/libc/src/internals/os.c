@@ -75,7 +75,7 @@ int __int_serve(struct s_esf_frame* frame, int n) {
 __attribute__((section(".__system.os")))
 bool alarm_soc_timer(int interval)
 {
-    if (interval <= 0) {
+    if (interval < 0) {
         return false;
     }
     int timer_address = 0x40000000;
