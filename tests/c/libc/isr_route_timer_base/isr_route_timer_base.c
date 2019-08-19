@@ -18,7 +18,7 @@ int main () {
     unused = 0;
     register_int_handler(RISCV_INT_EXT_M, &timer_handler);
 
-    if (!alarm_soc_timer(100)) {
+    if (!alarm_soc_timer(30)) {
         return EXIT_FAILURE;
     }
 
@@ -26,6 +26,7 @@ int main () {
     {
         ++unused;
     }
+    exit(0);
     return EXIT_SUCCESS;
 }
 
