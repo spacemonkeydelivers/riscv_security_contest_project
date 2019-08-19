@@ -66,6 +66,7 @@ module cpu
     reg bus_en = 0;
     reg[2:0] bus_op = 0;
     wire[31:0] bus_dataout;
+    reg[31:0] bus_dataout_stored;
     reg[31:0] bus_addr;
     wire bus_busy;
 
@@ -106,7 +107,7 @@ module cpu
     decoder dec_inst(
         .I_clk(clk),
         .I_en(dec_en),
-        .I_instr(bus_dataout),
+        .I_instr(bus_dataout_stored),
         .O_rs1(dec_rs1),
         .O_rs2(dec_rs2),
         .O_rd(dec_rd),
@@ -347,6 +348,7 @@ module cpu
                 nextpc_from_alu <= 0;
                 writeback_from_alu <= 0;
                 writeback_from_bus <= 0;
+                bus_dataout_stored <= 0;
             end
 
             STATE_FETCH: begin
@@ -379,6 +381,7 @@ module cpu
 
                 dec_en <= 1;
                 nextstate <= STATE_EXEC;
+                bus_dataout_stored <= bus_dataout;
 
                 // read registers
                 reg_re <= 1;

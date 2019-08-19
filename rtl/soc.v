@@ -126,27 +126,25 @@ module soc
       .wb_uart_data_i (wb_uart_data_out)
    );
 
-   wb_ram
+   wb_ram_new
    #(
-      .dw (WB_DATA_WIDTH),
-      .aw (WB_ADDR_WIDTH),
-      .depth (SOC_RAM_SIZE),
-      .memfile (FIRMWARE_FILE)
+      .WB_DATA_WIDTH (WB_DATA_WIDTH),
+      .WB_ADDR_WIDTH (WB_ADDR_WIDTH),
+      .WB_RAM_WORDS (SOC_RAM_SIZE / 4)
    )
    ram0
    (
       .wb_clk_i (clk_i),
-      .wb_adr_i (wb_ram_addr),
-      .wb_dat_i (wb_ram_data_in),
+      .wb_rst_i (rst_i),
+      .wb_addr_i (wb_ram_addr),
+      .wb_data_i (wb_ram_data_in),
       .wb_sel_i (wb_ram_sel),
+      .wb_stb_i (wb_ram_stb),
       .wb_we_i (wb_ram_we),
       .wb_cyc_i (wb_ram_cyc),
       .wb_ack_o (wb_ram_ack),
-      .wb_dat_o (wb_ram_data_out)
+      .wb_data_o (wb_ram_data_out)
    );
-   // TODO: wb_ram_stb ???
-   // TODO: wb_ram_ack ???
-   // TODO: rst_i to RAM
 
    reg [31:0] cpu_addr = 0;
    reg [31:0] cpu_data_in = 0;
