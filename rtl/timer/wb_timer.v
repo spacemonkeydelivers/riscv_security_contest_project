@@ -21,7 +21,7 @@ module wb_timer
 
    // irq pin, raised to HIGH if current time exceeds the threshold
    reg irq = 0;
-   assign timer_irq_o = irq;
+   assign timer_irq_o = irq & timer_started;
 
    // ack signal for wishbone
    reg ack = 0;
