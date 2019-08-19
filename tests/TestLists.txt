@@ -29,7 +29,7 @@ test_add(c_libc_printf4      c/libc/printf4)
 test_add(c_libc_printf5      c/libc/printf5)
 test_add(c_libc_printf_int   c/libc/printf_int)
 
-test_add(c_isr_route_timer_base   c/libc/isr_route_timer_base NIGHTLY)
+test_add(c_isr_route_timer_base   c/libc/isr_route_timer_base)
 test_add(c_isr_route_ialign_base  c/libc/isr_route_ialign_base)
 
 set(COMPLIANCE_SOURCES_ROOT ${CMAKE_SOURCE_DIR}/tests/compliance/rv32i/src)
