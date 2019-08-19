@@ -131,11 +131,7 @@ module soc
       .dw (WB_DATA_WIDTH),
       .aw (WB_ADDR_WIDTH),
       .depth (SOC_RAM_SIZE),
-`ifdef FIRMWARE_FILE
-      .memfile (`FIRMWARE_FILE)
-`else
-      .memfile ("/tmp/zeroes8k.txt")
-`endif
+      .memfile (FIRMWARE_FILE)
    )
    ram0
    (
