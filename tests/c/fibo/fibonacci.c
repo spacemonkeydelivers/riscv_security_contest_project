@@ -12,6 +12,9 @@ int main()
 {
     int x = 10;
     int result = fib(x);
+    if (result != 55) {
+        exit(EXIT_FAILURE);
+    }
     printf("fib(%d) = %d", x, result);
     return EXIT_SUCCESS;
 }
