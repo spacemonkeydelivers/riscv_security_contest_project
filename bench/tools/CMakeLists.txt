@@ -8,8 +8,9 @@ else()
 endif()
 
 set(TOOLCHAIN "/tank/work/dev/toolchains/riscv32-newlib-gcc")
-set(FLAGS "-march=rv32im -ffreestanding -nostdinc -nodefaultlibs -nostdlib -Os -Wall -Werror -Wextra")
+set(FLAGS "-ffreestanding -nostdinc -nodefaultlibs -nostdlib -Os -Wall -Werror -Wextra")
 set(FLAGS "${FLAGS} -I${PLATFORM_FILES_ROOT}/include")
+set(FLAGS "${FLAGS} -march=${SUPPORTED_RISCV_ARCH}")
 ExternalProject_Add(
     libc
     CONFIGURE_COMMAND ""

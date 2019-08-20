@@ -6,6 +6,7 @@ enable_testing()
 # Project's name
 project(riscv_soc)
 
+set(SUPPORTED_RISCV_ARCH "rv32i")
 # DO NOT USE!!!
 option(BUILD_OVP_MODELS "Build OVP VLNV library (Imperas installation is required)" OFF)
 
