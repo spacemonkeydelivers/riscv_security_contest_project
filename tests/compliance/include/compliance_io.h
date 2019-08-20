@@ -88,12 +88,12 @@
     li          x30, RVTEST_BTB_UART_BASE;                              \
     sb          _R, 3(x30);                                             \
 
-#ifdef COMPLIANCE_IO_ISSUE_14
+#ifdef DISABLE_COMPLIANCE_IO
 #define LOCAL_IO_WRITE_GPR(_R)
 #define LOCAL_IO_WRITE_FPR(_F)
 #define LOCAL_IO_WRITE_DFPR(_V1, _V2)
 #define LOCAL_IO_PUTC(_R)
-#endif  // COMPLIANCE_IO_ISSUE_14
+#endif  // DISABLE_COMPLIANCE_IO
 
 #define RVTEST_IO_INIT
 
@@ -176,9 +176,9 @@
     jal FN_WriteStr;                                                    \
     LOCAL_IO_POP(_SP)
 
-#ifdef COMPLIANCE_IO_ISSUE_14
+#ifdef DISABLE_COMPLIANCE_IO
 #define RVTEST_IO_WRITE_STR(_SP, _STR)
-#endif  // COMPLIANCE_IO_ISSUE_14
+#endif  // DISABLE_COMPLIANCE_IO
 
 // generate assertion listing
 #define LOCAL_CHECK() RVTEST_IO_CHECK()
