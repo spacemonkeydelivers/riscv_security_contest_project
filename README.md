@@ -36,7 +36,8 @@ eventually switch to ecall/scall.
     1. mkdir build
     2. cd build
     3. RISCV_TOOLCHAIN=<path to riscv toolchain> cmake -DSOC_RAM_SIZE=65536 $TRUNK
-    # NOTE: D_SOC_RAM_SIZE can be less, but conformance and some c tests need at least 64K to work
+    # NOTE_1: D_SOC_RAM_SIZE can be less, but conformance and some c tests need at least 64K to work
+    # NOTE_2: The value for RISCV_TOOLCHAIN is expected to be '/tank/work/dev/toolchains/riscv32i-newlib-gcc/
     4. make -j8
     5. ctest -j8
 ```
