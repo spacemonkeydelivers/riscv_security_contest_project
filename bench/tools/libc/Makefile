@@ -1,5 +1,5 @@
 INCLUDE=$(TOP)/include
-OBJ_FILES=boot.o isr.o config.o \
+OBJ_FILES=boot.o isr.o config.o libgcc_.o \
 	os.o \
 	libc-start.o printf.o \
 	stdlib.o unistd.o string.o
@@ -26,12 +26,16 @@ install: $(DEPS_INSTALL)
 
 test_program: $(LIBNAME).a $(TOP)/tests/basic.c
 	$(CC) $(CFLAGS) $(TOP)/tests/basic.c -static -L. -lc \
+		-Xlinker --defsym=__SOC_MEM_SIZE=999999 \
 		-T$(TOP)/share/soc.ld -I$(TOP)/include -o test_program
 
 all: $(LIBNAME).a
 
 generated/esf.h: $(TOP)/src/internals/esf.h.erb
 	mkdir -p generated && erb -T 1 $(TOP)/src/internals/esf.h.erb >generated/esf.h
+
+libgcc_.o: $(TOP)/src/asm/libgcc.S
+	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -I. -o $@ -c $<
 
 isr.o: $(TOP)/src/asm/isr.S generated/esf.h
 	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -I. -o $@ -c $<
@@ -64,6 +68,7 @@ unistd.o: $(TOP)/src/unistd.c
 $(LIBNAME).a: $(OBJ_FILES)
 	$(AR) rcs $@ $^
 
+# ar -rcT libaz.a ../build/distrib/tools/lib/libc.a /tank/work/dev/toolchains/riscv32-newlib-gcc/lib/gcc/riscv32-unknown-elf/8.3.0/libgcc.a
 .PHONY: clean
 
 clean:

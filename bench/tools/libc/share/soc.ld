@@ -12,6 +12,7 @@ SECTIONS
         *(.__system.init)
         *(.__system.isr)
         *(.__system.os)
+        *(.__libgcc_)
         *(.__system.data)
     }
     /* User code mapping */
