@@ -3,18 +3,24 @@
 
 int fib(int n)
 {
-    if (n > 1)
-        return (fib(n-1) + fib(n-2));
+    if (n > 1) {
+        int result =  (fib(n-1) + fib(n-2));
+        printf("fib(%d) = %d\n", n, result);
+        return result;
+    }
+    printf("fib(%d) = %d\n", n, n);
     return n;
 }
 
 int main()
 {
-    int x = 10;
+    int x = 6;
     int result = fib(x);
-    if (result != 55) {
+    const int EXPECTED = 8;
+    if (result != EXPECTED) {
+        printf("FAILURE: fib(%d) is expected to be %d, got %d", x, EXPECTED, result);
         exit(EXIT_FAILURE);
     }
-    printf("fib(%d) = %d", x, result);
+    printf("fib(%d) = %d\n", x, result);
     return EXIT_SUCCESS;
 }
