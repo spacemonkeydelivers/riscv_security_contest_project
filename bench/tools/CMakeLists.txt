@@ -26,4 +26,6 @@ ExternalProject_Add(
         TOP=${CMAKE_CURRENT_SOURCE_DIR}/libc all install test_program VERBOSE=1
     INSTALL_COMMAND ""
 )
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/misc/testsMakefile.include.in"
+               "${_SUBPROJECT_INSTALL_PREFIX}/share/testsMakefile.include")
 

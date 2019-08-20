@@ -1,10 +1,11 @@
-TOOLCHAIN  = <%= toolchain %>
-CC         = $(TOOLCHAIN)/riscv32-unknown-elf-gcc
-OBJCOPY    = $(TOOLCHAIN)/riscv32-unknown-elf-objcopy
+include <%= ENV['TOOLS_DISTRIB'] %>/share/testsMakefile.include
+
+CC         = $(RISCV_CC)
+OBJCOPY    = $(RISCV_OBJCOPY)
 # YES, we support M instructions in assembly tests
-CFLAGS     = -march=rv32im  -mabi=ilp32 -O0 -std=c11 -ffreestanding -w -nostdinc -nostdlib -nodefaultlibs -nostartfiles
-LDFLAGS    = -nostdlib -nodefaultlibs -nostartfiles
-LDSCRIPT   = <%= bench %>/misc/asm_tests.ld
+CFLAGS     = $(RISCV_CFLAGS_COMMON) -march=rv32im  -mabi=ilp32
+LDFLAGS    = $(RISCV_LDFLAGS_COMMON)
+LDSCRIPT   = $(RISCV_ASM_LD_SCRIPT)
 
 SRC  = <%= input_asm %>
 
@@ -13,7 +14,7 @@ SRC  = <%= input_asm %>
 all: test.elf test.v
 
 test.elf: asm_pre.s
-	$(CC) -Xlinker -T$(LDSCRIPT) $(CFLAGS) asm_pre.s -o test.elf
+	$(CC) -Xlinker -T$(RISCV_ASM_LD_SCRIPT) $(CFLAGS) asm_pre.s -o test.elf
 
 asm_pre.s: $(SRC)
 	$(CC) -x c -E $(CFLAGS) $(SRC) -o asm_pre.s
