@@ -1,8 +1,7 @@
-#  /riscv32-unknown-elf-gcc -nostartfiles -march=rv32imc  -mabi=ilp32 -T ../riscv_core/bench/soc.ld ../riscv_core/tests/asm/timer.s
-#
 TOOLCHAIN  = /tank/work/dev/toolchains/riscv32-newlib-gcc/bin
 CC         = $(TOOLCHAIN)/riscv32-unknown-elf-gcc
 OBJCOPY    = $(TOOLCHAIN)/riscv32-unknown-elf-objcopy
+# YES, we support M instructions in assembly tests
 CFLAGS     = -march=rv32im  -mabi=ilp32 -O0 -std=c11 -ffreestanding -w -nostdinc -nostdlib -nodefaultlibs -nostartfiles
 LDFLAGS    = -nostdlib -nodefaultlibs -nostartfiles
 LDSCRIPT   = <%= bench %>/misc/asm_tests.ld
