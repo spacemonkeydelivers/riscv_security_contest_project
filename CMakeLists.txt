@@ -23,6 +23,14 @@ set(LIBRARY_OUTPUT_PATH ${PLATFORM_FILES_ROOT}/lib)
 # SET(CMAKE_INSTALL_RPATH "${LIBRARY_OUTPUT_PATH}")
 
 find_package(Python2 COMPONENTS Interpreter Development)
+message("-- Checking that all required python libraries are installed...")
+execute_process(COMMAND "${Python2_EXECUTABLE}" -uB "${CMAKE_SOURCE_DIR}/cmake/checks/python.py"
+                RESULT_VARIABLE "PYTHON_LIBS_CHECKED")
+
+if (NOT ${PYTHON_LIBS_CHECKED} EQUAL 0)
+    message(FATAL_ERROR "could not detect the required python libraries")
+endif()
+
 find_package(Boost COMPONENTS python)
 
 if (NOT DEFINED ENV{RISCV_TOOLCHAIN})
@@ -34,6 +42,7 @@ endif()
 if (NOT EXISTS "${RISCV_TOOLCHAIN_PATH}/bin/riscv32-unknown-elf-gcc")
     message(FATAL_ERROR "Could not find gcc for risc-v: ${RISCV_TOOLCHAIN_PATH}/riscv32-unknown-elf-gcc")
 endif()
+
 
 find_program(VERILATOR_BIN verilator)
 find_path(VERILATOR_INCLUDE verilated.h
