@@ -7,7 +7,7 @@ build_project:
   script:
     - mkdir build
     - cd build
-    - cmake ../
+    - RISCV_TOOLCHAIN=/tank/work/dev/toolchains/riscv32i-newlib-gcc/ cmake ../
     - make -j8
   artifacts:
     paths:

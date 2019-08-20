@@ -3,7 +3,7 @@ TOOLS_DISTRIB  = <%= tools_distrib %>
 LIBC_PATH   = <%= tools_distrib %>/lib
 LIBC_INCLUDES = <%= tools_distrib %>/include
 
-TOOLCHAIN  = /tank/work/dev/toolchains/riscv32-newlib-gcc/bin
+TOOLCHAIN  = <%= toolchain %>
 CC         = $(TOOLCHAIN)/riscv32-unknown-elf-gcc
 OBJCOPY    = $(TOOLCHAIN)/riscv32-unknown-elf-objcopy
 CFLAGS     = -march=rv32i -mabi=ilp32 -O0 -std=c11 -ffreestanding -w -nostdinc -nostdlib -nodefaultlibs -nostartfiles

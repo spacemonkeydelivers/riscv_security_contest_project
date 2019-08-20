@@ -13,8 +13,9 @@ def generate_make_compliance(soc):
   asm_file = os.environ['TESTS_DIR'] + '/' + sys.argv[1]
   include_dir = os.environ['TESTS_DIR'] + '/compliance/include/'
   tools_dir = os.environ['TOOLS_DIR']
-  cmd = '(echo \'<% input_asm="{}"; bench="{}"; includes="{}" %>\' && cat \'{}\') | erb > Makefile.test'.format(
-        asm_file, tools_dir, include_dir, tools_dir + '/misc/Makefile_compliance.erb')
+  toolchain_dir = os.environ['TOOLCHAIN_DIR'] + '/' + 'bin'
+  cmd = '(echo \'<% toolchain="{}"; input_asm="{}"; bench="{}"; includes="{}" %>\' && cat \'{}\') | erb > Makefile.test'.format(
+        toolchain_dir, asm_file, tools_dir, include_dir, tools_dir + '/misc/Makefile_compliance.erb')
 
   print('running <{}>'.format(cmd))
   ret = os.system(cmd)
@@ -32,8 +33,9 @@ def generate_make_asm(soc):
 
   asm_file = os.environ['TESTS_DIR'] + '/' + sys.argv[1]
   tools_dir = os.environ['TOOLS_DIR']
-  cmd = '(echo \'<% input_asm="{}"; bench="{}" %>\' && cat \'{}\') | erb > Makefile.test'.format(
-        asm_file, tools_dir, tools_dir + '/misc/Makefile_asm.erb')
+  toolchain_dir = os.environ['TOOLCHAIN_DIR'] + '/' + 'bin'
+  cmd = '(echo \'<% toolchain="{}"; input_asm="{}"; bench="{}" %>\' && cat \'{}\') | erb > Makefile.test'.format(
+        toolchain_dir, asm_file, tools_dir, tools_dir + '/misc/Makefile_asm.erb')
 
   print('running <{}>'.format(cmd))
   ret = os.system(cmd)
@@ -52,6 +54,7 @@ def generate_make_c(soc):
 
   tools_dir = os.environ['TOOLS_DIR']
   tools_distr = os.environ['TOOLS_DISTRIB']
+  toolchain_dir = os.environ['TOOLCHAIN_DIR'] + '/' + 'bin'
   c_root = os.path.join(os.environ['TESTS_DIR'], sys.argv[1])
   pattern = os.path.join(c_root, '*.c')
   print('searching for c files as <{}>'.format(pattern))
@@ -59,10 +62,10 @@ def generate_make_c(soc):
   print('found results: {}'.format(c_list))
 
   cmd = ''.join([
-          '(echo \'<% input_c="{}"; tools_distrib="{}"; ram_size={} %>\' && cat \'{}\') ',
+          '(echo \'<% toolchain="{}"; input_c="{}"; tools_distrib="{}"; ram_size={} %>\' && cat \'{}\') ',
           '| erb > Makefile.test'
         ]).format(
-        c_list, tools_distr, ram_size, tools_dir + '/misc/Makefile_c.erb')
+        toolchain_dir, c_list, tools_distr, ram_size, tools_dir + '/misc/Makefile_c.erb')
   print('running <{}>'.format(cmd))
   ret = os.system(cmd)
   if ret != 0:
@@ -98,7 +101,6 @@ def build_test_image(soc):
 
 
 def run(libbench):
-
   soc = soc_lib.RiscVSoc(libbench, 'memtest_trace.vcd', True)
 
   driver = build_test_image(soc)
