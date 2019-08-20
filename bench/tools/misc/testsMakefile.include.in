@@ -1,0 +1,19 @@
+RISCV_TOOLCHAIN_ROOT = @RISCV_TOOLCHAIN_PATH@
+RISCV_CC  = $(RISCV_TOOLCHAIN_ROOT)/bin/riscv32-unknown-elf-gcc
+RISCV_OBJCOPY = $(RISCV_TOOLCHAIN_ROOT)/bin/riscv32-unknown-elf-objcopy
+
+RISCV_CFLAGS_COMMON = -O0 -std=c11 -ffreestanding -w -nostdinc -nostdlib -nodefaultlibs -nostartfiles
+RISCV_LDFLAGS_COMMON = -nostdlib -nodefaultlibs -nostartfiles
+
+TESTBENCH_TOOLS_SRC = @CMAKE_SOURCE_DIR@/bench/tools
+TESTBENCH_TOOLS_DISTRIB = @CMAKE_BINARY_DIR@/distrib/tools
+
+SOC_RAM_SIZE = @SOC_RAM_SIZE@
+RISCV_PSEUDOLIBC_PATH = @CMAKE_BINARY_DIR@/distrib/tools/lib
+RISCV_PSEUDOLIBC_INCLUDES = @CMAKE_BINARY_DIR@/distrib/tools/include
+
+RISCV_ASM_LD_SCRIPT = $(TESTBENCH_TOOLS_SRC)/misc/asm_tests.ld
+RISCV_COMPLIANCE_LD_SCRIPT = $(TESTBENCH_TOOLS_SRC)/misc/compliance.ld
+RISCV_C_LD_SCRIPT = $(TESTBENCH_TOOLS_DISTRIB)/share/soc.ld
+
+RISCV_COMPLIANCE_INCLUDES = @CMAKE_SOURCE_DIR@/tests/compliance/include
