@@ -7,7 +7,7 @@ else()
     set(_SUBPROJECT_INSTALL_PREFIX install)
 endif()
 
-set(TOOLCHAIN "/tank/work/dev/toolchains/riscv32-newlib-gcc")
+set(TOOLCHAIN ${RISCV_TOOLCHAIN_PATH})
 set(FLAGS "-ffreestanding -nostdinc -nodefaultlibs -nostdlib -Os -Wall -Werror -Wextra")
 set(FLAGS "${FLAGS} -I${PLATFORM_FILES_ROOT}/include")
 set(FLAGS "${FLAGS} -march=${SUPPORTED_RISCV_ARCH}")

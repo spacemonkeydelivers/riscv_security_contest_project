@@ -1,4 +1,4 @@
-TOOLCHAIN  = /tank/work/dev/toolchains/riscv32-newlib-gcc/bin
+TOOLCHAIN  = <%= toolchain %>
 CC         = $(TOOLCHAIN)/riscv32-unknown-elf-gcc
 OBJCOPY    = $(TOOLCHAIN)/riscv32-unknown-elf-objcopy
 INCLUDE    = <%= includes %>

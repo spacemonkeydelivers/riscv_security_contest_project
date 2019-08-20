@@ -2,7 +2,7 @@ import os
 
 class Disassembler:
     def __init__(self, path_to_elf):
-        self._objdump = '/tank/work/dev/toolchains/riscv32-newlib-gcc/bin/riscv32-unknown-elf-objdump'
+        self._objdump = os.environ['TOOLCHAIN_DIR'] + '/bin/riscv32-unknown-elf-objdump'
         disasm_cmd = ' '.join([
               self._objdump,
               '--no-show-raw-insn -d test.elf'

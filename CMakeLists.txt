@@ -25,6 +25,16 @@ set(LIBRARY_OUTPUT_PATH ${PLATFORM_FILES_ROOT}/lib)
 find_package(Python2 COMPONENTS Interpreter Development)
 find_package(Boost COMPONENTS python)
 
+if (NOT DEFINED ENV{RISCV_TOOLCHAIN})
+    message(FATAL_ERROR "You have to set RISCV_TOOLCHAIN var")
+else()
+    set(RISCV_TOOLCHAIN_PATH $ENV{RISCV_TOOLCHAIN})
+endif()
+
+if (NOT EXISTS "${RISCV_TOOLCHAIN_PATH}/bin/riscv32-unknown-elf-gcc")
+    message(FATAL_ERROR "Could not find gcc for risc-v: ${RISCV_TOOLCHAIN_PATH}/riscv32-unknown-elf-gcc")
+endif()
+
 find_program(VERILATOR_BIN verilator)
 find_path(VERILATOR_INCLUDE verilated.h
     PATH_SUFFIXES verilator/include
