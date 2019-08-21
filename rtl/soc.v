@@ -166,7 +166,8 @@ module soc
    )
    cpu0
    (
-      .INTERRUPT_I (timer_irq || tags_mismatch_irq),
+      .TIMER_INTERRUPT_I (timer_irq),
+      .TAGS_INTERRUPT_I (tags_mismatch_irq),
       .CLK_I (clk_i),
       .ACK_I (wb_cpu_ack),
       .DAT_I (wb_cpu_data_in),
