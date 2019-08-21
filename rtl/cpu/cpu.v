@@ -14,7 +14,8 @@ module cpu
 	    input ACK_I,
 	    input[31:0] DAT_I,
 	    input RST_I,
-        input INTERRUPT_I,
+        input TIMER_INTERRUPT_I,
+        input TAGS_INTERRUPT_I,
 	    output[31:0] ADR_O,
 	    output[31:0] DAT_O,
        output[3:0] SEL_O,
@@ -28,6 +29,7 @@ module cpu
     /*verilator public_module*/
     /*verilator no_inline_module*/
 
+    wire interrupt_occured = TIMER_INTERRUPT_I || TAGS_INTERRUPT_I;
     wire clk, reset;
     assign clk = CLK_I;
     assign reset = RST_I;
@@ -383,10 +385,6 @@ module cpu
                    nextstate <= STATE_TRAP1;
                    csr[M_CAUSE] <= CAUSE_INSTRUCTION_MISALIGNED;
                 end
-                else if (INTERRUPT_I && csr[M_TAGS][0] && csr[M_STATUS][3]) begin
-                   nextstate <= STATE_TRAP1;
-                   csr[M_CAUSE] <= CAUSE_TAG_MISMATCH;
-                end
                 else begin
                    nextstate <= STATE_DECODE;
                 end
@@ -410,8 +408,13 @@ module cpu
 
                 // checking for interrupt here because no bus operations are active here
                 // TODO: find a proper place that doesn't let an instruction fetch go to waste
-                if(csr[M_STATUS][3] & INTERRUPT_I) begin
-                    csr[M_CAUSE] <= CAUSE_EXTERNAL_INTERRUPT;
+                if (interrupt_occured && csr[M_STATUS][3]) begin
+                    if (TAGS_INTERRUPT_I && csr[M_TAGS][0]) begin
+                       csr[M_CAUSE] <= CAUSE_TAG_MISMATCH;
+                    end
+                    if (TIMER_INTERRUPT_I) begin
+                       csr[M_CAUSE] <= CAUSE_EXTERNAL_INTERRUPT;
+                    end
                     nextstate <= STATE_TRAP1;
                 end
 
