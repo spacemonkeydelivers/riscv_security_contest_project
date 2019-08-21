@@ -33,10 +33,12 @@
 	`define FUNC_LW		3'b010
 	`define FUNC_LBU	3'b100
 	`define FUNC_LHU	3'b101
+	`define FUNC_LT		3'b111
 
 	`define FUNC_SB		3'b000
 	`define FUNC_SH		3'b001
 	`define FUNC_SW		3'b010
+	`define FUNC_ST		3'b111
 
 	`define FUNC_ADDI	3'b000
 	`define FUNC_SLLI	3'b001

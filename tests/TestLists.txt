@@ -13,6 +13,7 @@ test_add(asm_lb                 asm/lb.s)
 test_add(asm_sb_ret             asm/sb_ret.s)
 test_add(asm_remu               asm/remu.s NIGHTLY)
 test_add(asm_remu_illegal       asm/remu_illegal.s NIGHTLY)
+test_add(asm_tags               asm/tags.s)
 
 test_add(asm_csrr_vendorid      asm/csrr_vendor.s)
 test_add(asm_csrw_vendorid      asm/csrw_vendor.s)
