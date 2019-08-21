@@ -13,7 +13,10 @@ SRC  = <%= input_c %>
 
 .PHONY : all
 
-all: test.elf test.v
+all: test.elf test.v tcl_copy
+
+tcl_copy:
+	cp $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl filter_init.tcl
 
 test.elf: $(SRC) $(LIBC_PATH)/libc.a
 	$(CC) $(CFLAGS) $(SRC) -I$(LIBC_INCLUDES) -static -L$(LIBC_PATH) -lc \

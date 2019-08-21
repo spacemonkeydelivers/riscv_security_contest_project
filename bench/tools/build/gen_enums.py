@@ -6,6 +6,7 @@ import os
 EN_CLASS    = []
 PY_EN_WRAP  = []
 ASM_DEFINES = []
+EN_FILTER   = {}
 
 def gen_enum(tgt_type, filename, matcher):
   matched_data = []
@@ -38,18 +39,37 @@ def gen_enum(tgt_type, filename, matcher):
         tgt_type.upper(), item['en_item'], item['item_val']))
   ASM_DEFINES.append('// {} end\n'.format(tgt_type))
 
+  filter_tmp = []
+  for item in matched_data:
+    # skip filter creation if size is not specified
+    if item['item_size'] == None:
+      continue
+    filter_tmp.append('{} {}'.format(
+        format(int(item['item_val']),
+               '0{}b'.format(item['item_size'])),
+        item['en_item']))
+  EN_FILTER[tgt_type] = filter_tmp
+
 
 import re
+import warnings
 
-def common_matcher(line, prefix):
-  m = re.match(r'\s*localparam\s+(\w+)\s*=\s*(\d+)\s*;', line)
-  t = 'dec'
-  if m == None:
-    m = re.match(r'\s*localparam\s+(\w+)\s*=\s*\d+\'b(\d+)\s*;', line)
+def common_matcher(line, header, prefix):
+  if header == 'localparam':
+    m = re.match('\s*localparam\s+(\w+)\s*=\s*(\d+)\s*;', line)
+    t = None
+    if m == None:
+      m = re.match('\s*localparam\s+(\w+)\s*=\s*(\d+)\'d(\d+)\s*;', line)
+      t = 'dec'
+    if m == None:
+      m = re.match(r'\s*localparam\s+(\w+)\s*=\s*(\d+)\'b(\d+)\s*;', line)
+      t = 'bin'
+    if m == None:
+      m = re.match(r'\s*localparam\s+(\w+)\s*=\s*(\d+)\'h([0-9a-fA-F]+)\s*;', line)
+      t = 'hex'
+  elif header == 'define':
+    m = re.match(r'\s*`define\s*(\w+)\s*(\d+)\'b(\d+)\s*.*', line)
     t = 'bin'
-  if m == None:
-    m = re.match(r'\s*localparam\s+(\w+)\s*=\s*\d+\'h([0-9a-fA-F]+)\s*;', line)
-    t = 'hex'
 
   if m == None:
     return None;
@@ -57,24 +77,33 @@ def common_matcher(line, prefix):
   en_item = m.group(1)
   if not en_item.startswith(prefix):
     return None
-
   en_item = en_item[len(prefix):]
-  item_val = m.group(2)
+
+  if t == None:
+    item_val  = m.group(2)
+    item_size = None
+    warnings.warn('Filter cannot be created for the target: \
+{}\nline:\n> {}value of the element must be specified \
+in a form that includes size'.format(prefix, line))
+  else:
+    item_val  = m.group(3)
+    item_size = m.group(2)
 
   if t == 'bin':
     item_val = int(item_val, 2)
   elif t == 'hex':
     item_val = int(item_val, 16)
-  else:
-    item_val = item_val
 
-  return { 'en_item': en_item, 'item_val': item_val }
+  return { 'en_item': en_item, 'item_val': item_val, 'item_size': item_size }
 
 gen_enum('en_state', 'rtl/cpu/cpu.v',
-        lambda l: common_matcher(l, 'STATE_') )
+        lambda l: common_matcher(l, 'localparam', 'STATE_') )
 
 gen_enum('en_mcause', 'rtl/cpu/cpu.v',
-        lambda l: common_matcher(l, 'CAUSE_') )
+        lambda l: common_matcher(l, 'localparam', 'CAUSE_') )
+
+gen_enum('en_opcode', 'rtl/cpu/riscvdefs.vh',
+        lambda l: common_matcher(l, 'define', 'OP_') )
 
 
 print('#ifndef D_SOC_HEADER_INCLUDE__GUARD')
@@ -92,3 +121,11 @@ print('')
 print('#ifdef D_GENERATE_SOC_ENUMS')
 print('\n'.join(PY_EN_WRAP))
 print('#endif // D_GENERATE_SOC_ENUMS')
+
+if not os.path.exists('common_filters'):
+  os.mkdir('common_filters')
+for key, value in EN_FILTER.items():
+  f = open('common_filters/{}.flt'.format(key.upper()), 'w+')
+  for item in value:
+    f.write('{}\n'.format(item))
+  f.close()
