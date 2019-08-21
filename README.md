@@ -58,3 +58,11 @@ eventually switch to ecall/scall.
     3.3. Writing 0 to the timer address space stops the timer   
     3.4. Any read to the timer address space resets the current timer value  
     **TODO: add test for working with timer and test CPU's IRQ**  
+
+**4. Building toolchain for the project**  
+    4.1. Please refer to https://git.yggdrasill.ga/riscv_softcore_security_contest/riscv-gnu-toolchain  
+    4.2. git clone --recursive https://git.yggdrasill.ga/riscv_softcore_security_contest/riscv-gnu-toolchain  
+    4.3. cd riscv-gnu-toolchain  
+    4.4. ./configure --prefix=<install path> --with-arch=rv32i --with-abi=ilp32  
+    4.5. make newlib -j20  
+    4.6. Get your toolchain with support for memory tagging instructions in <install path>  
