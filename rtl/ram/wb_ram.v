@@ -89,11 +89,9 @@ module wb_ram_new
       .data_o   (ram_data_out)
    );
       
-   localparam [2:0] STATE_IDLE       = 3'd0,
-                    STATE_READ_WORD  = 3'd1,
-                    STATE_WRITE_WORD = 3'd2,
-                    STATE_FINAL      = 3'd3,
-                    STATE_STOP       = 3'd4;
+   localparam [1:0] STATE_IDLE       = 3'd0,
+                    STATE_WRITE_WORD = 3'd1,
+                    STATE_STOP       = 3'd2;
 
    reg [2:0] state;
    reg [2:0] next_state;
@@ -101,10 +99,6 @@ module wb_ram_new
    reg ack;
    reg next_ack;
    assign wb_ack_o = ack;
-
-   // registers to store read words
-   reg [WB_DATA_WIDTH - 1:0] first_word_read;
-   reg [WB_DATA_WIDTH - 1:0] second_word_read;
 
    always @ (posedge wb_clk_i) begin
       if (wb_rst_i) begin
@@ -164,15 +158,11 @@ module wb_ram_new
                ram_we = (done_in_one_tick) ? wb_we_i : 0;
             end
          end
-         STATE_READ_WORD: begin
-         end
          STATE_WRITE_WORD: begin
             ram_data_in = data_to_write;
             ram_we = wb_we_i;
             next_state = STATE_STOP;
             next_ack = 1;
-         end
-         STATE_FINAL: begin
          end
          STATE_STOP: begin
             ram_we = 0;
