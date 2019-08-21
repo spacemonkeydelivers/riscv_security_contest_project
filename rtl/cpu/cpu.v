@@ -20,7 +20,9 @@ module cpu
        output[3:0] SEL_O,
 	    output CYC_O,
 	    output STB_O,
-	    output WE_O
+	    output WE_O,
+       output check_tags_o,
+       output clear_tag_mismatch_o
     );
    
     /*verilator public_module*/
@@ -39,6 +41,7 @@ module cpu
     localparam CAUSE_INVALID_INSTRUCTION    = 32'h00000002;
     localparam CAUSE_BREAK                  = 32'h00000003;
     localparam CAUSE_ECALL                  = 32'h0000000b;
+    localparam CAUSE_TAG_MISMATCH           = 32'h0000000a;
 
     localparam VENDOR_ID                    = 32'hC001F001;
 
@@ -64,13 +67,15 @@ module cpu
     );
     
     reg bus_en = 0;
-    reg[2:0] bus_op = 0;
+    reg[3:0] bus_op = 0;
     wire[31:0] bus_dataout;
     reg[31:0] bus_dataout_stored;
     reg[31:0] bus_addr;
     wire bus_busy;
 
     reg reg_we = 0, reg_re = 0;
+    reg clear_tag_mismatch = 0;
+    assign clear_tag_mismatch_o = clear_tag_mismatch;
     wire[31:0] reg_val1, reg_val2;
     reg[31:0] reg_datain;
 
@@ -192,6 +197,7 @@ module cpu
     localparam MSR_MCAUSE     = 12'h342;
     localparam MSR_MTVAL      = 12'h343;
     localparam MSR_MIP        = 12'h344;
+    localparam MSR_MTAGS      = 12'h345;
 
     enum {
        M_VENDOR_ID = 0,
@@ -210,6 +216,7 @@ module cpu
        M_CAUSE     = 13,
        M_TVAL      = 14,
        M_IP        = 15,
+       M_TAGS      = 16,
        M_LAST
     } 
     csr_names;
@@ -235,6 +242,7 @@ module cpu
           MSR_MCAUSE:     csr_index = M_CAUSE;
           MSR_MTVAL:      csr_index = M_TVAL;
           MSR_MIP:        csr_index = M_IP;
+          MSR_MTAGS:      csr_index = M_TAGS;
           default:        csr_index = M_LAST;
        endcase
     end
@@ -258,6 +266,7 @@ module cpu
 
             MSR_MTVEC:     csr_exists = 1;
             MSR_MSCRATCH:  csr_exists = 1;
+            MSR_MTAGS:     csr_exists = 1;
             default:       csr_exists = 0;
         endcase
     end
@@ -307,6 +316,7 @@ module cpu
     end
 
     wire addr_misaligned = | (pc[1:0] & 2'b11);
+    assign check_tags_o = csr[M_TAGS][0];
 
     reg [31:0] csr_to_write;
     always @(*) begin
@@ -329,6 +339,8 @@ module cpu
         reg_re <= 0;
         reg_we <= 0;
 
+        clear_tag_mismatch <= 0;
+
         mux_alu_s1_sel <= MUX_ALUDAT1_REGVAL1;
         mux_alu_s2_sel <= MUX_ALUDAT2_REGVAL2;
         mux_reg_input_sel <= MUX_REGINPUT_ALU;
@@ -342,6 +354,7 @@ module cpu
             STATE_RESET: begin
                 pcnext <= VECTOR_RESET;
                 csr[M_STATUS][3] <= 0; // disable machine-mode external interrupt
+                csr[M_TAGS][0] <= 0;
                 nextstate <= STATE_FETCH;
                 csr[M_TVEC] <= VECTOR_EXCEPTION;
                 csr[M_VENDOR_ID] <= VENDOR_ID;
@@ -369,6 +382,10 @@ module cpu
                 if (addr_misaligned) begin
                    nextstate <= STATE_TRAP1;
                    csr[M_CAUSE] <= CAUSE_INSTRUCTION_MISALIGNED;
+                end
+                else if (INTERRUPT_I && csr[M_TAGS][0] && csr[M_STATUS][3]) begin
+                   nextstate <= STATE_TRAP1;
+                   csr[M_CAUSE] <= CAUSE_TAG_MISMATCH;
                 end
                 else begin
                    nextstate <= STATE_DECODE;
@@ -515,6 +532,7 @@ module cpu
                     `FUNC_LH:   bus_op <= `BUSOP_READH;
                     `FUNC_LW:   bus_op <= `BUSOP_READW;
                     `FUNC_LBU:  bus_op <= `BUSOP_READBU;
+                    `FUNC_LT:   bus_op <= `BUSOP_READT;
                     default:    bus_op <= `BUSOP_READHU; // FUNC_LHU
                 endcase
                 //nextstate <= STATE_REGWRITEBUS;
@@ -529,6 +547,7 @@ module cpu
                 case(dec_funct3)
                     `FUNC_SB:   bus_op <= `BUSOP_WRITEB;
                     `FUNC_SH:   bus_op <= `BUSOP_WRITEH;
+                    `FUNC_ST:   bus_op <= `BUSOP_WRITET;
                     default:    bus_op <= `BUSOP_WRITEW; // FUNC_SW
                 endcase
                 // advance to next instruction
@@ -618,7 +637,13 @@ module cpu
             STATE_CSR2: begin
                 // update MSRs with value of rs1
                 if(!dec_imm[11]) begin // denotes a writable non-standard machine-mode MSR
-                    csr[csr_index] <= csr_to_write;
+                    if (csr_index == M_TAGS) begin
+                       csr[csr_index] <= csr_to_write & ~32'h00000002;
+                       clear_tag_mismatch <= csr_to_write[1];
+                    end
+                    else begin
+                       csr[csr_index] <= csr_to_write;
+                    end
                 end
                 // advance to next instruction
                 if (csr_ro) begin

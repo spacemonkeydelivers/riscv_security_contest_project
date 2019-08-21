@@ -38,6 +38,7 @@ module soc
    wire wb_timer_ack;
    wire [WB_DATA_WIDTH - 1:0] wb_timer_data_out;
    wire timer_irq;
+   wire tags_mismatch_irq;
    
    // uart interface
    wire [WB_ADDR_WIDTH - 1:0] wb_uart_addr;
@@ -143,7 +144,10 @@ module soc
       .wb_we_i (wb_ram_we),
       .wb_cyc_i (wb_ram_cyc),
       .wb_ack_o (wb_ram_ack),
-      .wb_data_o (wb_ram_data_out)
+      .wb_data_o (wb_ram_data_out),
+      .check_tags_i (check_tags),
+      .tag_mismatch_o (tags_mismatch_irq),
+      .clear_mismatch_i (clear_tags_mismatch)
    );
 
    reg [31:0] cpu_addr = 0;
@@ -152,6 +156,8 @@ module soc
    reg cpu_en = 0;
    reg [2:0] cpu_op = 0;
    wire cpu_busy;
+   wire check_tags;
+   wire clear_tags_mismatch;
 
    cpu
    #(
@@ -160,7 +166,7 @@ module soc
    )
    cpu0
    (
-      .INTERRUPT_I (timer_irq),
+      .INTERRUPT_I (timer_irq || tags_mismatch_irq),
       .CLK_I (clk_i),
       .ACK_I (wb_cpu_ack),
       .DAT_I (wb_cpu_data_in),
@@ -170,7 +176,9 @@ module soc
       .SEL_O (wb_cpu_sel),
       .CYC_O (wb_cpu_cyc),
       .STB_O (wb_cpu_stb),
-      .WE_O (wb_cpu_we)
+      .WE_O (wb_cpu_we),
+      .check_tags_o (check_tags),
+      .clear_tag_mismatch_o (clear_tags_mismatch)
    );
 
    wire uart_stall;

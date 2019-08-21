@@ -2,7 +2,7 @@
 
 module wb_cpu_bus(
 		input I_en,
-		input[2:0] I_op,
+		input[3:0] I_op,
 		input[31:0] I_addr,
 		input[31:0] I_data,
 		output[31:0] O_data,
@@ -41,6 +41,7 @@ module wb_cpu_bus(
 		case(I_op)
 			`BUSOP_READW, `BUSOP_WRITEW: mem_sel = 4'b1111;
 			`BUSOP_READH, `BUSOP_READHU, `BUSOP_WRITEH: mem_sel = 4'b0011;
+			`BUSOP_READT, `BUSOP_WRITET: mem_sel = 4'b0101;
 			default: mem_sel = 4'b0001; // mem_sel = 4'b0001;
 		endcase
 
@@ -52,7 +53,7 @@ module wb_cpu_bus(
 
 		// determine if a write operation is requested
 		case(I_op)
-			`BUSOP_WRITEB, `BUSOP_WRITEH, `BUSOP_WRITEW: write = 1;
+			`BUSOP_WRITEB, `BUSOP_WRITEH, `BUSOP_WRITEW, `BUSOP_WRITET: write = 1;
 			default: write = 0;
 		endcase
 	end
@@ -69,7 +70,7 @@ module wb_cpu_bus(
       begin
          CYC_O <= !ack_rcvd;
          STB_O <= !ack_rcvd;
-			WE_O <= write;
+			WE_O <= write & !ack_rcvd;
          SEL_O <= mem_sel;
          ADR_O <= busaddr;
          DAT_O <= I_data;
@@ -97,6 +98,9 @@ module wb_cpu_bus(
          end
          4'b0001: begin
             buffer <= {{24{DAT_I[7] & signextend}}, DAT_I[7:0]};
+         end
+         4'b0101: begin
+            buffer <= {28'b0, DAT_I[3:0]};
          end
       endcase
    end
