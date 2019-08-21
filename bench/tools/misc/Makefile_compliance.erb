@@ -13,7 +13,10 @@ SRC  = <%= input_asm %>
 
 .PHONY : all
 
-all: test.elf test.v
+all: test.elf test.v tcl_copy
+
+tcl_copy:
+	cp $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl filter_init.tcl
 
 test.elf: asm_pre.s
 	$(CC) -Xlinker -T$(LDSCRIPT) $(CFLAGS) asm_pre.s -o test.elf

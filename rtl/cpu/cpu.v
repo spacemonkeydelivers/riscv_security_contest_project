@@ -287,17 +287,17 @@ module cpu
         endcase
     end
 
-    localparam STATE_RESET          = 0;
-    localparam STATE_FETCH          = 1;
-    localparam STATE_DECODE         = 2;
-    localparam STATE_EXEC           = 3;
-    localparam STATE_STORE2         = 5;
-    localparam STATE_LOAD2          = 6;
-    localparam STATE_BRANCH2        = 7;
-    localparam STATE_TRAP1          = 8;
-    localparam STATE_SYSTEM         = 9;
-    localparam STATE_CSR1           = 10;
-    localparam STATE_CSR2           = 11;
+    localparam STATE_RESET          = 4'd0;
+    localparam STATE_FETCH          = 4'd1;
+    localparam STATE_DECODE         = 4'd2;
+    localparam STATE_EXEC           = 4'd3;
+    localparam STATE_STORE2         = 4'd5;
+    localparam STATE_LOAD2          = 4'd6;
+    localparam STATE_BRANCH2        = 4'd7;
+    localparam STATE_TRAP1          = 4'd8;
+    localparam STATE_SYSTEM         = 4'd9;
+    localparam STATE_CSR1           = 4'd10;
+    localparam STATE_CSR2           = 4'd11;
 
 
     reg[3:0] state, prevstate = STATE_RESET, nextstate = STATE_RESET;
