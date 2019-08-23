@@ -15,7 +15,7 @@ SRC  = <%= input_asm %>
 
 all: test.elf test.v tcl_copy
 
-tcl_copy:
+tcl_copy: $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl
 	cp $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl filter_init.tcl
 
 test.elf: asm_pre.s
