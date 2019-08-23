@@ -1,17 +1,13 @@
-#include "lib/defines.S"
+#include <defines.S>
+#include <boot.S>
 
-.global __start
 
-.section .reset, "awx"
-__start:
+.text
+main:
+    csrr a0, pmpaddr15
+    FAILED 1
 
-la t0, failed
-csrw mtvec, t0 
-
-csrr a0, pmpaddr15
-
-FAILED 1
-
-failed:
-PASSED
+.balign 4
+ON_EXCEPTION:
+    PASSED
 

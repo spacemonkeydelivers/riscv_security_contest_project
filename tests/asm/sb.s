@@ -1,11 +1,8 @@
-#include "lib/defines.S"
+#include <defines.S>
+#include <boot.S>
 
-.global __start
-
-.section .reset, "awx"
-__start:
-
-
+.text
+main:
 la sp, test_data
 
 li a0, 1

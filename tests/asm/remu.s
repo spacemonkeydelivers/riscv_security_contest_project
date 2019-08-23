@@ -1,10 +1,8 @@
-#include "lib/defines.S"
+#include <defines.S>
+#include <boot.S>
 
-.global __start
-
-.section .reset, "awx"
-__start:
-
+.text
+main:
     li a0, 0x0deadbee
     li a6, 0x10
     remu t4, a0, a6

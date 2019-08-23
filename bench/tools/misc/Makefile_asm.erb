@@ -3,7 +3,7 @@ include <%= ENV['TOOLS_DISTRIB'] %>/share/testsMakefile.include
 CC         = $(RISCV_CC)
 OBJCOPY    = $(RISCV_OBJCOPY)
 # YES, we support M instructions in assembly tests
-CFLAGS     = $(RISCV_CFLAGS_COMMON) -march=rv32im  -mabi=ilp32
+CFLAGS     = $(RISCV_CFLAGS_COMMON) -I$(RISCV_ASM_INCLUDES) -march=rv32im  -mabi=ilp32
 LDFLAGS    = $(RISCV_LDFLAGS_COMMON)
 LDSCRIPT   = $(RISCV_ASM_LD_SCRIPT)
 
@@ -19,7 +19,7 @@ tcl_copy:
 test.elf: asm_pre.s
 	$(CC) -Xlinker -T$(RISCV_ASM_LD_SCRIPT) $(CFLAGS) asm_pre.s -o test.elf
 
-asm_pre.s: $(SRC)
+asm_pre.s: $(SRC) $(RISCV_ASM_INCLUDES)/boot.S $(RISCV_ASM_INCLUDES)/defines.S
 	$(CC) -x c -E $(CFLAGS) $(SRC) -o asm_pre.s
 
 test.v: test.elf

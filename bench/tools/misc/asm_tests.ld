@@ -6,5 +6,6 @@ SECTIONS
     /* the assembly should be placed in  in .text section */
     .reset 0 : AT(0) {
         *(.reset);
+        *(.text);
     }
 }

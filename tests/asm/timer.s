@@ -1,13 +1,8 @@
-#include "lib/defines.S"
+#include <defines.S>
+#include <boot.S>
 
-.global __start
-
-.section .reset, "awx"
-__start:
-addi a3, zero, 8
-csrw mstatus, a3
-la t1, test_passed
-csrw mtvec, t1
+.text
+main:
 mv sp, zero
 lui sp, 0x40000
 addi a0, zero, 10
@@ -27,5 +22,5 @@ mv zero, zero
 FAILED 1
 
 .balign 4
-test_passed:
+ON_EXCEPTION:
 PASSED

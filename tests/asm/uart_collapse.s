@@ -1,9 +1,8 @@
-#include "lib/defines.S"
+#include <defines.S>
+#include <boot.S>
 
-.global __start
-
-.section .reset, "awx"
-__start:
+.text
+main:
     la sp, UART_BASE_ADDR
     la a0, 0x41
     sb a0, 0(sp)

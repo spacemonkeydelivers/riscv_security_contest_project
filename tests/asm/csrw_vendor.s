@@ -1,18 +1,15 @@
-#include "lib/defines.S"
+#include <defines.S>
+#include <boot.S>
 
-.global __start
 
-.section .reset, "awx"
-__start:
+.text
+main:
+    csrw mvendorid, zero
+    lw a1, 0(sp)
 
-la t0, failed
-csrw mtvec, t0 
+    FAILED 1
 
-csrw mvendorid, zero
-lw a1, 0(sp)
-
-FAILED 1
-
-failed:
-PASSED
+.balign 4
+ON_EXCEPTION:
+    PASSED
 

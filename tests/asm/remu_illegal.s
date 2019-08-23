@@ -1,12 +1,8 @@
-#include "lib/defines.S"
+#include <defines.S>
+#include <boot.S>
 
-.global __start
-
-.section .reset, "awx"
-__start:
-
-    la t1, test_passed
-    csrw mtvec, t1
+.text
+main:
     li a0, 0x0deadbee
     li a6, 0x10
 // we expect that remu will trigger ILLEGAL_INSTRUCITON_FAULT
@@ -14,7 +10,7 @@ __start:
     FAILED 1
 
 .balign 4
-test_passed:
+ON_EXCEPTION:
 // todo: add mcause checks
     PASSED
 
