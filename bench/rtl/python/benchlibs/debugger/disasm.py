@@ -40,7 +40,7 @@ class Disassembler:
           f.write('{}\n'.format(item))
         f.close()
 
-        src = '../../common_filters/'
+        src = os.environ['TOOLS_DISTRIB'] + '/share/common_filters'
         for item in os.listdir(src):
           s = os.path.join(src, item)
           d = os.path.join('filters/', item)

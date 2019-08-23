@@ -122,10 +122,11 @@ print('#ifdef D_GENERATE_SOC_ENUMS')
 print('\n'.join(PY_EN_WRAP))
 print('#endif // D_GENERATE_SOC_ENUMS')
 
-if not os.path.exists('common_filters'):
-  os.mkdir('common_filters')
+filters_path = os.environ['DISTRIB_TOOLS_SHARE'] + '/common_filters'
+if not os.path.exists(filters_path):
+  os.mkdir(filters_path)
 for key, value in EN_FILTER.items():
-  f = open('common_filters/{}.flt'.format(key.upper()), 'w+')
+  f = open('{}/{}.flt'.format(filters_path, key.upper()), 'w+')
   for item in value:
     f.write('{}\n'.format(item))
   f.close()

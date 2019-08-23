@@ -4,11 +4,11 @@
 # set nfacs [ gtkwave::getNumFacs ]
 # set dumpname [ gtkwave::getDumpFileName ]
 # set dmt [ gtkwave::getDumpType ]
-# 
+#
 # puts "number of signals in dumpfile '$dumpname' of type $dmt: $nfacs"
-# 
+#
 # set clk48 [list]
-# 
+#
 # for {set i 0} {$i < $nfacs } {incr i} {
 #     set facname [ gtkwave::getFacName $i ]
 #     set indx [ string first opcode $facname ]
