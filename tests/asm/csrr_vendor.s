@@ -1,23 +1,22 @@
-#include "lib/defines.S"
+#include <defines.S>
+#include <boot.S>
 
-.global __start
+.text
+main:
 
-.section .reset, "awx"
-__start:
+    la sp, test_data
 
-la t0, failed
-csrw mtvec, t0 
-la sp, test_data
+    csrr a0, mvendorid
+    lw a1, 0(sp)
 
-csrr a0, mvendorid
-lw a1, 0(sp)
+    bne a0, a1, failed
 
-bne a0, a1, failed
+    PASSED
 
-PASSED
-
+.balign 4
 failed:
-FAILED 1
+ON_EXCEPTION:
+    FAILED 1
 
 test_data:
 .4byte 0xc001f001

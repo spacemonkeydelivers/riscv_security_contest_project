@@ -1,15 +1,8 @@
-#include "lib/defines.S"
+#include <defines.S>
+#include <boot.S>
 
-.global __start
-
-.section .reset, "awx"
-__start:
-
-la t1, handler
-csrw mtvec, t1
-li t2, 8
-csrw mstatus, 8
-
+.text
+main:
 li sp, 0x1000
 li a0, 4
 li a2, 5
@@ -42,10 +35,11 @@ PASSED
 failed:
 FAILED 1
 
-handler:
-li t2, 3
-csrw tags, t2
-mret
+.balign 4
+ON_EXCEPTION:
+    li t2, 3
+    csrw tags, t2
+    mret
 
 .align 4
 test_data:
