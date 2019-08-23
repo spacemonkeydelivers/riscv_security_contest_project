@@ -66,7 +66,8 @@ file(MAKE_DIRECTORY "${PLATFORM_HEADERS_DIR}")
 set(SOC_ENUMS "${PLATFORM_HEADERS_DIR}/soc_enums.h")
 add_custom_command(
     OUTPUT "${SOC_ENUMS}"
-    COMMAND ${Python2_EXECUTABLE}
+    COMMAND DISTRIB_TOOLS_SHARE=${CMAKE_BINARY_DIR}/distrib/tools/share
+            ${Python2_EXECUTABLE}
             ${CMAKE_SOURCE_DIR}/bench/tools/build/gen_enums.py
             ${CMAKE_SOURCE_DIR} > "${SOC_ENUMS}"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
