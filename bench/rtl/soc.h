@@ -43,6 +43,11 @@ public:
 
     en_state cpu_state() const;
 
+    void switchBusMasterToExternal(bool s);
+    void toggleCpuReset(bool t);
+    void writeWordExt(unsigned address, uint32_t val);
+    uint32_t readWordExt(unsigned address);
+
 private:
     Vsoc*          m_soc         {nullptr};
     uint64_t       m_tickCnt     {0};
@@ -53,6 +58,19 @@ private:
 
     uint64_t       UART_TX_ADDR  {0x3};
     uint64_t       UART_RX_ADDR  {0x2};
+
+    enum busMaster
+    {
+        MASTER_CPU = 0,
+        MASTER_EXT = 1,
+    };
+
+    enum extAccessSize
+    {
+        EXT_ACCESS_BYTE = 0,
+        EXT_ACCESS_HALF = 1,
+        EXT_ACCESS_WORD = 2,
+    };
 };
 
 #endif //D_SOC___INCLUDE_HEADER_GUARD__

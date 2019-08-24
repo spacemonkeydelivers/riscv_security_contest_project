@@ -1,13 +1,110 @@
+module wb_ext
+#(
+   parameter DATA_WIDTH = 32,
+   parameter ADDR_WIDTH = 32,
+   parameter WB_DATA_WIDTH = 32,
+   parameter WB_ADDR_WIDTH = 32,
+   parameter WB_SEL_WIDTH  = WB_DATA_WIDTH / 8
+)
+ (
+   input  wire                       clk_i,
+   input  wire                       rst_i,
+   input  wire [DATA_WIDTH - 1:0]    transaction_data_i,
+   input  wire [ADDR_WIDTH - 1:0]    transaction_addr_i,
+   output wire [DATA_WIDTH - 1:0]    transaction_data_o,
+   input  wire [1:0]                 transaction_size_i,
+   input  wire                       transaction_we_i,
+   input  wire                       transaction_start_i,
+   input  wire                       transaction_clear_ready_i,
+   output wire                       transaction_ready_o,
+   input  wire                       wb_ack_i,
+   input  wire [WB_DATA_WIDTH - 1:0] wb_data_i,
+   output wire [WB_ADDR_WIDTH - 1:0] wb_addr_o,
+   output wire [WB_DATA_WIDTH - 1:0] wb_data_o,
+   output wire                       wb_we_o,
+   output wire [WB_SEL_WIDTH - 1:0]  wb_sel_o,
+   output wire                       wb_stb_o,
+   output wire                       wb_cyc_o
+);
+   /*verilator no_inline_module*/
+
+   localparam TRAN_SIZE_BYTE = 0;
+   localparam TRAN_SIZE_HALF = 1;
+   localparam TRAN_SIZE_WORD = 2;
+
+   localparam WB_SEL_BYTE = 4'b0001;
+   localparam WB_SEL_HALF = 4'b0011;
+   localparam WB_SEL_WORD = 4'b1111;
+
+   reg tran_started;
+   reg tran_finished;
+   reg [WB_DATA_WIDTH - 1:0] data;
+   assign transaction_data_o = data;
+
+   reg [3:0] data_sel;
+   assign wb_sel_o = data_sel;
+
+   reg wb_we;
+   assign wb_we_o = wb_we;
+
+   assign wb_stb_o = tran_started;
+   assign wb_cyc_o = tran_started;
+   assign transaction_ready_o = tran_finished;
+   assign wb_addr_o = transaction_addr_i;
+   assign wb_data_o = transaction_data_i;
+
+   always @ (posedge clk_i) begin
+      if (rst_i) begin
+         tran_started <= 0;
+         tran_finished <= 0;
+         data_sel <= 0;
+         data <= 0;
+         wb_we <= 0;
+      end
+      else begin
+         if (transaction_start_i && !tran_started) begin
+            tran_started <= 1;
+            case (transaction_size_i)
+               TRAN_SIZE_BYTE: data_sel <= WB_SEL_BYTE;
+               TRAN_SIZE_HALF: data_sel <= WB_SEL_HALF;
+               TRAN_SIZE_WORD: data_sel <= WB_SEL_WORD;
+               default:        data_sel <= WB_SEL_WORD;
+            endcase
+            wb_we <= transaction_we_i;
+         end
+         if (tran_started && wb_ack_i) begin
+            tran_started <= 0;
+            tran_finished <= 1;
+            data <= wb_data_i;
+            wb_we <= 0;
+         end
+         if (transaction_clear_ready_i) begin
+            tran_finished <= 0;
+         end
+      end
+   end
+endmodule
+
 module soc
 #(
-   parameter FIRMWARE_FILE = "/tmp/zeroes8k.txt",
+   parameter FIRMWARE_FILE = "",
    parameter SOC_RAM_SIZE = 8192
 )
 (
-   input wire clk_i,
-   input wire rst_i,
-   input wire uart_rx_i,
-   output wire uart_tx_o
+   input  wire clk_i,
+   input  wire cpu_rst_i,
+   input  wire rst_i,
+   input  wire uart_rx_i,
+   output wire uart_tx_o,
+   input  wire bus_master_selector_i,
+   input  wire [WB_ADDR_WIDTH - 1:0] ext_tran_addr_i,
+   input  wire [WB_DATA_WIDTH - 1:0] ext_tran_data_i,
+   input  wire [1:0]                 ext_tran_size_i,
+   input  wire                       ext_tran_start_i,
+   input  wire                       ext_tran_write_i,
+   input  wire                       ext_tran_clear_i,
+   output wire [WB_DATA_WIDTH - 1:0] ext_tran_data_o,
+   output wire                       ext_tran_ready_o
 );
    /*verilator no_inline_module*/
 
@@ -17,6 +114,16 @@ module soc
 
    localparam CPU_RESET_ADDR = 32'h0;
    localparam CPU_EXCEPTION_ADDR = 32'h00AA_1155;
+   
+   // external interface
+   wire [WB_ADDR_WIDTH - 1:0] wb_ext_addr;
+   wire [WB_DATA_WIDTH - 1:0] wb_ext_data_in;
+   wire wb_ext_we;
+   wire [WB_SEL_WIDTH - 1:0]  wb_ext_sel;
+   wire wb_ext_stb;
+   wire wb_ext_cyc;
+   wire wb_ext_ack;
+   wire [WB_DATA_WIDTH - 1:0] wb_ext_data_out;
    
    // cpu interface
    wire [WB_ADDR_WIDTH - 1:0] wb_cpu_addr;
@@ -81,6 +188,35 @@ module soc
       .timer_irq_o (timer_irq)
    );
    
+   wb_ext
+   #(
+      .DATA_WIDTH (WB_DATA_WIDTH),
+      .ADDR_WIDTH (WB_ADDR_WIDTH),
+      .WB_DATA_WIDTH (WB_DATA_WIDTH),
+      .WB_ADDR_WIDTH (WB_ADDR_WIDTH)
+   )
+   ext0
+   (
+      .clk_i (clk_i),
+      .rst_i (rst_i),
+      .transaction_data_i (ext_tran_data_i),
+      .transaction_addr_i (ext_tran_addr_i),
+      .transaction_size_i (ext_tran_size_i),
+      .transaction_we_i (ext_tran_write_i),
+      .transaction_start_i (ext_tran_start_i),
+      .transaction_clear_ready_i (ext_tran_clear_i),
+      .wb_ack_i (wb_ext_ack),
+      .transaction_ready_o (ext_tran_ready_o),
+      .transaction_data_o (ext_tran_data_o),
+      .wb_addr_o (wb_ext_addr),
+      .wb_data_o (wb_ext_data_out),
+      .wb_data_i (wb_ext_data_in),
+      .wb_we_o (wb_ext_we),
+      .wb_sel_o (wb_ext_sel),
+      .wb_stb_o (wb_ext_stb),
+      .wb_cyc_o (wb_ext_cyc)
+   );
+   
    wb_mux
    #(
       .WB_DATA_WIDTH (WB_DATA_WIDTH),
@@ -89,6 +225,16 @@ module soc
    )
    mux0
    (
+      .bus_master_i (bus_master_selector_i),
+      // external
+      .wb_ext_addr_i (wb_ext_addr),
+      .wb_ext_data_i (wb_ext_data_out),
+      .wb_ext_we_i (wb_ext_we),
+      .wb_ext_sel_i (wb_ext_sel),
+      .wb_ext_stb_i (wb_ext_stb),
+      .wb_ext_cyc_i (wb_ext_cyc),
+      .wb_ext_ack_o (wb_ext_ack),
+      .wb_ext_data_o (wb_ext_data_in),
       // cpu
       .wb_cpu_addr_i (wb_cpu_addr),
       .wb_cpu_data_i (wb_cpu_data_out),
@@ -171,7 +317,7 @@ module soc
       .CLK_I (clk_i),
       .ACK_I (wb_cpu_ack),
       .DAT_I (wb_cpu_data_in),
-      .RST_I (rst_i),
+      .RST_I (cpu_rst_i),
       .ADR_O (wb_cpu_addr),
       .DAT_O (wb_cpu_data_out),
       .SEL_O (wb_cpu_sel),

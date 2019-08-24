@@ -29,6 +29,10 @@ BOOST_PYTHON_MODULE(libbench)
         .def("uartTxValid", &RV_SOC::validUartTxTransaction)
         .def("pcValid", &RV_SOC::validPc)
         .def("cpuState", &RV_SOC::cpu_state)
+        .def("switchBusMasterToExternal", &RV_SOC::switchBusMasterToExternal)
+        .def("toggleCpuReset", &RV_SOC::toggleCpuReset)
+        .def("writeWordExt", &RV_SOC::writeWordExt)
+        .def("readWordExt", &RV_SOC::readWordExt)
         .def("wordSize", &RV_SOC::getWordSize);
 }
 

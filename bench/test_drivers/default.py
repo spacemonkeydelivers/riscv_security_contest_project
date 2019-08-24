@@ -132,7 +132,7 @@ def run(libbench):
   driver = build_test_image(soc)
 
   soc.setDebug(False)
-  soc.load_data_to_ram("test.v")
+  soc.load_data_to_ram("test.v", external = False)
 
   if driver == None:
     print "could not detect custom driver, using standard procedure"
