@@ -21,6 +21,5 @@ mv zero, zero
 
 FAILED 1
 
-.balign 4
 ON_EXCEPTION:
-PASSED
+    PASSED

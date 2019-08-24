@@ -35,7 +35,6 @@ PASSED
 failed:
 FAILED 1
 
-.balign 4
 ON_EXCEPTION:
     li t2, 3
     csrw tags, t2

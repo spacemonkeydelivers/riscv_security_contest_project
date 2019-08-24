@@ -36,5 +36,7 @@
 
 #define UART_BASE_ADDR 0x80000003
 
+#define ON_EXCEPTION .balign 4; ON_EXCEPTION_handler
+
 #endif // D_RISCV_SOC_TESTS_DEFINES_INCLUDE_GUARD
 

@@ -17,7 +17,9 @@ tcl_copy: $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl
 	cp $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl filter_init.tcl
 
 test.elf: asm_pre.s
-	$(CC) -Xlinker -T$(RISCV_ASM_LD_SCRIPT) $(CFLAGS) asm_pre.s -o test.elf
+	$(CC) -Xlinker -T$(RISCV_ASM_LD_SCRIPT) \
+	-Xlinker --defsym=__SOC_MEM_SIZE=$(SOC_RAM_SIZE) \
+	$(CFLAGS) asm_pre.s -o test.elf
 
 asm_pre.s: $(SRC) $(RISCV_ASM_INCLUDES)/boot.S $(RISCV_ASM_INCLUDES)/defines.S
 	$(CC) -x c -E $(CFLAGS) $(SRC) -o asm_pre.s

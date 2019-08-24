@@ -9,7 +9,6 @@ main:
     remu t4, a0, a6
     FAILED 1
 
-.balign 4
 ON_EXCEPTION:
 // todo: add mcause checks
     PASSED
