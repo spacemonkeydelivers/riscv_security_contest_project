@@ -34,13 +34,17 @@ endif()
 find_package(Boost COMPONENTS python)
 
 if (NOT DEFINED ENV{RISCV_TOOLCHAIN})
-    message(FATAL_ERROR "You have to set RISCV_TOOLCHAIN var")
+    set(RISCV_TOOLCHAIN_PATH /tank/work/dev/toolchains/riscv32i-tags-newlib-gcc)
+    message("RISCV_TOOLCHAIN_PATH is NOT set, using the default value: ${RISCV_TOOLCHAIN_PATH}")
+    if (NOT EXISTS "${RISCV_TOOLCHAIN_PATH}")
+        message(FATAL_ERROR "No toolchain was detected at the default path, please set RISCV_TOOLCHAIN_PATH")
+    endif()
 else()
     set(RISCV_TOOLCHAIN_PATH $ENV{RISCV_TOOLCHAIN})
 endif()
 
 if (NOT EXISTS "${RISCV_TOOLCHAIN_PATH}/bin/riscv32-unknown-elf-gcc")
-    message(FATAL_ERROR "Could not find gcc for risc-v: ${RISCV_TOOLCHAIN_PATH}/riscv32-unknown-elf-gcc")
+    message(FATAL_ERROR "Could not find gcc for risc-v: ${RISCV_TOOLCHAIN_PATH}/riscv32-unknown-elf-gcc\nPlease set RISCV_TOOLCHAIN appropriately")
 endif()
 
 
