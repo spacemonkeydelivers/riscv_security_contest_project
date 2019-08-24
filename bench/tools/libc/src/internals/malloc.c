@@ -30,12 +30,12 @@ __attribute__((section(".__system.init")))
 bool malloc_init(const struct init_ctx* ctx)
 {
     if (ctx->memtag_en) {
-        printf("MEMORY TAGGING is enabled\n");
+        printf("LIBC: MEMORY TAGGING is enabled\n");
     }
     else {
-        printf("MEMORY TAGGING is disabled\n");
+        printf("LIBC: MEMORY TAGGING is disabled\n");
     }
-    printf("heap_start: %p, heap_end: %p\n",
+    printf("LIBC: heap @[%p, %p]\n",
            ctx->heap_start, ctx->heap_end);
     // protect mem info
     struct memory_subsystem* s_info_ptr = (struct memory_subsystem*)
