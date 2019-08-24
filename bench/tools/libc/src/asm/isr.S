@@ -28,6 +28,11 @@ __isr_wrapper:
     csrr a1, mcause
     li t2, EN_MCAUSE_EXTERNAL_INTERRUPT
     beq a1, t2, interrupt
+    li t1, 0x7fffffff
+    and t1, a1, t1
+    li t2, EN_MCAUSE_TAG_MISMATCH
+    bne t2, t1, exception
+    call _ossec_panic
 exception:
     # in case of exceptions a1 contains mcause which is compatible with the spec
     call __exc_serve

@@ -1,6 +1,7 @@
 SECTIONS
 {
     STACK_SIZE = 4096;
+    HEAP_SIZE = 12288; /* 12K */
     _start = 0;
     ENTRY(_start)
     /* BIOS mapping */
@@ -14,24 +15,28 @@ SECTIONS
         *(.__system.os)
         *(.__libgcc_)
         *(.__system.data)
+        *(.__system.secure_data)
     }
     /* User code mapping */
     .text : {
         *(.text)
     }
-    .data : {
+    .data ALIGN(16): {
         *(.data)
     }
-    .rodata : {
+    .rodata ALIGN(16): {
         *(.rodata)
     }
-    .bss : {
+    .bss ALIGN(16): {
         __bss_start = .;
         *(.bss)
         __bss_end = .;
     }
+    __heap_start = ALIGN(16) ;
+    __heap_end = . + HEAP_SIZE ;
+
     /* Stack code mapping */
-    .application_stack : {
+    .application_stack __heap_end : {
         begin = .;
         *(.__application_stack);
         . = begin + STACK_SIZE;

@@ -1,8 +1,13 @@
 #ifndef __INCLUDE_GUARD_RISCV_STDLIB__
 #define __INCLUDE_GUARD_RISCV_STDLIB__
 
+#include <stddef.h>
+
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
+
+void* malloc(size_t size);
+void free(void*);
 
 void exit(int status) __attribute__ ((noreturn));
 

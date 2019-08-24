@@ -2,6 +2,9 @@
 .weak __cfg_initialize_io
 .equ __cfg_initialize_io, 1
 
+.weak __cfg_enable_memtag
+.equ __cfg_enable_memtag, 1
+
 
 // NOTE: these to parameters must be in-sync with linker script
 .weak  __cfg_app_stack_top
