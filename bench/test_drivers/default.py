@@ -10,6 +10,32 @@ import benchlibs.debug as debug
 
 PATH_tools_dir = os.environ['TOOLS_DIR']
 
+def extract_uart_checker(filename):
+  checker_data = []
+  activated = False
+  with open(filename) as f:
+    content = f.readlines()
+    for line in content:
+      if re.search(r'^\s*UART_CHECK:ENABLED\s*$', line):
+        activated = True
+        continue
+
+      if (activated == True) and re.search(r'^\s*\*/\s*$', line):
+        activated = False
+        if len(checker_data) > 0:
+          checker_data[-1] = checker_data[-1][:-1]
+
+      if activated:
+        checker_data.append(line)
+
+  if len(checker_data) > 0:
+    with open('uart.expected', 'w') as f:
+      for item in checker_data:
+        f.write(item)
+  else:
+    if os.path.isfile('uart.expected'):
+      os.remove('uart.expected')
+
 def generate_make_compliance(soc):
 
   asm_file = os.environ['TESTS_DIR'] + '/' + sys.argv[1]
@@ -39,6 +65,8 @@ def generate_make_asm(soc):
   if ret != 0:
     raise 'could not generate makefile'
 
+  extract_uart_checker(asm_file)
+
   driver = None
   # try to detect custom driver fot this test
   driver_path = asm_file + ".py"
@@ -52,7 +80,8 @@ def generate_make_c(soc):
   c_root = os.path.join(os.environ['TESTS_DIR'], sys.argv[1])
   pattern = os.path.join(c_root, '*.c')
   print('searching for c files as <{}>'.format(pattern))
-  c_list = ' '.join(glob.glob(pattern))
+  c_files = glob.glob(pattern)
+  c_list = ' '.join(c_files)
   print('found results: {}'.format(c_list))
 
   cmd = ''.join([
@@ -64,6 +93,9 @@ def generate_make_c(soc):
   ret = os.system(cmd)
   if ret != 0:
     raise 'could not generate makefile'
+
+  for c_file in c_files:
+    extract_uart_checker(c_file)
 
   driver = None
   driver_path = os.path.join(c_root, "driver.py")
@@ -88,7 +120,7 @@ def build_test_image(soc):
   print('running make...')
   ret = os.system('make -f Makefile.test VERBOSE=1')
   if ret != 0:
-    raise 'could not create test image'
+    raise Exception('could not create test image')
 
   return driver
 
@@ -124,6 +156,13 @@ def run(libbench):
       dbg.repl()
     else:
       soc.run(ticks, expect_failure = expect_failure)
+      if os.path.isfile('uart.expected'):
+        ret = os.system(' && '.join(['cat io.txt | sed \'/^LIBC: /d\'>_io.txt',
+                                     'diff _io.txt uart.expected']))
+        if ret == 0:
+          print('UART output matches the expected one')
+        else:
+          raise Exception('UART output mismatch!, test failed')
   else:
     print "custom driver detected, control transfered"
     driver.run(soc)

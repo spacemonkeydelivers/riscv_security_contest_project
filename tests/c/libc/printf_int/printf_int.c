@@ -6,3 +6,9 @@ int main () {
     printf("bee: %x\n", a);
     return EXIT_SUCCESS;
 }
+
+/*
+UART_CHECK:ENABLED
+bee: deadbee
+
+*/

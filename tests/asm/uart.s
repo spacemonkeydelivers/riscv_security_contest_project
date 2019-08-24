@@ -1,5 +1,10 @@
 #include <defines.S>
 
+/*
+UART_CHECK:ENABLED
+A
+*/
+
 .global __start
 
 .section .reset, "awx"

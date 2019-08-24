@@ -16,3 +16,8 @@ int main ()
     printf("test function: %s\n", "test");
     return 0;
 }
+/*
+UART_CHECK:ENABLED
+test function: test
+
+*/
