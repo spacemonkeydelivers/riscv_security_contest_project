@@ -4,11 +4,11 @@
 #include <defines.S>
 
 .global __start
-.weak ON_EXCEPTION
+.weak ON_EXCEPTION_handler
 
 .section .reset, "awx"
 __start:
-    la t1, ON_EXCEPTION
+    la t1, ON_EXCEPTION_handler
     csrw mtvec, t1
     li t2, 8
     csrw mstatus, 8

@@ -13,9 +13,8 @@ main:
 
     PASSED
 
-.balign 4
-failed:
 ON_EXCEPTION:
+failed:
     FAILED 1
 
 test_data:
