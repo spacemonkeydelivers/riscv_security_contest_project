@@ -155,7 +155,10 @@ class RiscVSoc:
     def set_ticks_to_run(self, value):
         self._ticks_to_run = value
 
-    def load_data_to_ram(self, path_to_image, offset_in_words = 0):
+    def load_data_to_ram(self, path_to_image, offset_in_words = 0, external = False):
+        if external:
+            self._soc.toggleCpuReset(True)
+            self._soc.switchBusMasterToExternal(True)
         data = map(lambda x: x.strip(), open(path_to_image, "r").readlines())
         offset = 0
         for line in data:
@@ -167,14 +170,29 @@ class RiscVSoc:
                 b = line.split()
                 for k in range(0, len(b), 4):
                     word = int("".join(b[k:k+4][::-1]), 16)
-                    self._soc.writeWord(offset, word)
+                    if external:
+                        self._soc.writeWordExt(offset, word)
+                    else:
+                        self._soc.writeWord(offset, word)
                     if self._debug:
                         print("Writing 0x{0:08x} to address 0x{1:08x}".format(word, offset * 4))
                     offset += 1
+        if external:
+            self._soc.toggleCpuReset(False)
+            self._soc.switchBusMasterToExternal(False)
 
-    def print_ram(self, start_word_index = 0, num_words = 8):
+    def print_ram(self, start_word_index = 0, num_words = 8, external = False):
+        if external:
+            self._soc.toggleCpuReset(True)
+            self._soc.switchBusMasterToExternal(True)
         for w_idx in xrange(start_word_index, start_word_index + num_words):
-            print("0x{0:08x} : 0x{1:08x}".format(w_idx * self._word_size, self._soc.readWord(w_idx)))
+            if external:
+                print("0x{0:08x} : 0x{1:08x}".format(w_idx * self._word_size, self._soc.readWordExt(w_idx)))
+            else:
+                print("0x{0:08x} : 0x{1:08x}".format(w_idx * self._word_size, self._soc.readWord(w_idx)))
+        if external:
+            self._soc.toggleCpuReset(False)
+            self._soc.switchBusMasterToExternal(False)
 
     def read_word_ram(self, word_index = None):
         if (word_index == None):

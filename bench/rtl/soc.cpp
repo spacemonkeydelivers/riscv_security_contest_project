@@ -84,6 +84,93 @@ void RV_SOC::tick(unsigned num)
         m_tickCnt++;
     }
 }
+    
+void RV_SOC::switchBusMasterToExternal(bool s)
+{
+    m_soc->bus_master_selector_i = s ? RV_SOC::busMaster::MASTER_EXT
+                                     : RV_SOC::busMaster::MASTER_CPU;
+}
+    
+void RV_SOC::toggleCpuReset(bool enReset)
+{
+    m_soc->cpu_rst_i = enReset;
+}
+
+void RV_SOC::writeWordExt(unsigned address, uint32_t val)
+{
+    if (address >= m_ramSize) {
+        std::cerr << "writeWordExt: address " << std::dec << (address * 4) <<
+            " (w_idx = 0x" <<  std::hex << address << ") is out of range " <<
+            "[RamSize = " << std::dec << m_ramSize * 4 << " bytes]" << std::endl;
+        throw std::out_of_range("write: the specified address is out of range");
+    }
+    unsigned wait = 20;
+    m_soc->ext_tran_addr_i = address << 2;
+    m_soc->ext_tran_data_i = val;
+    m_soc->ext_tran_size_i = RV_SOC::extAccessSize::EXT_ACCESS_WORD;
+    m_soc->ext_tran_write_i = 1;
+    m_soc->ext_tran_start_i = 1;
+
+    tick();
+    m_soc->ext_tran_start_i = 0;
+    m_soc->ext_tran_write_i = 0;
+
+    bool success = false;
+    for (unsigned i = wait; i >= 0; i--) {
+        if (m_soc->ext_tran_ready_o) {
+            success = true;
+            break;
+        }
+        tick();
+    }
+
+    if (success) {
+        m_soc->ext_tran_clear_i = 1;
+        tick();
+        m_soc->ext_tran_clear_i = 0;
+    } else {
+        std::cerr << "writeWordExt: no success result" << std::endl;
+    }
+}
+
+uint32_t RV_SOC::readWordExt(unsigned address)
+{
+    if (address >= m_ramSize) {
+        std::cerr << "readWordExt: address " << std::dec << (address * 4) <<
+            " (w_idx = 0x" << std::hex << address << ") is out of range" <<
+            "[RamSize = " << std::dec << m_ramSize * 4 << " bytes]" << std::endl;
+        throw std::out_of_range("read: the specified address is out of range");
+    }
+    unsigned wait = 20;
+    m_soc->ext_tran_addr_i = address << 2;
+    m_soc->ext_tran_write_i = 0;
+    m_soc->ext_tran_data_i = 0;
+    m_soc->ext_tran_size_i = RV_SOC::extAccessSize::EXT_ACCESS_WORD;
+    m_soc->ext_tran_start_i = 1;
+
+    tick();
+    m_soc->ext_tran_start_i = 0;
+    m_soc->ext_tran_write_i = 0;
+
+    bool success = false;
+    for (unsigned i = wait; i >= 0; i--) {
+        if (m_soc->ext_tran_ready_o) {
+            success = true;
+            break;
+        }
+        tick();
+    }
+    uint32_t data = 0;
+    if (success) {
+        m_soc->ext_tran_clear_i = 1;
+        data = m_soc->ext_tran_data_o;
+        tick();
+        m_soc->ext_tran_clear_i = 0;
+    } else {
+        std::cerr << "readWordExt: no success result" << std::endl;
+    }
+    return data;
+}
 
 void RV_SOC::writeWord(unsigned address, uint32_t val)
 {
@@ -110,8 +197,10 @@ uint32_t RV_SOC::readWord(unsigned address)
 void RV_SOC::reset()
 {
     m_soc->rst_i = 1;
+    m_soc->cpu_rst_i = 1;
     tick();
     m_soc->rst_i = 0;
+    m_soc->cpu_rst_i = 0;
     tick();
 }
 
