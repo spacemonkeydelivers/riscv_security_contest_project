@@ -19,8 +19,16 @@ bss_init:
     la sp, __APP_STACK_TOP
     la t1, __isr_wrapper
     csrw mtvec, t1
-    li a0, 0 # TODO: we have no context defined (for now)
+    la a0, __cfg_enable_memtag
+    la a1, __heap_start
+    la a2, __heap_end
+    sw a0, -12(sp)
+    sw a1, -8(sp)
+    sw a2, -4(sp)
+    addi a0, sp, -12
+    addi sp, sp, -16
     call __soc_init
+    addi sp, sp, 16
     # enable external interrupts
     li s0, 8
     csrw mstatus, s0

@@ -1,6 +1,6 @@
 INCLUDE=$(TOP)/include
 OBJ_FILES=boot.o isr.o config.o libgcc_.o \
-	os.o \
+	os.o malloc.o security.o \
 	libc-start.o printf.o \
 	stdlib.o unistd.o string.o
 LIBNAME=libc
@@ -45,6 +45,12 @@ boot.o: $(TOP)/src/asm/boot.S generated/esf.h
 
 os.o: $(TOP)/src/internals/os.c generated/esf.h
 	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -I. -o $@ -c $<
+
+malloc.o: $(TOP)/src/internals/malloc.c
+	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -I.  -I$(TOP)/include -o $@ -c $<
+
+security.o: $(TOP)/src/internals/security.c
+	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -I. -I$(TOP)/include -o $@ -c $<
 
 config.o: $(TOP)/src/asm/config.S
 	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -o $@ -c $<

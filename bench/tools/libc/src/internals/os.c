@@ -2,6 +2,10 @@
 #include <soc/traps.h>
 #include <soc/timer.h>
 #include <stdint.h>
+#include <stdio.h>
+
+#include "init_ctx.h"
+#include "security.h"
 
 
 __attribute__((section(".__system.data")))
@@ -97,9 +101,19 @@ void _putchar(char character) {
     *dst = character;
 }
 
+extern bool malloc_init(const struct init_ctx* ctx);
+extern void exit(int status);
+
 __attribute__((section(".__system.init")))
-void __soc_init(const void* context)
+void __soc_init(const struct init_ctx* ctx)
 {
-    (void)context;
+    if (!_ossec_init(ctx)) {
+        printf("PANIC: could not initialize security subsystem");
+        exit(253);
+    }
+    if (!malloc_init(ctx)) {
+        printf("PANIC: could not initialize memory subsystem");
+        exit(254);
+    }
 }
 
