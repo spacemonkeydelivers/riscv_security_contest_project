@@ -318,7 +318,8 @@ module cpu
     end
 
     wire addr_misaligned = | (pc[1:0] & 2'b11);
-    assign check_tags_o = csr[M_TAGS][0];
+    reg check_tag_on_fetch;
+    assign check_tags_o = csr[M_TAGS][0] && check_tag_on_fetch;
 
     reg [31:0] csr_to_write;
     always @(*) begin
@@ -357,6 +358,7 @@ module cpu
                 pcnext <= VECTOR_RESET;
                 csr[M_STATUS][3] <= 0; // disable machine-mode external interrupt
                 csr[M_TAGS][0] <= 0;
+                csr[M_TAGS][2] <= 0;
                 nextstate <= STATE_FETCH;
                 csr[M_TVEC] <= VECTOR_EXCEPTION;
                 csr[M_VENDOR_ID] <= VENDOR_ID;
@@ -364,9 +366,11 @@ module cpu
                 writeback_from_alu <= 0;
                 writeback_from_bus <= 0;
                 bus_dataout_stored <= 0;
+                check_tag_on_fetch = 0;
             end
 
             STATE_FETCH: begin
+                check_tag_on_fetch = csr[M_TAGS][2];
                 // write result of previous instruction to registers if requested
                 mux_reg_input_sel <= writeback_from_alu ? MUX_REGINPUT_ALU : MUX_REGINPUT_BUS;
                 reg_we <= writeback_from_alu | writeback_from_bus;
@@ -531,12 +535,30 @@ module cpu
                 bus_en <= 1;
                 mux_bus_addr_sel <= MUX_BUSADDR_ALU;
                 case(dec_funct3)
-                    `FUNC_LB:   bus_op <= `BUSOP_READB;
-                    `FUNC_LH:   bus_op <= `BUSOP_READH;
-                    `FUNC_LW:   bus_op <= `BUSOP_READW;
-                    `FUNC_LBU:  bus_op <= `BUSOP_READBU;
-                    `FUNC_LT:   bus_op <= `BUSOP_READT;
-                    default:    bus_op <= `BUSOP_READHU; // FUNC_LHU
+                    `FUNC_LB: begin
+                        bus_op <= `BUSOP_READB;
+                        check_tag_on_fetch = csr[M_TAGS][0];
+                     end
+                    `FUNC_LH: begin
+                        bus_op <= `BUSOP_READH;
+                        check_tag_on_fetch = csr[M_TAGS][0];
+                     end
+                    `FUNC_LW: begin
+                        bus_op <= `BUSOP_READW;
+                        check_tag_on_fetch = csr[M_TAGS][0];
+                     end
+                    `FUNC_LBU: begin
+                        bus_op <= `BUSOP_READBU;
+                        check_tag_on_fetch = csr[M_TAGS][0];
+                     end
+                    `FUNC_LT: begin
+                        bus_op <= `BUSOP_READT;
+                        check_tag_on_fetch = 0;
+                     end
+                    default: begin
+                        bus_op <= `BUSOP_READHU; // FUNC_LHU
+                        check_tag_on_fetch = csr[M_TAGS][0];
+                     end
                 endcase
                 //nextstate <= STATE_REGWRITEBUS;
                 writeback_from_bus <= 1;
@@ -548,10 +570,22 @@ module cpu
                 bus_en <= 1;
                 mux_bus_addr_sel <= MUX_BUSADDR_ALU;
                 case(dec_funct3)
-                    `FUNC_SB:   bus_op <= `BUSOP_WRITEB;
-                    `FUNC_SH:   bus_op <= `BUSOP_WRITEH;
-                    `FUNC_ST:   bus_op <= `BUSOP_WRITET;
-                    default:    bus_op <= `BUSOP_WRITEW; // FUNC_SW
+                    `FUNC_SB: begin
+                        bus_op <= `BUSOP_WRITEB;
+                        check_tag_on_fetch = csr[M_TAGS][0];
+                     end
+                    `FUNC_SH: begin
+                        bus_op <= `BUSOP_WRITEH;
+                        check_tag_on_fetch = csr[M_TAGS][0];
+                     end
+                    `FUNC_ST: begin
+                        bus_op <= `BUSOP_WRITET;
+                        check_tag_on_fetch = 0;
+                     end
+                    default: begin
+                        bus_op <= `BUSOP_WRITEW; // FUNC_SW
+                        check_tag_on_fetch = csr[M_TAGS][0];
+                     end
                 endcase
                 // advance to next instruction
                 nextstate <= STATE_FETCH;
