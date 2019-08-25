@@ -15,7 +15,7 @@ module alu(
    
    /*verilator public_module*/ 
 	
-	reg[31:0] result, sum, myor, myxor, myand;
+	reg[31:0] result, sum, myor, myxor, myand, mul;
 	reg[32:0] sub; // additional bit for underflow detection
 	reg eq, lt, ltu, busy = 0;
 	reg[4:0] shiftcnt;
@@ -42,6 +42,8 @@ module alu(
 		myor = I_dataS1 | I_dataS2;
 		myxor = I_dataS1 ^ I_dataS2;
 		myand = I_dataS1 & I_dataS2;
+        // FIXME
+        mul = I_dataS1 * I_dataS2;
 	end
 	
 	always @(*) begin
@@ -98,6 +100,11 @@ module alu(
 				`ALUOP_SRA: result <= sra;
 				`ALUOP_SRL: result <= srl;
 				`endif
+                `ALUOP_MUL: result <= mul;
+                // FIXME
+                `ALUOP_MULH: result <= mul;
+                `ALUOP_MULHSU: result <= mul;
+                `ALUOP_MULHU: result <= mul;
 			endcase
 
 			O_lt <= lt;
