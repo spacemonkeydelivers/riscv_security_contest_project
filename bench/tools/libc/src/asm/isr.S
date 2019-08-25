@@ -26,19 +26,14 @@ __isr_wrapper:
 
 #ifdef __SOC_IS_NOT_SYSTEM_CONFORMANT
     csrr a1, mcause
-    li t2, EN_MCAUSE_EXTERNAL_INTERRUPT
-    beq a1, t2, interrupt
-    li t1, 0x7fffffff
-    and t1, a1, t1
-    li t2, EN_MCAUSE_TAG_MISMATCH
-    bne t2, t1, exception
-    call _ossec_panic
+    blt a1, zero, interrupt
 exception:
     # in case of exceptions a1 contains mcause which is compatible with the spec
     call __exc_serve
     j restore
 interrupt:
-    li a1, EN_ASM_RISCV_INT_EXT_M
+    li t1, 0x7fffffff
+    and a1, a1, t1
     call __int_serve
 #else
     .error "isr routing for conformant core is not implemented"

@@ -102,7 +102,7 @@ unsigned _ossec_get_secure_ptr(volatile void* ptr) {
 
 __attribute__((section(".__system.os")))
 unsigned _ossec_panic() {
-    printf("PANIC: SECURITY VIOLATION DETECTED!\n");
+    printf("LIBC: <PANIC> SECURITY VIOLATION DETECTED!\n");
     exit(42);
     return 0;
 }
