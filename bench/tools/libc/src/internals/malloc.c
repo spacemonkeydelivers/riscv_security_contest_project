@@ -36,8 +36,7 @@ bool malloc_init(const struct init_ctx* ctx)
     else {
         printf("LIBC: MEMORY TAGGING is disabled\n");
     }
-    printf("LIBC: heap @[%p, %p]\n",
-           ctx->heap_start, ctx->heap_end);
+    printf("LIBC: heap @[%p, %p]\n", ctx->heap_start, ctx->heap_end);
     // protect mem info
     struct memory_subsystem* s_info_ptr = (struct memory_subsystem*)
         _ossec_protect_ptr(&mem_info, sizeof(mem_info));
@@ -80,6 +79,7 @@ void* malloc(size_t size) {
     // if we serve interrupts. The expectation is that such situations can
     // happen iff malloc is called from a signal
     if (_os_is_serving_isr()) {
+        printf("LIBC: WARNING malloc should not be called from a signal!\n");
         return 0; // do not allow allocations during ISR
     }
     size = aligntonext(size, 4);
@@ -97,7 +97,7 @@ void* malloc(size_t size) {
 
     unsigned sz_allocation = next_location + size + sizeof(alloc_header_t);
     if (sz_allocation > s_info_ptr->arena_end) {
-        printf("WARNING: OOM is detected");
+        printf("LIBC: WARNING: OOM is detected\n");
         return 0; // OOM
     }
     free_header = (alloc_header_t*)

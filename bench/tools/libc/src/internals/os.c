@@ -110,7 +110,7 @@ int _os_is_serving_isr () {
             : [result]"=r"(result)
             :
             : "t0");
-    return result > 0;
+    return result == 0;
 }
 
 extern bool malloc_init(const struct init_ctx* ctx);
