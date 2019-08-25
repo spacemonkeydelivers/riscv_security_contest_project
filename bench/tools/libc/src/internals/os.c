@@ -100,6 +100,18 @@ void _putchar(char character) {
     volatile char* dst = (volatile char*)0x80000003;
     *dst = character;
 }
+__attribute__((section(".__system.os")))
+int _os_is_serving_isr () {
+    int result = 0;
+    __asm__ (
+            "csrr %[result], mstatus\n\t"
+            "li t0, 8\n\t"
+            "and %[result], %[result], t0\n\t"
+            : [result]"=r"(result)
+            :
+            : "t0");
+    return result > 0;
+}
 
 extern bool malloc_init(const struct init_ctx* ctx);
 extern void exit(int status);

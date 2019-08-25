@@ -5,6 +5,7 @@
 
 #include "init_ctx.h"
 #include "security.h"
+#include "os.h"
 
 #define alignto(p, bits)      (((p) >> bits) << bits)
 #define aligntonext(p, bits)  alignto(((p) + (1 << bits) - 1), bits)
@@ -71,6 +72,15 @@ alloc_header_t* find_free_block(size_t size) {
 void* malloc(size_t size) {
     if (size == 0) {
         return 0; // implementation defined behavior
+    }
+    // Issue: at the current moment our library does not support any kind of
+    // atomics/locks. And thus this malloc implementation has an issue
+    // with context switch routines. For the sake simplicity we do not allow
+    // malloc to modify global state if interrupts are DISABLED, that is
+    // if we serve interrupts. The expectation is that such situations can
+    // happen iff malloc is called from a signal
+    if (_os_is_serving_isr()) {
+        return 0; // do not allow allocations during ISR
     }
     size = aligntonext(size, 4);
     alloc_header_t* free_header = find_free_block(size);
