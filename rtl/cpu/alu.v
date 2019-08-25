@@ -6,7 +6,7 @@ module alu(
 	input I_reset,
 	input[31:0] I_dataS1,
 	input[31:0] I_dataS2,
-	input [3:0] I_aluop,
+	input [3:0] I_aluop, // Increase me!
 	output O_busy,
 	output[31:0] O_data,
 	output reg O_lt,
@@ -15,13 +15,22 @@ module alu(
    
    /*verilator public_module*/ 
 	
-	reg[31:0] result, sum, myor, myxor, myand, mul;
+	reg[31:0] result, sum, myor, myxor, myand;
 	reg[32:0] sub; // additional bit for underflow detection
 	reg eq, lt, ltu, busy = 0;
 	reg[4:0] shiftcnt;
 
 	assign O_data = result;
 
+    // mul
+    reg[63:0] muluu;
+    reg[63:0] mulss;
+    reg[63:0] mulsu;
+
+    reg[63:0] tmp_src1;
+    reg[63:0] tmp_src2;
+    reg[63:0] tmp_src2u;
+   
 //`define SINGLE_CYCLE_SHIFTER
 `ifdef SINGLE_CYCLE_SHIFTER
 	wire[31:0] sll, srl, sra;
@@ -42,9 +51,19 @@ module alu(
 		myor = I_dataS1 | I_dataS2;
 		myxor = I_dataS1 ^ I_dataS2;
 		myand = I_dataS1 & I_dataS2;
+    end
+
+    always @(*) begin
         // FIXME
-        mul = I_dataS1 * I_dataS2;
-	end
+        tmp_src1 = { {32{I_dataS1[31]}}, I_dataS1[31:0]};
+        tmp_src2 = { {32{I_dataS2[31]}}, I_dataS2[31:0]};
+        tmp_src2u = { {32{1'b0}}, I_dataS2[31:0]};
+
+        mulss = tmp_src1 * tmp_src2;
+        muluu = I_dataS1 * I_dataS2;
+        mulsu = tmp_src1 * tmp_src2u;
+
+    end
 	
 	always @(*) begin
 		// unsigned comparison: simply look at underflow bit
@@ -100,11 +119,12 @@ module alu(
 				`ALUOP_SRA: result <= sra;
 				`ALUOP_SRL: result <= srl;
 				`endif
-                `ALUOP_MUL: result <= mul;
                 // FIXME
-                `ALUOP_MULH: result <= mul;
-                `ALUOP_MULHSU: result <= mul;
-                `ALUOP_MULHU: result <= mul;
+                // single-cycle multiplication :)
+                `ALUOP_MUL: result <= mulss[31:0];
+                `ALUOP_MULH: result <= mulss[63:32];
+                `ALUOP_MULHSU: result <= mulsu[63:32];
+                `ALUOP_MULHU: result <= muluu[63:32];
 			endcase
 
 			O_lt <= lt;
