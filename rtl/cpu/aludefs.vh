@@ -11,5 +11,11 @@
 	`define ALUOP_SLL  4'b0111
 	`define ALUOP_SRL  4'b1000
 	`define ALUOP_SRA  4'b1001
+
+    // RV32M
+    `define ALUOP_MUL       4'b1010
+    `define ALUOP_MULH      4'b1011
+    `define ALUOP_MULHSU    4'b1100
+    `define ALUOP_MULHU     4'b1101
 	
 `endif

@@ -69,6 +69,9 @@
 	`define FUNC_CSRRSI			3'b110
 	`define FUNC_CSRRCI			3'b111
 
+    // funct7
+    `define FUNC7_MUL_DIV   7'b0000001
+
 	// imm[11:0] of SYSTEM-opcode encodes function
 	`define SYSTEM_ECALL	12'b000000000000
 	`define SYSTEM_EBREAK	12'b000000000001

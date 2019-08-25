@@ -434,10 +434,32 @@ module cpu
                         mux_alu_s1_sel <= MUX_ALUDAT1_REGVAL1;
                         mux_alu_s2_sel <= MUX_ALUDAT2_REGVAL2;
                         case(dec_funct3)
-                            `FUNC_ADD_SUB:  alu_op <= dec_funct7[5] ? `ALUOP_SUB : `ALUOP_ADD;
-                            `FUNC_SLL:      alu_op <= `ALUOP_SLL;
-                            `FUNC_SLT:      alu_op <= `ALUOP_SLT;
-                            `FUNC_SLTU:     alu_op <= `ALUOP_SLTU;
+                            `FUNC_ADD_SUB:  begin
+                                case(dec_funct7)
+                                    7'b0100000:     alu_op <= `ALUOP_SUB;
+                                    `FUNC7_MUL_DIV: alu_op <= `ALUOP_MUL;
+                                    default:        alu_op <= `ALUOP_ADD;
+                                endcase
+                            end
+                            `FUNC_SLL:      begin
+                                case(dec_funct7)
+                                    `FUNC7_MUL_DIV: alu_op <= `ALUOP_MULH;
+                                    default:        alu_op <= `ALUOP_SLL;
+                                endcase
+                            end
+                            `FUNC_SLT:      begin
+                                case(dec_funct7)
+                                    `FUNC7_MUL_DIV: alu_op <= `ALUOP_MULHSU;
+                                    default:        alu_op <= `ALUOP_SLT;
+                                endcase
+                            end
+                            `FUNC_SLTU:     begin
+                                case(dec_funct7)
+                                    `FUNC7_MUL_DIV: alu_op <= `ALUOP_MULHU;
+                                    default:        alu_op <= `ALUOP_SLTU;
+                                endcase
+                            end
+                            // TODO: DIV
                             `FUNC_XOR:      alu_op <= `ALUOP_XOR;
                             `FUNC_SRL_SRA:  alu_op <= dec_funct7[5] ? `ALUOP_SRA : `ALUOP_SRL;
                             `FUNC_OR:       alu_op <= `ALUOP_OR;
