@@ -21,28 +21,29 @@ SECTIONS
     .text : {
         *(.text)
     }
-    .data ALIGN(16): {
+    .data : {
         *(.data)
     }
-    .rodata ALIGN(16): {
+    .rodata : {
         *(.rodata)
     }
-    .bss ALIGN(16): {
+    .bss : {
         __bss_start = .;
         *(.bss)
         __bss_end = .;
+
     }
     __heap_start = ALIGN(16) ;
-    __heap_end = . + HEAP_SIZE ;
+    __heap_end = __heap_start + HEAP_SIZE ;
 
     /* Stack code mapping */
     .application_stack __heap_end : {
-        begin = .;
+        __APP_STACK_BOTTOM = .;
         *(.__application_stack);
-        . = begin + STACK_SIZE;
+        . = __APP_STACK_BOTTOM + STACK_SIZE;
+        __APP_STACK_TOP = ((. + 15) & ( ~ 15 )) ;
     }
     __SOC_MEM_SIZE  = DEFINED(__SOC_MEM_SIZE) ? __SOC_MEM_SIZE : 8192 ;
-    __APP_STACK_TOP = ((. + 15) & ( ~ 15 )) ;
     /* TODO: add assert for available memory */
     ASSERT(__APP_STACK_TOP <= __SOC_MEM_SIZE, "not enough memory")
 }
