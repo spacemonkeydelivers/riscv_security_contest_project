@@ -149,6 +149,9 @@ class RiscVSoc:
     def get_soc_ram_size(self):
         return self._soc.ramSize() * 4
 
+    def enable_vcd_trace(self):
+        self._soc.enableVcdTrace()
+
     def get_ticks_to_run(self):
         return self._ticks_to_run
 

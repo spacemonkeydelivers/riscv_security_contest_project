@@ -33,6 +33,7 @@ BOOST_PYTHON_MODULE(libbench)
         .def("toggleCpuReset", &RV_SOC::toggleCpuReset)
         .def("writeWordExt", &RV_SOC::writeWordExt)
         .def("readWordExt", &RV_SOC::readWordExt)
+        .def("enableVcdTrace", &RV_SOC::enableVcdTrace)
         .def("wordSize", &RV_SOC::getWordSize);
 }
 

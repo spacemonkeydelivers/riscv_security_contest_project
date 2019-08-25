@@ -48,6 +48,8 @@ public:
     void writeWordExt(unsigned address, uint32_t val);
     uint32_t readWordExt(unsigned address);
 
+    void enableVcdTrace();
+
 private:
     Vsoc*          m_soc         {nullptr};
     uint64_t       m_tickCnt     {0};
@@ -58,6 +60,7 @@ private:
 
     uint64_t       UART_TX_ADDR  {0x3};
     uint64_t       UART_RX_ADDR  {0x2};
+    const char*    m_tracePath   {nullptr};
 
     enum busMaster
     {
