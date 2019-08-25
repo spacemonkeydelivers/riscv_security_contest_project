@@ -77,12 +77,19 @@ module alu(
     always @(*) begin
         // FIXME
         // TODO: add overflow semantics on MAX_NEG / -1
-        // TODO: handle zero division
-        div = src1_signed / src2_signed;
-        divu = I_dataS1 / I_dataS2;
+        if(I_dataS2[31:0] == { 32{1'b0} } ) begin
+            div = {32{1'b1}};
+            divu = {32{1'b1}};
 
-        rem = src1_signed % src2_signed;
-        remu = I_dataS1 % I_dataS2;
+            rem = I_dataS1;
+            remu = I_dataS1;
+        end else begin
+            div = src1_signed / src2_signed;
+            divu = I_dataS1 / I_dataS2;
+
+            rem = src1_signed % src2_signed;
+            remu = I_dataS1 % I_dataS2;
+        end
     end
 	
 	always @(*) begin
