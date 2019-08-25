@@ -7,6 +7,10 @@
 #include "init_ctx.h"
 #include "security.h"
 
+extern unsigned _ossec_panic();
+extern bool malloc_init(const struct init_ctx* ctx);
+extern void exit(int status);
+
 
 __attribute__((section(".__system.data")))
 uint32_t __EXC_service[RISCV_EXC_TOTAL] = {};
@@ -74,6 +78,10 @@ int __int_serve(struct s_esf_frame* frame, int n) {
     if (h) {
         h(n, frame);
     }
+    // Secure Monitore Panic is fatal
+    if (n == RISCV_INT_SM_PANIC) {
+        _ossec_panic();
+    }
     return 0;
 }
 __attribute__((section(".__system.os")))
@@ -113,18 +121,15 @@ int _os_is_serving_isr () {
     return result == 0;
 }
 
-extern bool malloc_init(const struct init_ctx* ctx);
-extern void exit(int status);
-
 __attribute__((section(".__system.init")))
 void __soc_init(const struct init_ctx* ctx)
 {
     if (!_ossec_init(ctx)) {
-        printf("PANIC: could not initialize security subsystem");
+        printf("LIBC: <PANIC> could not initialize security subsystem");
         exit(253);
     }
     if (!malloc_init(ctx)) {
-        printf("PANIC: could not initialize memory subsystem");
+        printf("LIBC: <PANIC> could not initialize memory subsystem");
         exit(254);
     }
 }
