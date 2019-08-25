@@ -133,6 +133,7 @@ def run(libbench):
 
   soc.setDebug(False)
   soc.load_data_to_ram("test.v", external = False)
+  soc.enable_vcd_trace()
 
   if driver == None:
     print "could not detect custom driver, using standard procedure"
