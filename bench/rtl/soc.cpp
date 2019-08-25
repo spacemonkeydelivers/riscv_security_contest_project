@@ -25,13 +25,7 @@ RV_SOC::RV_SOC(const char* trace)
 {
     m_soc = new Vsoc;
     assert(!m_trace);
-    if (trace)
-    {
-        Verilated::traceEverOn(true);
-        m_trace = new VerilatedVcdC;
-        m_soc->trace(m_trace, 99);
-        m_trace->open(trace);
-    }
+    m_tracePath = trace;
     m_ramSize = sizeof(m_soc->soc->ram0->ram0->mem) / wordSize;
     m_regFileSize = sizeof(m_soc->soc->cpu0->reg_inst->regfile) / wordSize;
     clearRam();
@@ -47,6 +41,17 @@ RV_SOC::~RV_SOC()
     }
     assert(m_soc);
     delete m_soc;
+}
+    
+void RV_SOC::enableVcdTrace()
+{
+    if (m_tracePath)
+    {
+        Verilated::traceEverOn(true);
+        m_trace = new VerilatedVcdC;
+        m_soc->trace(m_trace, 99);
+        m_trace->open(m_tracePath);
+    }
 }
 
 void RV_SOC::tick(unsigned num)

@@ -56,6 +56,12 @@ class Debugger:
             if '+ticks_to_run' in arg:
                 tick_num = int(arg.split('=')[1])
                 self._soc.set_ticks_to_run(tick_num)
+                break
+
+        for arg in DBG:
+            if '+vcd_trace' in arg:
+                soc.enable_vcd_trace()
+                break
 
     def add_command(self, command):
         handler = command(self._bench, self._soc, self)
