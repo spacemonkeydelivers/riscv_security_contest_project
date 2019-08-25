@@ -79,7 +79,7 @@ void* malloc(size_t size) {
     // if we serve interrupts. The expectation is that such situations can
     // happen iff malloc is called from a signal
     if (_os_is_serving_isr()) {
-        printf("LIBC: WARNING malloc should not be called from a signal!\n");
+        printf("LIBC: <WARNING> malloc should not be called from a signal!\n");
         return 0; // do not allow allocations during ISR
     }
     size = aligntonext(size, 4);

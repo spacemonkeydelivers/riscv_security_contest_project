@@ -44,6 +44,8 @@ test_add(c_libc_printf5      c/libc/printf5)
 test_add(c_libc_printf_int   c/libc/printf_int)
 test_add(c_libc_malloc       c/libc/malloc)
 
+test_add(c_Slibc_secure_malloc c/libc_sec/sec_malloc)
+
 test_add(c_isr_route_timer_base   c/libc/isr_route_timer_base NIGHTLY)
 test_add(c_isr_route_ialign_base  c/libc/isr_route_ialign_base)
 
