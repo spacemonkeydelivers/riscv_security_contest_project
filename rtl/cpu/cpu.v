@@ -49,7 +49,7 @@ module cpu
 
     // ALU instance
     reg alu_en = 0;
-    reg[3:0] alu_op = 0;
+    reg[4:0] alu_op = 0;
     wire[31:0] alu_dataout;
     reg[31:0] alu_dataS1, alu_dataS2;
     wire alu_busy, alu_lt, alu_ltu, alu_eq;
@@ -459,11 +459,31 @@ module cpu
                                     default:        alu_op <= `ALUOP_SLTU;
                                 endcase
                             end
-                            // TODO: DIV
-                            `FUNC_XOR:      alu_op <= `ALUOP_XOR;
-                            `FUNC_SRL_SRA:  alu_op <= dec_funct7[5] ? `ALUOP_SRA : `ALUOP_SRL;
-                            `FUNC_OR:       alu_op <= `ALUOP_OR;
-                            `FUNC_AND:      alu_op <= `ALUOP_AND;
+                            `FUNC_XOR:      begin
+                                case(dec_funct7)
+                                    `FUNC7_MUL_DIV: alu_op <= `ALUOP_DIV;
+                                    default:        alu_op <= `ALUOP_XOR;
+                                endcase
+                            end
+                            `FUNC_SRL_SRA:  begin
+                                case(dec_funct7)
+                                    7'b0100000:     alu_op <= `ALUOP_SRA;
+                                    `FUNC7_MUL_DIV: alu_op <= `ALUOP_DIVU;
+                                    default:        alu_op <= `ALUOP_SRL;
+                                endcase
+                            end
+                            `FUNC_OR:       begin
+                                case(dec_funct7)
+                                    `FUNC7_MUL_DIV: alu_op <= `ALUOP_REM;
+                                    default:        alu_op <= `ALUOP_OR;
+                                endcase
+                            end
+                            `FUNC_AND:      begin
+                                case(dec_funct7)
+                                    `FUNC7_MUL_DIV: alu_op <= `ALUOP_REMU;
+                                    default:        alu_op <= `ALUOP_AND;
+                                endcase
+                            end
                             default:        alu_op <= `ALUOP_ADD;
                         endcase
                         // do register writeback in FETCH

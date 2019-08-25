@@ -6,7 +6,7 @@ module alu(
 	input I_reset,
 	input[31:0] I_dataS1,
 	input[31:0] I_dataS2,
-	input [3:0] I_aluop, // Increase me!
+	input [4:0] I_aluop,
 	output O_busy,
 	output[31:0] O_data,
 	output reg O_lt,
@@ -30,6 +30,16 @@ module alu(
     reg[63:0] tmp_src1;
     reg[63:0] tmp_src2;
     reg[63:0] tmp_src2u;
+
+    // div
+    reg[31:0] div;
+    reg[31:0] divu;
+    wire signed[31:0] src1_signed;
+    wire signed[31:0] src2_signed;
+    assign src1_signed = I_dataS1;
+    assign src2_signed = I_dataS2;
+    reg[31:0] rem;
+    reg[31:0] remu;
    
 //`define SINGLE_CYCLE_SHIFTER
 `ifdef SINGLE_CYCLE_SHIFTER
@@ -62,7 +72,17 @@ module alu(
         mulss = tmp_src1 * tmp_src2;
         muluu = I_dataS1 * I_dataS2;
         mulsu = tmp_src1 * tmp_src2u;
+    end
 
+    always @(*) begin
+        // FIXME
+        // TODO: add overflow semantics on MAX_NEG / -1
+        // TODO: handle zero division
+        div = src1_signed / src2_signed;
+        divu = I_dataS1 / I_dataS2;
+
+        rem = src1_signed % src2_signed;
+        remu = I_dataS1 % I_dataS2;
     end
 	
 	always @(*) begin
@@ -125,6 +145,11 @@ module alu(
                 `ALUOP_MULH: result <= mulss[63:32];
                 `ALUOP_MULHSU: result <= mulsu[63:32];
                 `ALUOP_MULHU: result <= muluu[63:32];
+                // single-cycle division ;)
+                `ALUOP_DIV: result <= div;
+                `ALUOP_DIVU: result <= divu;
+                `ALUOP_REM: result <= rem;
+                `ALUOP_REMU: result <= remu;
 			endcase
 
 			O_lt <= lt;
