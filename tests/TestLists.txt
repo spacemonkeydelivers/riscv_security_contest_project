@@ -27,6 +27,11 @@ test_add(asm_tags_mismatch_lw   asm/tags/mismatch_lw.s)
 test_add(asm_tags_match_s_l     asm/tags/match_s_l.s)
 test_add(asm_tags_disabled_stlt asm/tags/disabled_stlt.s)
 
+test_add(asm_mult               asm/mext/mult.s)
+test_add(asm_mulh               asm/mext/mulh.s)
+test_add(asm_mulhsu             asm/mext/mulhsu.s)
+test_add(asm_mulhu              asm/mext/mulhu.s)
+
 test_add(asm_csrr_vendorid      asm/csrr_vendor.s)
 test_add(asm_csrw_vendorid      asm/csrw_vendor.s)
 test_add(asm_csre_missing_csr   asm/csrr_missing.s)
