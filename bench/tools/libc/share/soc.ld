@@ -30,11 +30,18 @@ SECTIONS
     .bss : {
         __bss_start = .;
         *(.bss)
+        *(.sbss)
         __bss_end = .;
 
     }
-    __heap_start = ALIGN(16) ;
-    __heap_end = __heap_start + HEAP_SIZE ;
+
+    .heap (NOLOAD) : {
+        . = ALIGN(16) ;
+        __heap_start = . ;
+        . =  . + HEAP_SIZE ;
+        __heap_end = . ;
+    }
+
 
     /* Stack code mapping */
     .application_stack __heap_end : {
