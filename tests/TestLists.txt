@@ -36,6 +36,7 @@ test_add(asm_mext_div           asm/mext/div.s)
 test_add(asm_mext_divu          asm/mext/divu.s)
 test_add(asm_mext_rem           asm/mext/rem.s)
 test_add(asm_mext_remu          asm/mext/remu.s)
+test_add(asm_mext_zero          asm/mext/zerodiv.s)
 
 test_add(asm_csrr_vendorid      asm/csrr_vendor.s)
 test_add(asm_csrw_vendorid      asm/csrw_vendor.s)

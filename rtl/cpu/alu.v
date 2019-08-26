@@ -32,13 +32,13 @@ module alu(
     reg[63:0] tmp_src2u;
 
     // div
-    reg[31:0] div;
+    reg[32:0] div;
     reg[31:0] divu;
-    wire signed[31:0] src1_signed;
-    wire signed[31:0] src2_signed;
+    wire signed[32:0] src1_signed;
+    wire signed[32:0] src2_signed;
     assign src1_signed = I_dataS1;
     assign src2_signed = I_dataS2;
-    reg[31:0] rem;
+    reg[32:0] rem;
     reg[31:0] remu;
    
 //`define SINGLE_CYCLE_SHIFTER
@@ -64,7 +64,6 @@ module alu(
     end
 
     always @(*) begin
-        // FIXME
         tmp_src1 = { {32{I_dataS1[31]}}, I_dataS1[31:0]};
         tmp_src2 = { {32{I_dataS2[31]}}, I_dataS2[31:0]};
         tmp_src2u = { {32{1'b0}}, I_dataS2[31:0]};
@@ -75,20 +74,23 @@ module alu(
     end
 
     always @(*) begin
-        // FIXME
-        // TODO: add overflow semantics on MAX_NEG / -1
-        if(I_dataS2[31:0] == { 32{1'b0} } ) begin
+        if(I_dataS2 == { 32{1'b0} } ) begin
             div = {32{1'b1}};
             divu = {32{1'b1}};
 
             rem = I_dataS1;
             remu = I_dataS1;
         end else begin
-            div = src1_signed / src2_signed;
             divu = I_dataS1 / I_dataS2;
-
-            rem = src1_signed % src2_signed;
             remu = I_dataS1 % I_dataS2;
+            
+            if ((I_dataS2 == { {1'b1}, {31{1'b0}} }) && (I_dataS1 == {32{1'b1}})) begin
+                div = I_dataS1;
+                rem = {32{1'b0}};
+            end else begin
+                div = {src1_signed[31], src1_signed} / {src2_signed[31], src2_signed};
+                rem = {src1_signed[31], src1_signed} % {src2_signed[31], src2_signed};
+            end
         end
     end
 	
@@ -146,7 +148,6 @@ module alu(
 				`ALUOP_SRA: result <= sra;
 				`ALUOP_SRL: result <= srl;
 				`endif
-                // FIXME
                 // single-cycle multiplication :)
                 `ALUOP_MUL: result <= mulss[31:0];
                 `ALUOP_MULH: result <= mulss[63:32];
