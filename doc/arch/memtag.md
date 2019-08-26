@@ -72,8 +72,8 @@ granule address, loading register would contain the desired tag value in lower
 
 - **st** operation:
 ```
-mnemonic: lt
-format: lt src, (offset)[base]
+mnemonic: st
+format: st src, (offset)[base]
 ```
 Used to store a tag for a particular granule into tag memory. Semantically is
 similar to store instructions. The address of the st should correspond to the
