@@ -14,7 +14,7 @@ __isr_wrapper:
 
     # align stack pointer
     mv t1, sp
-    addi t1, t1, 16
+    addi t1, t1, -16
     li t2, 0xf
     not t2, t2
     and t1, t1, t2
