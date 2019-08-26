@@ -2,7 +2,7 @@ include <%= ENV['TOOLS_DISTRIB'] %>/share/testsMakefile.include
 
 CC         = $(RISCV_CC)
 OBJCOPY    = $(RISCV_OBJCOPY)
-CFLAGS     = $(RISCV_CFLAGS_COMMON) -I$(RISCV_COMPLIANCE_INCLUDES) -march=rv32i  -mabi=ilp32
+CFLAGS     = $(RISCV_CFLAGS_COMMON) -I$(RISCV_COMPLIANCE_INCLUDES) -march=rv32im  -mabi=ilp32
 # uncomment the line below if you wan to disable IO facilities of compliance tests
 # CFLAGS     += -DDISABLE_COMPLIANCE_IO
 
