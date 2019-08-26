@@ -36,7 +36,7 @@ VA (32-bit) looks as follows:
 - LA:   logical address (aka virtual on systems with virtual memory).
 ```
 The described scheme also implies that when memory tagging extension is
-activated our hart can address up to 32 MB of memory (more some PASS bits are
+activated our hart can address up to 32 MB of memory (more if PASS bits are
 used as an extension the LA).
 
 ## ISA changes / HW features 
