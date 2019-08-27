@@ -34,10 +34,6 @@ module alu(
     // div
     reg[32:0] div;
     reg[31:0] divu;
-    wire signed[32:0] src1_signed;
-    wire signed[32:0] src2_signed;
-    assign src1_signed = I_dataS1;
-    assign src2_signed = I_dataS2;
     reg[32:0] rem;
     reg[31:0] remu;
    
@@ -84,13 +80,11 @@ module alu(
             divu = I_dataS1 / I_dataS2;
             remu = I_dataS1 % I_dataS2;
             
-            if ((I_dataS2 == { {1'b1}, {31{1'b0}} }) && (I_dataS1 == {32{1'b1}})) begin
-                div = I_dataS1;
-                rem = {32{1'b0}};
-            end else begin
-                div = {src1_signed[31], src1_signed} / {src2_signed[31], src2_signed};
-                rem = {src1_signed[31], src1_signed} % {src2_signed[31], src2_signed};
-            end
+            div = $signed({I_dataS1[31], I_dataS1}) / $signed({I_dataS2[31], I_dataS2});
+            rem = $signed({I_dataS1[31], I_dataS1}) % $signed({I_dataS2[31], I_dataS2});
+            /*if (rem[32]) begin
+                rem = {2'b0, 31'b1};
+            end*/
         end
     end
 	
