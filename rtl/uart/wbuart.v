@@ -334,7 +334,7 @@ module	wbuart(i_clk, i_rst,
 		else
 			tx_uart_reset <= 1'b0;
 
-	txuartlite #(INITIAL_SETUP[23:0]) tx(i_clk, (tx_empty_n), tx_data,
+	txuartlite #(.CLOCKS_PER_BAUD(INITIAL_SETUP[23:0])) tx(i_clk, (tx_empty_n), tx_data,
 			o_uart_tx, tx_busy);
 
 	// Now that we are done with the chain, pick some wires for the user
