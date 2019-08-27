@@ -284,26 +284,31 @@ endif # UART_3_NRF_UARTE
 
 
 config NRFX_TIMER0
+	bool
 	default y
 	depends on UART_0_NRF_HW_ASYNC_TIMER = 0 || UART_1_NRF_HW_ASYNC_TIMER = 0 || \
 		   UART_3_NRF_HW_ASYNC_TIMER = 0 || UART_2_NRF_HW_ASYNC_TIMER = 0
 
 config NRFX_TIMER1
+	bool
 	default y
 	depends on UART_0_NRF_HW_ASYNC_TIMER = 1 || UART_1_NRF_HW_ASYNC_TIMER = 1 || \
 		   UART_3_NRF_HW_ASYNC_TIMER = 1 || UART_2_NRF_HW_ASYNC_TIMER = 1
 
 config NRFX_TIMER2
+	bool
 	default y
 	depends on UART_0_NRF_HW_ASYNC_TIMER = 2 || UART_1_NRF_HW_ASYNC_TIMER = 2 || \
 		   UART_3_NRF_HW_ASYNC_TIMER = 2 || UART_2_NRF_HW_ASYNC_TIMER = 2
 
 config NRFX_TIMER3
+	bool
 	default y
 	depends on UART_0_NRF_HW_ASYNC_TIMER = 3 || UART_1_NRF_HW_ASYNC_TIMER = 3 || \
 		   UART_3_NRF_HW_ASYNC_TIMER = 3 || UART_2_NRF_HW_ASYNC_TIMER = 3
 
 config NRFX_TIMER4
+	bool
 	default y
 	depends on UART_0_NRF_HW_ASYNC_TIMER = 4 || UART_1_NRF_HW_ASYNC_TIMER = 4 || \
 		   UART_3_NRF_HW_ASYNC_TIMER = 4 || UART_2_NRF_HW_ASYNC_TIMER = 4
@@ -312,13 +317,16 @@ config NRFX_TIMER4
 if UART_0_NRF_HW_ASYNC || UART_1_NRF_HW_ASYNC || UART_2_NRF_HW_ASYNC || UART_3_NRF_HW_ASYNC
 
 config NRFX_TIMER
+	bool
 	default y
 
 config NRFX_PPI
+	bool
 	depends on HAS_HW_NRF_PPI
 	default y
 
 config NRFX_DPPI
+	bool
 	depends on HAS_HW_NRF_DPPIC
 	default y
 
