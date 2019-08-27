@@ -94,7 +94,7 @@ module wb_mux
 
    assign wb_cpu_ack_o = (access_timer) ? wb_timer_ack_i :
                          (access_ram)   ? wb_ram_ack_i :
-                         (access_uart)  ? wb_uart_ack_i : 0;
+                         (access_uart)  ? wb_uart_ack_i : 1'b0;
    
    assign wb_cpu_data_o = (access_timer) ? wb_timer_data_i :
                           (access_ram)   ? wb_ram_data_i   :
@@ -102,7 +102,7 @@ module wb_mux
 
    assign wb_ext_ack_o = (access_timer) ? wb_timer_ack_i :
                          (access_ram)   ? wb_ram_ack_i :
-                         (access_uart)  ? wb_uart_ack_i : 0;
+                         (access_uart)  ? wb_uart_ack_i : 1'b0;
    
    assign wb_ext_data_o = (access_timer) ? wb_timer_data_i :
                           (access_ram)   ? wb_ram_data_i   :

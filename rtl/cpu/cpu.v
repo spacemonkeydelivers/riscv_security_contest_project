@@ -1,5 +1,5 @@
 `include "cpu/alu.v"
-`include "cpu/wb_bus.v"
+`include "cpu/wb_cpu_bus.v"
 `include "cpu/decoder.v"
 `include "cpu/registers.v"
 
@@ -139,8 +139,8 @@ module cpu
     );
 
     // Muxer for first operand of ALU
-    localparam MUX_ALUDAT1_REGVAL1 = 0;
-    localparam MUX_ALUDAT1_PC      = 1;
+    localparam MUX_ALUDAT1_REGVAL1 = 1'd0;
+    localparam MUX_ALUDAT1_PC      = 1'd1;
     reg mux_alu_s1_sel = MUX_ALUDAT1_REGVAL1;
     always @(*) begin
         case(mux_alu_s1_sel)
@@ -150,9 +150,9 @@ module cpu
     end
 
     // Muxer for second operand of ALU
-    localparam MUX_ALUDAT2_REGVAL2 = 0;
-    localparam MUX_ALUDAT2_IMM     = 1;
-    localparam MUX_ALUDAT2_INSTLEN = 2;
+    localparam MUX_ALUDAT2_REGVAL2 = 2'd0;
+    localparam MUX_ALUDAT2_IMM     = 2'd1;
+    localparam MUX_ALUDAT2_INSTLEN = 2'd2;
     reg[1:0] mux_alu_s2_sel = MUX_ALUDAT2_REGVAL2;
     always @(*) begin
         case(mux_alu_s2_sel)
@@ -163,8 +163,8 @@ module cpu
     end
 
     // Muxer for bus address
-    localparam MUX_BUSADDR_ALU = 0;
-    localparam MUX_BUSADDR_PC  = 1;
+    localparam MUX_BUSADDR_ALU = 1'd0;
+    localparam MUX_BUSADDR_PC  = 1'd1;
     reg mux_bus_addr_sel = MUX_BUSADDR_ALU;
     always @(*) begin
         case(mux_bus_addr_sel)
@@ -174,8 +174,8 @@ module cpu
     end
 
     // Muxer for MSRs
-    wire[11:0] mux_msr_sel;
-    reg[31:0] msr_data;
+    wire [11:0] mux_msr_sel;
+    wire [31:0] msr_data;
     assign mux_msr_sel = dec_imm[11:0];
 
     reg csr_exists;
@@ -201,27 +201,24 @@ module cpu
     localparam MSR_MIP        = 12'h344;
     localparam MSR_MTAGS      = 12'h345;
 
-    enum {
-       M_VENDOR_ID = 0,
-       M_ARCH_ID   = 1,
-       M_IMP_ID    = 2,
-       M_HART_ID   = 3,
-       M_STATUS    = 4,
-       M_ISA       = 5,
-       M_EDEKEG    = 6,
-       M_IDELEG    = 7,
-       M_IE        = 8,
-       M_TVEC      = 9,
-       M_COUNTEREN = 10,
-       M_SCRATCH   = 11,
-       M_EPC       = 12,
-       M_CAUSE     = 13,
-       M_TVAL      = 14,
-       M_IP        = 15,
-       M_TAGS      = 16,
-       M_LAST
-    } 
-    csr_names;
+    localparam [4:0] M_VENDOR_ID = 0,
+                     M_ARCH_ID   = 1,
+                     M_IMP_ID    = 2,
+                     M_HART_ID   = 3,
+                     M_STATUS    = 4,
+                     M_ISA       = 5,
+                     M_EDEKEG    = 6,
+                     M_IDELEG    = 7,
+                     M_IE        = 8,
+                     M_TVEC      = 9,
+                     M_COUNTEREN = 10,
+                     M_SCRATCH   = 11,
+                     M_EPC       = 12,
+                     M_CAUSE     = 13,
+                     M_TVAL      = 14,
+                     M_IP        = 15,
+                     M_TAGS      = 16,
+                     M_LAST      = 17;
     
     reg [31:0] csr [0:16];
     reg [4:0]  csr_index;
@@ -229,13 +226,9 @@ module cpu
     always @(*) begin
        case (mux_msr_sel)
           MSR_MVENDORID:  csr_index = M_VENDOR_ID;
-          MSR_MARCHID:    csr_index = M_ARCH_ID;
-          MSR_MIMPID:     csr_index = M_IMP_ID;
           MSR_MHARTID:    csr_index = M_HART_ID;
           MSR_MSTATUS:    csr_index = M_STATUS;
           MSR_MISA:       csr_index = M_ISA;
-          MSR_MEDELEG:    csr_index = M_EDEKEG;
-          MSR_MIDELEG:    csr_index = M_IDELEG;
           MSR_MIE:        csr_index = M_IE;
           MSR_MTVEC:      csr_index = M_TVEC;
           MSR_MCOUNTEREN: csr_index = M_COUNTEREN;
@@ -249,15 +242,11 @@ module cpu
        endcase
     end
 
-    always @(*) begin
-        msr_data = csr[csr_index];
-    end
+    assign msr_data = csr[csr_index];
 
     always @(*) begin
         case(mux_msr_sel)
             MSR_MVENDORID: csr_exists = 1;
-            MSR_MARCHID:   csr_exists = 1;
-            MSR_MIMPID:    csr_exists = 1;
             MSR_MHARTID:   csr_exists = 1;
             
             MSR_MSTATUS:   csr_exists = 1;
@@ -275,10 +264,10 @@ module cpu
     assign csr_ro = (mux_msr_sel[11:10] == 2'b11) && ((`FUNC_CSRRW == dec_funct3) || (`FUNC_CSRRWI) == dec_funct3);
 
     // Muxer for register data input
-    localparam MUX_REGINPUT_ALU = 0;
-    localparam MUX_REGINPUT_BUS = 1;
-    localparam MUX_REGINPUT_IMM = 2;
-    localparam MUX_REGINPUT_MSR = 3;
+    localparam MUX_REGINPUT_ALU = 2'd0;
+    localparam MUX_REGINPUT_BUS = 2'd1;
+    localparam MUX_REGINPUT_IMM = 2'd2;
+    localparam MUX_REGINPUT_MSR = 2'd3;
     reg[1:0] mux_reg_input_sel = MUX_REGINPUT_ALU;
     always @(*) begin
         case(mux_reg_input_sel)
@@ -300,6 +289,7 @@ module cpu
     localparam STATE_SYSTEM         = 4'd9;
     localparam STATE_CSR1           = 4'd10;
     localparam STATE_CSR2           = 4'd11;
+    localparam STATE_DEAD           = 4'd12;
 
 
     reg[3:0] state, prevstate = STATE_RESET, nextstate = STATE_RESET;
@@ -314,7 +304,9 @@ module cpu
 
     // only transition to new state if not busy    
     always @(negedge clk) begin
-        state = busy ? prevstate : nextstate;
+        /* verilator lint_off BLKSEQ */        
+        state = busy ? state : nextstate; 
+        /* verilator lint_off BLKSEQ */        
     end
 
     wire addr_misaligned = | (pc[1:0] & 2'b11);
@@ -353,6 +345,12 @@ module cpu
         // remember currently active state to return to if busy
         prevstate <= state;
 
+
+        csr[M_STATUS] <= csr[M_STATUS];
+        csr[M_TAGS] <= csr[M_TAGS];
+        csr[M_TVEC] <= csr[M_TVEC];
+        csr[M_VENDOR_ID] <= csr[M_VENDOR_ID];
+
         case(state)
             STATE_RESET: begin
                 pcnext <= VECTOR_RESET;
@@ -366,11 +364,11 @@ module cpu
                 writeback_from_alu <= 0;
                 writeback_from_bus <= 0;
                 bus_dataout_stored <= 0;
-                check_tag_on_fetch = 0;
+                check_tag_on_fetch <= 0;
             end
 
             STATE_FETCH: begin
-                check_tag_on_fetch = csr[M_TAGS][2];
+                check_tag_on_fetch <= csr[M_TAGS][2];
                 // write result of previous instruction to registers if requested
                 mux_reg_input_sel <= writeback_from_alu ? MUX_REGINPUT_ALU : MUX_REGINPUT_BUS;
                 reg_we <= writeback_from_alu | writeback_from_bus;
@@ -579,27 +577,27 @@ module cpu
                 case(dec_funct3)
                     `FUNC_LB: begin
                         bus_op <= `BUSOP_READB;
-                        check_tag_on_fetch = csr[M_TAGS][0];
+                        check_tag_on_fetch <= csr[M_TAGS][0];
                      end
                     `FUNC_LH: begin
                         bus_op <= `BUSOP_READH;
-                        check_tag_on_fetch = csr[M_TAGS][0];
+                        check_tag_on_fetch <= csr[M_TAGS][0];
                      end
                     `FUNC_LW: begin
                         bus_op <= `BUSOP_READW;
-                        check_tag_on_fetch = csr[M_TAGS][0];
+                        check_tag_on_fetch <= csr[M_TAGS][0];
                      end
                     `FUNC_LBU: begin
                         bus_op <= `BUSOP_READBU;
-                        check_tag_on_fetch = csr[M_TAGS][0];
+                        check_tag_on_fetch <= csr[M_TAGS][0];
                      end
                     `FUNC_LT: begin
                         bus_op <= `BUSOP_READT;
-                        check_tag_on_fetch = 0;
+                        check_tag_on_fetch <= 1'b0;
                      end
                     default: begin
                         bus_op <= `BUSOP_READHU; // FUNC_LHU
-                        check_tag_on_fetch = csr[M_TAGS][0];
+                        check_tag_on_fetch <= csr[M_TAGS][0];
                      end
                 endcase
                 //nextstate <= STATE_REGWRITEBUS;
@@ -614,19 +612,19 @@ module cpu
                 case(dec_funct3)
                     `FUNC_SB: begin
                         bus_op <= `BUSOP_WRITEB;
-                        check_tag_on_fetch = csr[M_TAGS][0];
+                        check_tag_on_fetch <= csr[M_TAGS][0];
                      end
                     `FUNC_SH: begin
                         bus_op <= `BUSOP_WRITEH;
-                        check_tag_on_fetch = csr[M_TAGS][0];
+                        check_tag_on_fetch <= csr[M_TAGS][0];
                      end
                     `FUNC_ST: begin
                         bus_op <= `BUSOP_WRITET;
-                        check_tag_on_fetch = 0;
+                        check_tag_on_fetch <= 1'b0;
                      end
                     default: begin
                         bus_op <= `BUSOP_WRITEW; // FUNC_SW
-                        check_tag_on_fetch = csr[M_TAGS][0];
+                        check_tag_on_fetch <= csr[M_TAGS][0];
                      end
                 endcase
                 // advance to next instruction
@@ -635,7 +633,7 @@ module cpu
 
             STATE_BRANCH2: begin
                 // use idle ALU to compute PC+immediate - in case we branch
-                alu_en <= 1;
+                alu_en <= 1'b1;
                 alu_op <= `ALUOP_ADD;
                 mux_alu_s1_sel <= MUX_ALUDAT1_PC;
                 mux_alu_s2_sel <= MUX_ALUDAT2_IMM;
@@ -730,6 +728,12 @@ module cpu
                 end else begin
                    nextstate <= STATE_FETCH;
                 end
+            end
+            STATE_DEAD: begin
+               nextstate <= STATE_DEAD;
+            end
+            default: begin
+               nextstate <= STATE_DEAD;
             end
             
         endcase
