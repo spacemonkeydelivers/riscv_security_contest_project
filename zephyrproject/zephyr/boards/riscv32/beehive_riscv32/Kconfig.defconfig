@@ -1,0 +1,6 @@
+if BOARD_BEEHIVE
+
+config BOARD
+	default "behive4glory"
+
+endif

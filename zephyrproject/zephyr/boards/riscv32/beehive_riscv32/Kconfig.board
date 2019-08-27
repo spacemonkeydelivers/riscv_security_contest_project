@@ -1,0 +1,3 @@
+config BOARD_BEEHIVE
+	bool "bljad"
+	depends on SOC_BEEHIVE_RISCV32
