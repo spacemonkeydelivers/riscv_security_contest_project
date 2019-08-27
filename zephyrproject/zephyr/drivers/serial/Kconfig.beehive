@@ -1,0 +1,30 @@
+# Kconfig.fe310 - BeeHive Freedom UART configuration option
+#
+# Copyright (c) 2019 Bee King <BeeKingTheAmazing@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+menuconfig UART_BEEHIVE
+	bool "BeeHive serial driver"
+	depends on SOC_BEEHIVE_RISCV32
+	select SERIAL_HAS_DRIVER
+	help
+	  This option enables the BeeHive Freedom serial driver.
+
+# ---------- Port 0 ----------
+
+menuconfig UART_BEEHIVE_PORT_0
+	bool "Enable BEEHIVE Port 0"
+	depends on UART_BEEHIVE
+	help
+	  This tells the driver to configure the UART port at boot, depending on
+	  the additional configure options below.
+
+config UART_BEEHIVE_PORT_0_NAME
+    string "Port 0 Device Name"
+    default "uart0"
+    depends on UART_BEEHIVE_PORT_0
+    help
+      This is the device name for UART, and is included in the device
+      struct.

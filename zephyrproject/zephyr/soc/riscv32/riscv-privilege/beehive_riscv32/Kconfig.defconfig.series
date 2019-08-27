@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: Apache-2.0
+
+if SOC_SERIES_BEEHIVE_RISCV32
+
+config SOC_SERIES
+	string
+	default "beehive_riscv32"
+
+config SYS_CLOCK_HW_CYCLES_PER_SEC
+	int
+	default 32768
+
+config RISCV_SOC_INTERRUPT_INIT
+	bool
+	default y
+
+config RISCV_HAS_CPU_IDLE
+	bool
+	default y
+
+config RISCV_HAS_PLIC
+	bool
+	default n
+
+config NUM_IRQS
+	int
+	default 16
+
+config XIP
+	bool
+	default y
+
+config RISCV_ROM_BASE_ADDR
+	hex
+	default 0x0
+
+config RISCV_ROM_SIZE
+	hex
+	default 0x4000
+
+config RISCV_RAM_BASE_ADDR
+	hex
+	default	0x4000
+
+config RISCV_RAM_SIZE
+	hex
+	default 0x1800
+
+endif # SOC_SERIES_RISCV32_SIFIVE_FREEDOM
