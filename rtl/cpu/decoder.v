@@ -55,6 +55,7 @@ module decoder(
             `FUNC_BGE:  O_branchmask[3] = isbranch;
             `FUNC_BLTU: O_branchmask[4] = isbranch;
             `FUNC_BGEU: O_branchmask[5] = isbranch;
+            default:    O_branchmask    = 6'b0;
 		endcase
 
 	end

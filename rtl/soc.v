@@ -1,3 +1,14 @@
+`include "timer/wb_timer.v"
+`include "bus/wb_ext.v"
+`include "bus/wb_mux.v"
+`include "ram/wb_ram.v"
+`include "ram/generic_ram.v"
+`include "cpu/cpu.v"
+`include "uart/wbuart.v"
+`include "uart/rxuartlite.v"
+`include "uart/txuartlite.v"
+`include "uart/ufifo.v"
+
 module soc
 #(
    parameter FIRMWARE_FILE = "",
@@ -79,6 +90,8 @@ module soc
    wire wb_ram_cyc;
    wire wb_ram_ack;
    wire [WB_DATA_WIDTH - 1:0] wb_ram_data_out;
+   wire check_tags;
+   wire clear_tags_mismatch;
 
    wb_timer
    #(
@@ -186,7 +199,7 @@ module soc
       .wb_uart_data_i (wb_uart_data_out)
    );
 
-   wb_ram_new
+   wb_ram
    #(
       .WB_DATA_WIDTH (WB_DATA_WIDTH),
       .WB_ADDR_WIDTH (WB_ADDR_WIDTH),
@@ -215,8 +228,6 @@ module soc
    reg cpu_en = 0;
    reg [2:0] cpu_op = 0;
    wire cpu_busy;
-   wire check_tags;
-   wire clear_tags_mismatch;
 
    cpu
    #(
@@ -262,7 +273,7 @@ module soc
       .i_wb_cyc(wb_uart_cyc),
       .i_wb_stb(wb_uart_stb),
       .i_wb_we(wb_uart_we),
-      .i_wb_addr(wb_uart_addr),
+      .i_wb_addr(wb_uart_addr[1:0]), //zipcpu's wbuart has only 2 bit for address
       .i_wb_data(wb_uart_data_in),
       .o_wb_ack(wb_uart_ack),
       .o_wb_stall(uart_stall),

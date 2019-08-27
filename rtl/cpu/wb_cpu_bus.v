@@ -102,6 +102,9 @@ module wb_cpu_bus(
          4'b0101: begin
             buffer <= {28'b0, DAT_I[3:0]};
          end
+         default: begin
+            buffer <= 32'hDEAD;
+         end
       endcase
    end
 
