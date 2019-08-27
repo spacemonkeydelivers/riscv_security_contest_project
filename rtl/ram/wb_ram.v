@@ -1,35 +1,4 @@
-module generic_ram
-   #(
-      parameter RAM_WORDS_SIZE = 256,
-      parameter RAM_MEM_FILE = "",
-      parameter RAM_WORDS_WIDTH = 32
-   )
-   (
-      input wire                                clk_i,
-      input wire                                we_i,
-      input wire [RAM_WORDS_WIDTH - 1:0]        data_i,
-      input wire [$clog2(RAM_WORDS_SIZE) - 1:0] w_addr_i,
-      input wire [$clog2(RAM_WORDS_SIZE) - 1:0] r_addr_i,
-      output reg [RAM_WORDS_WIDTH - 1:0]        data_o
-   );
-
-   reg [RAM_WORDS_WIDTH - 1:0] mem [0:RAM_WORDS_SIZE - 1] /* verilator public */;
-
-   always @(posedge clk_i) begin
-      if (we_i) begin
-         mem[w_addr_i] <= data_i;
-      end
-      data_o <= mem[r_addr_i];
-   end
-
-   generate
-   initial
-      if(|RAM_MEM_FILE) begin
-         $readmemh(RAM_MEM_FILE, mem);
-      end
-   endgenerate
-
-endmodule
+`include "helpers.vh"
 
 `define WB_SEL_BYTE 4'b0001
 `define WB_SEL_HALF 4'b0011
@@ -38,7 +7,7 @@ endmodule
 `define BYTE_SIZE_IN_BITS 8
 `define WORD_SIZE_IN_BYTES 4
 
-module wb_ram_new
+module wb_ram
    #(
       parameter WB_DATA_WIDTH      = 32,
       parameter WB_ADDR_WIDTH      = 32,
@@ -66,10 +35,10 @@ module wb_ram_new
    
    localparam WB_ADDR_SKIP_BITS = 2;
    localparam GRANULES_NUM = (WB_RAM_WORDS * `WORD_SIZE_IN_BYTES) / GRANULE_SIZE_BYTES;
-   localparam GRAMULES_ADDR_SKIP = $clog2(GRANULE_SIZE_BYTES);
-   localparam GRANULES_ADDR_WIDTH = $clog2(GRANULES_NUM);
+   localparam GRAMULES_ADDR_SKIP = log2(GRANULE_SIZE_BYTES);
+   localparam GRANULES_ADDR_WIDTH = log2(GRANULES_NUM);
 
-   wire [GRANULE_TAG_WIDTH - 1:0] current_tag = wb_addr_i[WB_ADDR_WIDTH - WB_ADDR_SKIP_BITS:WB_ADDR_WIDTH - WB_ADDR_SKIP_BITS - GRANULE_TAG_WIDTH];
+   wire [GRANULE_TAG_WIDTH - 1:0] current_tag = wb_addr_i[WB_ADDR_WIDTH - WB_ADDR_SKIP_BITS - 1:WB_ADDR_WIDTH - WB_ADDR_SKIP_BITS - GRANULE_TAG_WIDTH];
    wire [GRANULES_ADDR_WIDTH - 1:0] current_granule_addr = wb_addr_i[GRAMULES_ADDR_SKIP + GRANULES_ADDR_WIDTH - 1:GRAMULES_ADDR_SKIP];
 
    reg [WB_DATA_WIDTH - 1:0] wb_data_out;
@@ -87,14 +56,14 @@ module wb_ram_new
    wire done_in_one_tick = !(write_byte || write_half);
 
    reg [WB_DATA_WIDTH - 1:0] tag_data_in;
-   wire [WB_DATA_WIDTH - 1:0] tag_data_out;
+   wire [GRANULE_TAG_WIDTH - 1:0] tag_data;
    reg [GRANULES_ADDR_WIDTH - 1:0] tag_w_addr;
    reg [GRANULES_ADDR_WIDTH - 1:0] tag_r_addr;
    reg tag_we;
 
    generic_ram
    #(
-      .RAM_WORDS_SIZE (WB_RAM_WORDS),
+      .RAM_WORDS_SIZE (GRANULES_NUM),
       .RAM_WORDS_WIDTH (GRANULE_TAG_WIDTH),
       .RAM_MEM_FILE (WB_RAM_MEM_FILE)
    )
@@ -102,10 +71,10 @@ module wb_ram_new
    (
       .clk_i    (wb_clk_i),
       .we_i     (tag_we),
-      .data_i   (tag_data_in),
+      .data_i   (tag_data_in[GRANULE_TAG_WIDTH - 1:0]),
       .w_addr_i (tag_w_addr),
       .r_addr_i (tag_r_addr),
-      .data_o   (tag_data_out)
+      .data_o   (tag_data)
    );
    
    reg [WB_ADDR_WIDTH - 1:0] ram_data_in;
@@ -125,17 +94,17 @@ module wb_ram_new
       .clk_i    (wb_clk_i),
       .we_i     (ram_we),
       .data_i   (ram_data_in),
-      .w_addr_i (ram_w_addr[WB_ADDR_WIDTH - 1:2]),
-      .r_addr_i (ram_r_addr[WB_ADDR_WIDTH - 1:2]),
+      .w_addr_i (ram_w_addr[log2(WB_RAM_WORDS) - 1 + 2:2]),
+      .r_addr_i (ram_r_addr[log2(WB_RAM_WORDS) - 1 + 2:2]),
       .data_o   (ram_data_out)
    );
       
-   localparam [1:0] STATE_IDLE       = 3'd0,
-                    STATE_WRITE_WORD = 3'd1,
-                    STATE_STOP       = 3'd2;
+   localparam [1:0] STATE_IDLE       = 2'd0,
+                    STATE_WRITE_WORD = 2'd1,
+                    STATE_STOP       = 2'd2;
 
-   reg [2:0] state;
-   reg [2:0] next_state;
+   reg [1:0] state;
+   reg [1:0] next_state;
 
    reg ack;
    reg next_ack;
@@ -153,8 +122,8 @@ module wb_ram_new
       else begin
          state <= next_state;
          ack <= next_ack;
-         irq <= (clear_mismatch_i) ? 0 :
-                (tag_mismatch || irq) ? 1 : 0;
+         irq <= (clear_mismatch_i) ? 1'b0 :
+                (tag_mismatch || irq) ? 1'b1 : 1'b0;
       end
    end
    
@@ -172,7 +141,7 @@ module wb_ram_new
          `WB_SEL_BYTE: wb_data_out = {24'b0, final_byte};
          `WB_SEL_HALF: wb_data_out = {16'b0, final_half};
          `WB_SEL_WORD: wb_data_out = final_word;
-         `WB_SEL_TAG:  wb_data_out = {28'b0, tag_data_out};
+         `WB_SEL_TAG:  wb_data_out = {28'b0, tag_data};
          default:      wb_data_out = 32'h0;
       endcase
    end
@@ -198,6 +167,14 @@ module wb_ram_new
       next_state = STATE_IDLE;
       next_ack = 0;
       tag_mismatch = 0;
+      ram_r_addr = ram_r_addr;
+      ram_w_addr = ram_w_addr;
+      ram_data_in = ram_data_in;
+      tag_r_addr = tag_r_addr;
+      tag_w_addr = tag_w_addr;
+      tag_data_in = tag_data_in;
+      ram_we = 0;
+      tag_we = 0;
       case (state)
          STATE_IDLE: begin
             if (ram_accessed) begin
@@ -205,14 +182,14 @@ module wb_ram_new
                ram_w_addr = wb_addr_i;
                ram_data_in = data_to_write;
                next_state = (done_in_one_tick) ? STATE_STOP : STATE_WRITE_WORD;
-               next_ack = (done_in_one_tick) ? 1 : 0;
-               ram_we = (done_in_one_tick) ? wb_we_i : 0;
+               next_ack = (done_in_one_tick) ? 1'b1 : 1'b0;
+               ram_we = (done_in_one_tick) ? wb_we_i : 1'b0;
                tag_r_addr = current_granule_addr;
             end
             if (tag_accessed) begin
                tag_r_addr = current_granule_addr;
                tag_w_addr = current_granule_addr;
-               tag_data_in = wb_data_i[GRANULE_TAG_WIDTH - 1:0];
+               tag_data_in = wb_data_i;
                tag_we = wb_we_i;
                next_ack = 1;
                next_state = STATE_STOP;
@@ -225,7 +202,7 @@ module wb_ram_new
             next_ack = 1;
          end
          STATE_STOP: begin
-            tag_mismatch = (check_tags_i && ram_accessed) ? (current_tag != tag_data_out) : 0;
+            tag_mismatch = (check_tags_i && ram_accessed) ? (current_tag != tag_data) : 1'b0;
             ram_we = 0;
             tag_we = 0;
             next_state = STATE_IDLE;
