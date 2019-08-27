@@ -1,0 +1,40 @@
+# Kconfig - Clock controller driver configuration options
+
+#
+# Copyright (c) 2015 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+#
+# Clock controller drivers
+#
+menuconfig CLOCK_CONTROL
+	bool "Hardware clock controller support"
+	help
+	  Enable support for hardware clock controller. Such hardware can
+	  provide clock for other subsystem, and thus can be also used for
+	  power efficiency by controlling their clock. Note that this has
+	  nothing to do with RTC.
+
+if CLOCK_CONTROL
+
+module = CLOCK_CONTROL
+module-str = clock control
+source "subsys/logging/Kconfig.template.log_config"
+
+source "drivers/clock_control/Kconfig.nrf"
+
+source "drivers/clock_control/Kconfig.quark_se"
+
+source "drivers/clock_control/Kconfig.stm32"
+
+source "drivers/clock_control/Kconfig.beetle"
+
+source "drivers/clock_control/Kconfig.mcux_ccm"
+
+source "drivers/clock_control/Kconfig.mcux_sim"
+
+source "drivers/clock_control/Kconfig.rv32m1"
+
+endif # CLOCK_CONTROL

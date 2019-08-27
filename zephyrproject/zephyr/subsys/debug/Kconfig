@@ -1,0 +1,277 @@
+# Kconfig - debug configuration options
+
+#
+# Copyright (c) 2015 Wind River Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+menu "System Monitoring Options"
+
+config PERFORMANCE_METRICS
+	bool "Enable performance metrics [EXPERIMENTAL]"
+	help
+	  Enable Performance Metrics.
+
+config BOOT_TIME_MEASUREMENT
+	bool "Boot time measurements [EXPERIMENTAL]"
+	depends on PERFORMANCE_METRICS
+	help
+	  This option enables the recording of timestamps during system start
+	  up. The global variable __start_time_stamp records the time kernel begins
+	  executing, while __main_time_stamp records when main() begins executing,
+	  and __idle_time_stamp records when the CPU becomes idle. All values are
+	  recorded in terms of CPU clock cycles since system reset.
+
+config CPU_CLOCK_FREQ_MHZ
+	int "CPU Clock Frequency in MHz"
+	default 20
+	depends on BOOT_TIME_MEASUREMENT
+	help
+	  This option specifies the CPU Clock Frequency in MHz in order to
+	  convert Intel RDTSC timestamp to microseconds.
+
+config STATS
+	bool "Statistics support"
+	help
+	  Enable per-module event counters for troubleshooting, maintenance,
+	  and usage monitoring.  Statistics can be retrieved with the mcumgr
+	  management subsystem.
+
+config STATS_NAMES
+	bool "Statistic names"
+	depends on STATS
+	help
+	  Include a full name string for each statistic in the build.  If this
+	  setting is disabled, statistics are assigned generic names of the
+	  form "s0", "s1", etc.  Enabling this setting simplifies debugging,
+	  but results in a larger code size.
+endmenu
+
+menu "Debugging Options"
+
+config DEBUG
+	bool "Build kernel with debugging enabled"
+	help
+	  Build a kernel suitable for debugging.  Right now, this option
+	  only disables optimization, more debugging variants can be selected
+	  from here to allow more debugging.
+
+config TRACING
+	bool "Enabling Tracing"
+	help
+	  Enable system tracing. This requires a backend such as SEGGER
+	  Systemview to be enabled as well.
+config ASAN
+	bool "Build with address sanitizer"
+	depends on ARCH_POSIX
+	help
+	  Builds Zephyr with Address Sanitizer enabled.  This is currently
+	  only supported by the native_posix port, and requires a recent-ish
+	  compiler with the ``-fsanitize=address`` command line option, and
+	  the libasan library.
+
+config STACK_USAGE
+	bool "Generate stack usage information"
+	help
+	  Generate an extra file that specifies the maximum amount of stack used,
+	  on a per-function basis.
+
+config STACK_SENTINEL
+	bool "Enable stack sentinel"
+	select THREAD_STACK_INFO
+	depends on !USERSPACE
+	help
+	  Store a magic value at the lowest addresses of a thread's stack.
+	  Periodically check that this value is still present and kill the
+	  thread gracefully if it isn't. This is currently checked in four
+	  places:
+
+	  1) Upon any context switch for the outgoing thread
+	  2) Any hardware interrupt that doesn't context switch, the check is
+	     performed for the interrupted thread
+	  3) When a thread returns from its entry point
+	  4) When a thread calls k_yield() but doesn't context switch
+
+	  This feature doesn't prevent corruption and the system may be
+	  in an unusable state. However, given the bizarre behavior associated
+	  with stack overflows, knowledge that this is happening is very
+	  useful.
+
+	  This feature is intended for those systems which lack hardware support
+	  for stack overflow protection, or have insufficient system resources
+	  to use that hardware support.
+
+config PRINTK
+	bool "Send printk() to console"
+	default y
+	help
+	  This option directs printk() debugging output to the supported
+	  console device, rather than suppressing the generation
+	  of printk() output entirely. Output is sent immediately, without
+	  any mutual exclusion or buffering.
+
+config PRINTK_BUFFER_SIZE
+	int "printk() buffer size"
+	depends on PRINTK
+	depends on USERSPACE
+	default 32
+	help
+	  If userspace is enabled, printk() calls are buffered so that we do
+	  not have to make a system call for every character emitted. Specify
+	  the size of this buffer.
+
+config EARLY_CONSOLE
+	bool "Send stdout at the earliest stage possible"
+	help
+	  This option will enable stdout as early as possible, for debugging
+	  purpose. For instance, in case of STDOUT_CONSOLE being set it will
+	  initialize its driver earlier than normal, in order to get the stdout
+	  sent through the console at the earliest stage possible.
+
+config ASSERT
+	bool "Enable __ASSERT() macro"
+	default y if TEST
+	help
+	  This enables the __ASSERT() macro in the kernel code. If an assertion
+	  fails, the calling thread is put on an infinite tight loop. Since
+	  enabling this adds a significant footprint, it should only be enabled
+	  in a non-production system.
+
+config ASSERT_LEVEL
+	int "__ASSERT() level"
+	default 2
+	range 0 2
+	depends on ASSERT
+	help
+	  This option specifies the assertion level used by the __ASSERT()
+	  macro. It can be set to one of three possible values:
+
+	  Level 0: off
+	  Level 1: on + warning in every file that includes __assert.h
+	  Level 2: on + no warning
+
+config FORCE_NO_ASSERT
+	bool "Force-disable no assertions"
+	help
+	  This boolean option disables Zephyr assertion testing even
+	  in circumstances (sanitycheck) where it is enabled via
+	  CFLAGS and not Kconfig.  Added solely to be able to work
+	  around compiler bugs for specific tests.
+
+config OBJECT_TRACING
+	bool "Kernel object tracing"
+	help
+	  This option enable the feature for tracing kernel objects. This option
+	  is for debug purposes and increases the memory footprint of the kernel.
+
+config OVERRIDE_FRAME_POINTER_DEFAULT
+	bool "Override compiler defaults for -fomit-frame-pointer"
+	help
+	  Omitting the frame pointer prevents the compiler from putting the stack
+	  frame pointer into a register. Saves a few instructions in function
+	  prologues/epilogues and frees up a register for general-purpose use,
+	  which can provide good performance improvements on register-constrained
+	  architectures like x86. On some architectures (including x86) omitting
+	  frame pointers impedes debugging as local variables are harder to
+	  locate. At -O1 and above gcc will enable -fomit-frame-pointer
+	  automatically but only if the architecture does not require if for
+	  effective debugging.
+
+	  Choose Y if you want to override the default frame pointer behavior
+	  of your compiler, otherwise choose N.
+
+config OMIT_FRAME_POINTER
+	bool "Omit frame pointer"
+	depends on OVERRIDE_FRAME_POINTER_DEFAULT
+	help
+	  Choose Y for best performance. On some architectures (including x86)
+	  this will favor code size and performance over debugability.
+
+	  Choose N in you wish to retain the frame pointer. This option may
+	  be useful if your application uses runtime backtracing and does not
+	  support parsing unwind tables.
+
+	  If unsure, disable OVERRIDE_FRAME_POINTER_DEFAULT to allow the compiler
+	  to adopt sensible defaults for your architecture.
+
+
+#
+# Generic Debugging Options
+#
+config DEBUG_INFO
+	bool "Enable system debugging information"
+	help
+	  This option enables the addition of various information that can be
+	  used by debuggers in debugging the system, or enable additional
+	  debugging information to be reported at runtime.
+
+config EXCEPTION_STACK_TRACE
+	bool "Attempt to print stack traces upon exceptions"
+	default y
+	depends on PRINTK
+	depends on DEBUG_INFO
+	depends on !OMIT_FRAME_POINTER
+	help
+	  If the architecture fatal handling code supports it, attempt to
+	  print a stack trace of function memory addresses when an
+	  exception is reported.
+
+#
+# Miscellaneous debugging options
+#
+
+config OPENOCD_SUPPORT
+	bool "OpenOCD support [EXPERIMENTAL]"
+	select THREAD_MONITOR
+	select THREAD_NAME
+	help
+	  This option exports an array of offsets to kernel structs, used by
+	  OpenOCD to determine the state of running threads.  (This option
+	  selects CONFIG_THREAD_MONITOR, so all of its caveats are implied.)
+
+config TRACING_CPU_STATS
+	bool "Enable CPU usage tracing"
+	select THREAD_MONITOR
+	select THREAD_STACK_INFO
+	select TRACING
+	help
+	  Module provides information about percent of CPU usage based on
+	  tracing hooks for threads switching in and out, interrupts enters
+	  and exits (only distinguishes between idle thread, non idle thread
+	  and scheduler). Use provided API or enable automatic logging to
+	  get values.
+
+config TRACING_CPU_STATS_LOG
+	bool "Enable current CPU usage logging"
+	depends on TRACING_CPU_STATS
+	help
+	  Periodically displays information about CPU usage.
+
+config TRACING_CPU_STATS_INTERVAL
+	int "Logging interval for CPU measurements [ms]"
+	default 2000
+	depends on TRACING_CPU_STATS_LOG
+	help
+	  Time period of displaying information about CPU usage.
+
+config TRACING_CTF
+	bool "Tracing via Common Trace Format support"
+	select THREAD_MONITOR
+	select TRACING
+	help
+	  Enable tracing to a Common Trace Format stream. In order to use it a
+	  CTF bottom layer should be selected, such as TRACING_CTF_BOTTOM_POSIX.
+
+config TRACING_CTF_BOTTOM_POSIX
+	bool "CTF backend for the native_posix port, using a file in the host filesystem"
+	depends on TRACING_CTF
+	depends on ARCH_POSIX
+	help
+	  Enable POSIX backend for CTF tracing. It will output the CTF stream to a
+	  file using fwrite.
+
+
+source "subsys/debug/Kconfig.segger"
+
+endmenu

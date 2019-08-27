@@ -1,0 +1,32 @@
+---
+title: SAM Family UART
+version: 0.1
+
+description: >
+    This binding gives a base representation of the SAM UART
+
+inherits:
+    !include uart.yaml
+
+properties:
+    compatible:
+      constraint: "atmel,sam-uart"
+
+    reg:
+      type: array
+      description: mmio register space
+      generation: define
+      category: required
+
+    interrupts:
+      type: array
+      category: required
+      description: required interrupts
+      generation: define
+
+    peripheral-id:
+      type: int
+      description: peripheral ID
+      generation: define
+      category: required
+...

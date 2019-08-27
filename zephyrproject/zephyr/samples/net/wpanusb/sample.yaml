@@ -1,0 +1,13 @@
+sample:
+  description: Test wpanusb sample
+  name: wpanusb
+common:
+  harness: net
+  tags: net ieee802154 usb
+tests:
+  sample.net.wpanusb_frdm_cr20a:
+    extra_args: OVERLAY_CONFIG=overlay-mcr20a.conf
+    platform_whitelist: frdm_k64f
+  sample.net.wpanusb_quark_se_cc2520:
+    extra_args: OVERLAY_CONFIG=overlay-cc2520.conf
+    platform_whitelist: quark_se_c1000_devboard

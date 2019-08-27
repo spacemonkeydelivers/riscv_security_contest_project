@@ -1,0 +1,26 @@
+#
+# Copyright (c) 2018, Linaro Limited
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+---
+title: ARM SBCon two-wire serial bus interface
+version: 0.1
+
+description: >
+    This is a representation of the ARM SBCon two-wire serial bus interface
+
+inherits:
+    !include i2c.yaml
+
+properties:
+    compatible:
+      constraint: "arm,versatile-i2c"
+
+    reg:
+      type: array
+      description: mmio register space
+      generation: define
+      category: required
+
+...

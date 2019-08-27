@@ -1,0 +1,8 @@
+sample:
+  description: BSD Sockets API TCP echo server sample
+  name: socket_echo
+tests:
+  sample.net.sockets.echo:
+    harness: net
+    depends_on: netif
+    tags: net socket

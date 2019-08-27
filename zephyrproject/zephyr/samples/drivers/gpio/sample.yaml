@@ -1,0 +1,12 @@
+sample:
+  name: GPIO toggling
+tests:
+  sample.driver.gpio:
+    tags: drivers
+    filter: DT_GPIO_LEDS_LED0_GPIO_CONTROLLER and DT_GPIO_KEYS_SW0_GPIO_CONTROLLER
+    harness: console
+    harness_config:
+        type: one_line
+        regex:
+            - "Toggling (.*)"
+    depends_on: gpio

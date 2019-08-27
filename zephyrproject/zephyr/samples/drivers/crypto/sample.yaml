@@ -1,0 +1,29 @@
+sample:
+  description: An example to illustrate the usage of
+    crypto APIs
+  name: Crypto APIs
+common:
+  tags: crypto
+  harness: console
+  min_ram: 20
+  arch_exclude: xtensa x86_64
+tests:
+  sample.driver.crypto.mbedtls:
+    min_flash: 34
+    extra_args: CONF_FILE=prj_mtls_shim.conf
+    harness_config:
+      type: multi_line
+      regex:
+        - ".*: Cipher Sample"
+        - ".*main: CBC Mode"
+        - ".*main: CTR Mode"
+        - ".*main: CCM Mode"
+  sample.driver.crypto.mbedtls.micro:
+    tags: crypto
+    harness_config:
+      type: multi_line
+      regex:
+        - ".*: Cipher Sample"
+        - ".*main: CBC Mode"
+        - ".*main: CTR Mode"
+        - ".*main: CCM Mode"

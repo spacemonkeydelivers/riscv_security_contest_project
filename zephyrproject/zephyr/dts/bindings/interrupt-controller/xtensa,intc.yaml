@@ -1,0 +1,34 @@
+---
+title: Xtensa Core Interrupt Controller
+version: 0.1
+
+description: >
+    This binding describes Xtensa Core Interrupt controller
+
+properties:
+  compatible:
+      category: required
+      type: string
+      description: compatible strings
+      constraint: "xtensa,core-intc"
+      generation: define
+
+  reg:
+      category: required
+      type: int
+      description: mmio register space
+      generation: define
+
+  snps,num-irq-priority-bits:
+      category: required
+      type: int
+      description: number of bits of IRQ priorities
+      generation: define
+
+cell_string: IRQ
+
+"#cells":
+  - irq
+  - sense
+  - priority
+...
