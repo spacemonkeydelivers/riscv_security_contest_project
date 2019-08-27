@@ -1,6 +1,6 @@
 if BOARD_BEEHIVE
 
 config BOARD
-	default "behive4glory"
+	default "behive_riscv32"
 
 endif
