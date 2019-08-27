@@ -1,5 +1,7 @@
 `include "cpu/aludefs.vh"
 
+`define HW_DIVISION 1
+
 module alu(
 	input I_clk,
 	input I_en,
@@ -58,6 +60,7 @@ module alu(
 		myxor = I_dataS1 ^ I_dataS2;
 		myand = I_dataS1 & I_dataS2;
     end
+`ifdef HW_DIVISION
 
     always @(*) begin
         tmp_src1 = { {32{I_dataS1[31]}}, I_dataS1[31:0]};
@@ -69,12 +72,16 @@ module alu(
         mulsu = tmp_src1 * tmp_src2u;
     end
 
+    reg tmp_div;
+    reg tmp_rem;
     always @(*) begin
+       tmp_div = 0;
+       tmp_rem = 0;
         if(I_dataS2 == { 32{1'b0} } ) begin
-            div = {32{1'b1}};
+            div = {1'b0, {32{1'b1}}};
             divu = {32{1'b1}};
 
-            rem = I_dataS1;
+            rem = {1'b0, I_dataS1};
             remu = I_dataS1;
         end else begin
             divu = I_dataS1 / I_dataS2;
@@ -87,7 +94,8 @@ module alu(
             end*/
         end
     end
-	
+`endif
+
 	always @(*) begin
 		// unsigned comparison: simply look at underflow bit
 		ltu = sub[32];
@@ -142,16 +150,18 @@ module alu(
 				`ALUOP_SRA: result <= sra;
 				`ALUOP_SRL: result <= srl;
 				`endif
+`ifdef HW_DIVISION
                 // single-cycle multiplication :)
                 `ALUOP_MUL: result <= mulss[31:0];
                 `ALUOP_MULH: result <= mulss[63:32];
                 `ALUOP_MULHSU: result <= mulsu[63:32];
                 `ALUOP_MULHU: result <= muluu[63:32];
                 // single-cycle division ;)
-                `ALUOP_DIV: result <= div;
+                `ALUOP_DIV: result <= div[31:0];
                 `ALUOP_DIVU: result <= divu;
-                `ALUOP_REM: result <= rem;
+                `ALUOP_REM: result <= rem[31:0];
                 `ALUOP_REMU: result <= remu;
+`endif
 			endcase
 
 			O_lt <= lt;
