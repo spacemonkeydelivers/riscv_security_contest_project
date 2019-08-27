@@ -8,8 +8,8 @@
  * @file SoC configuration macros for the SiFive Freedom processor
  */
 
-#ifndef __RISCV32_BEEHIVE4GLORY_SOC_H_
-#define __RISCV32_BEEHIVE4GLORY_SOC_H_
+#ifndef __RISCV32_BEEHIVE_RISCV32_SOC_H_
+#define __RISCV32_BEEHIVE_RISCV32_SOC_H_
 
 #include <soc_common.h>
 
@@ -24,4 +24,4 @@
 #define RISCV_RAM_BASE               CONFIG_RISCV_RAM_BASE_ADDR
 #define RISCV_RAM_SIZE               CONFIG_RISCV_RAM_SIZE
 
-#endif /* __RISCV32_BEEHIVE4GLORY_SOC_H_ */
+#endif /* __RISCV32_BEEHIVE_RISCV32_SOC_H_ */

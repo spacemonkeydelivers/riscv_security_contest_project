@@ -1,4 +1,4 @@
-identifier: beehive
+identifier: beehive_riscv32
 name: The operating system Paradise
 type: m
 arch: riscv32
