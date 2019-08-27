@@ -72,6 +72,7 @@ void RV_SOC::tick(unsigned num)
             m_tickCnt++;
             break;
         }
+        en_state state_before = cpu_state();
 
         m_soc->clk_i = 1;
         m_soc->eval();
@@ -87,9 +88,15 @@ void RV_SOC::tick(unsigned num)
             m_trace->flush();
         }
         m_tickCnt++;
+
+        en_state state_after = cpu_state();
+        if (    (state_before != state_after)
+            &&  (state_after == en_state::FETCH)) {
+            ++m_fetchCnt;
+        }
     }
 }
-    
+
 void RV_SOC::switchBusMasterToExternal(bool s)
 {
     m_soc->bus_master_selector_i = s ? RV_SOC::busMaster::MASTER_EXT
@@ -287,3 +294,12 @@ en_state RV_SOC::cpu_state() const
 {
     return (en_state)(int)m_soc->soc->cpu0->state;
 }
+uint64_t RV_SOC::counterGetTick ()
+{
+    return  m_tickCnt;
+}
+uint64_t RV_SOC::counterGetStep ()
+{
+    return m_fetchCnt;
+}
+

@@ -50,9 +50,13 @@ public:
 
     void enableVcdTrace();
 
+    uint64_t counterGetTick ();
+    uint64_t counterGetStep ();
+
 private:
     Vsoc*          m_soc         {nullptr};
     uint64_t       m_tickCnt     {0};
+    uint64_t       m_fetchCnt    {0};
     VerilatedVcdC* m_trace       {nullptr};
 
     uint64_t       m_ramSize     {0};

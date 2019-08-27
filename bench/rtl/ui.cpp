@@ -34,6 +34,8 @@ BOOST_PYTHON_MODULE(libbench)
         .def("writeWordExt", &RV_SOC::writeWordExt)
         .def("readWordExt", &RV_SOC::readWordExt)
         .def("enableVcdTrace", &RV_SOC::enableVcdTrace)
+        .def("counterGetTick", &RV_SOC::counterGetTick)
+        .def("counterGetStep", &RV_SOC::counterGetStep)
         .def("wordSize", &RV_SOC::getWordSize);
 }
 

@@ -42,9 +42,14 @@ class CmdPrint:
         print '______________________'
 
     def print_state(self):
+
+        tick_ctr = self.debugger._soc._soc.counterGetTick()
+        step_ctr = self.debugger._soc._soc.counterGetStep()
+
         pc = self.soc.pc()
         upc = self.soc.upc()
         print '--- CPU state ---'
+        print 'step: #{}, utick: {}'.format(step_ctr, tick_ctr)
         disasm = self.debugger._disasm.display(pc)
         udisasm = self.debugger._disasm.display(upc)
         if disasm != udisasm:

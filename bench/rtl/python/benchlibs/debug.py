@@ -75,9 +75,12 @@ class Debugger:
 
     def print_utrace(self):
         s = []
+        tick_ctr = self._soc._soc.counterGetTick()
+        step_ctr = self._soc._soc.counterGetStep()
         for k in self._trace['states']:
             v = self._trace['states'][k]
             s.append('{}({})'.format(k, v))
+        print('     - step: #{}, utick: {}'.format(step_ctr, tick_ctr))
         print('     - {} || tick#{}'.format(','.join(s), self._trace['tick_cnt']))
 
     def tracing_callback(self):
