@@ -38,6 +38,7 @@ class CmdStep:
                 upc = self.soc.upc()
                 next_insn = self.debugger._disasm.display(upc)
                 print('next: {0}'.format(next_insn))
+                return 'step {}'.format(num)
             except ValueError:
                 print 'Error: could not figure out how many steps required'
             return

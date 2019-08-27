@@ -30,10 +30,11 @@ class CmdTick:
                 print('utrace after:')
                 self.debugger.print_utrace()
                 print('__________________')
+                return 'tick {}'.format(num)
             except ValueError:
                 print 'Error: could not figure out how many ticks required'
             return
-  
+
         print('Error: incorrect <tick> command')
         return None
 
