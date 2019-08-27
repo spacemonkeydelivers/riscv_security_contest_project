@@ -1,0 +1,32 @@
+---
+title: Kinetis LPUART
+version: 0.1
+
+description: >
+    This binding gives a base representation of the Kinetis LPUART
+
+inherits:
+    !include uart.yaml
+
+properties:
+    compatible:
+      constraint: "nxp,kinetis-lpuart"
+
+    reg:
+      type: array
+      description: mmio register space
+      generation: define
+      category: required
+
+    interrupts:
+      type: array
+      category: required
+      description: required interrupts
+      generation: define
+
+    pinctrl-*:
+      type: array
+      category: optional
+      description: pinmux information for RX, TX, CTS, RTS
+      generation: structures
+...

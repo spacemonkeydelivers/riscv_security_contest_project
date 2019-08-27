@@ -1,0 +1,52 @@
+#
+# Copyright (c) 2018, SiFive Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+---
+title: SiFive PWM
+version: 0.1
+
+description: >
+    This binding gives a base representation of the SiFive PWM
+
+inherits:
+    !include pwm.yaml
+
+properties:
+    compatible:
+      type: string
+      category: required
+      description: compatible strings
+      constraint: "sifive,pwm0"
+      generation: define
+
+    clock-frequency:
+      type: int
+      category: optional
+      description: Clock frequency information for PWM operation
+      generation: define
+
+    reg:
+      type: array
+      description: mmio register space
+      generation: define
+      category: required
+
+    interrupts:
+      type: array
+      category: required
+      description: required interrupts
+      generation: define
+
+    sifive,compare-width:
+      type: int
+      category: required
+      description: Width of the PWM comparator in bits
+      generation: define
+
+"#cells":
+  - channel
+# period in terms of nanoseconds
+  - period
+...

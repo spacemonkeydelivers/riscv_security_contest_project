@@ -1,0 +1,7 @@
+sample:
+  description: Demonstration of the PCA9633 LED driver
+  name: PCA9633 sample
+tests:
+  sample.driver.led_pca9633:
+    platform_whitelist: stm32373c_eval
+    tags: LED

@@ -1,0 +1,12 @@
+sample:
+  description: TBD
+  name: TBD
+tests:
+  sample.net.mqtt_publisher:
+    harness: net
+    platform_whitelist: frdm_k64f qemu_x86
+    tags: net mqtt
+  sample.net.mqtt_publisher.bt:
+    harness: net
+    platform_whitelist: 96b_nitrogen
+    tags: net mqtt bluetooth

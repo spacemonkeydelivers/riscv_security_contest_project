@@ -1,0 +1,15 @@
+sample:
+  name: Watchdog Driver Sample
+tests:
+  sample.driver.watchdog:
+    tags: drivers
+    harness: console
+    harness_config:
+        type: multi_line
+        ordered: true
+        regex:
+            - "Watchdog sample application"
+            - "Feeding watchdog..."
+            - "Waiting for reset..."
+            - "Watchdog sample application"
+    depends_on: watchdog

@@ -1,0 +1,37 @@
+# Kconfig - counter configuration options
+
+#
+# Copyright (c) 2016 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+menuconfig COUNTER
+	bool "Counter Drivers"
+	help
+	  Enable support for counter and timer.
+
+if COUNTER
+
+config COUNTER_LOG_LEVEL
+	int "Counter log level"
+	default 0
+	range 0 4
+	help
+	  Counter logging level.
+
+source "drivers/counter/Kconfig.qmsi"
+
+source "drivers/counter/Kconfig.tmr_cmsdk_apb"
+
+source "drivers/counter/Kconfig.dtmr_cmsdk_apb"
+
+source "drivers/counter/Kconfig.mcux_rtc"
+
+source "drivers/counter/Kconfig.nrfx"
+
+source "drivers/counter/Kconfig.imx_epit"
+
+source "drivers/counter/Kconfig.stm32_rtc"
+
+endif # COUNTER
