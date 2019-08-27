@@ -202,7 +202,15 @@ class RiscVSoc:
             raise ValueError("word_index argument must be specified")
         if self._debug:
             print("Reading 0x{0:08x} from 0x{1:08x}".format(self._soc.readWord(word_index), word_index * self._word_size))
-        return self._soc.readWord(word_index)
+
+        try:
+          result =  self._soc.readWord(word_index)
+          return result
+        except IndexError, e:
+          print '#error during memory read detected <{}>'.format(e)
+          return None
+
+
 
     def write_word_ram(self, address, value):
         if self._debug:

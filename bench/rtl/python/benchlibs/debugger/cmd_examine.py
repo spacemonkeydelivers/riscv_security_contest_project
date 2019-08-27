@@ -44,6 +44,8 @@ class CmdExamine:
           if s_addr < 0:
               continue
           word = self.soc.read_word_ram(word_index = s_addr / 4)
+          if word == None:
+              return None
           if fmt == 'b':
              a = [ s_addr + 0, s_addr + 1, s_addr + 2, s_addr + 3]
              d = [ word & 0xff, (word >> 8) & 0xff, (word >> 16) & 0xff, (word >> 24) & 0xff]
@@ -91,6 +93,9 @@ class CmdExamine:
                 if (out == 't'):
                   width = width * 4
                 data = self.read_data(inpt, number, addr)
+                if data == None:
+                    print('Error: examining memory failed')
+                    return None
                 fmts = {
                   'd': '{0:#010x}: {1}',
                   'u': '{0:#010x}: {1}',
