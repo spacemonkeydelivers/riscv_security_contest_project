@@ -110,7 +110,13 @@ class CmdExamine:
                         d = self.debugger._disasm.display(a)
                     print(fmts[out].format(a, d))
                 print('_______________________')
-                return None
+
+                if out == 't':
+                  i_w = width / 8
+                else:
+                  i_w = width / 2
+                rerun_addr = addr + number * i_w
+                return 'x /{0:}{1:}{2:} {3:#x}'.format(out, inpt, number, rerun_addr)
               except ValueError:
                 print 'Error: could not parse format string'
         print('Error: incorrect <examine> command')

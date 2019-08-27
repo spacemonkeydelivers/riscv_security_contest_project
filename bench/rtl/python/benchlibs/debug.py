@@ -26,6 +26,7 @@ class Debugger:
         self._bench  = benchlib
         self._soc    = soc
         self._cmd    = {}
+        self._rerun  = None
 
         commands = [
             CmdAssign,
@@ -102,6 +103,13 @@ class Debugger:
     def stepi(self, n):
         return None
 
+    def preprocess_cmd(self, user_input):
+        if user_input == None:
+            return None
+        input_cmd = [x.strip() for x in user_input.split()]
+        input_cmd = [i for i in input_cmd if i]
+        return input_cmd
+
     def repl(self):
         while True:
             try:
@@ -116,11 +124,23 @@ class Debugger:
                 print 'got EOF - terminating debug session'
                 break
 
-            input_cmd = [x.strip() for x in user_input.split()]
-            input_cmd = [i for i in input_cmd if i] 
+            input_cmd = self.preprocess_cmd(user_input)
 
             if len(input_cmd) == 0:
-                continue
+                if user_input == '': # if we have just hit "enter"
+                    input_cmd = self.preprocess_cmd(self._rerun)
+                    if input_cmd == None:
+                        continue
+                    if len(input_cmd) == 0:
+                        continue
+                    print ('#rerun cmd: {}'.format(' '.join(input_cmd)))
+                else:
+                    if self._rerun != None:
+                        print '#note rerun dropped'
+                    self._rerun = None
+
+                if self._rerun == None:
+                  continue
 
             cmd = input_cmd[0]
             input_cmd.pop(0)
@@ -130,7 +150,7 @@ class Debugger:
                   if input_cmd[0] == 'help':
                         self._cmd[cmd].help()
                         continue
-                self._cmd[cmd].run(input_cmd)
+                self._rerun = self._cmd[cmd].run(input_cmd)
             else:
                 print("Error: unknown command {}".format(cmd))
 
