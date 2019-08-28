@@ -40,4 +40,4 @@ mv t4, zero
 mv t5, zero
 mv t6, zero
 
-__test_exit 0, exit
+__test_exit 0x0A11C001, exit

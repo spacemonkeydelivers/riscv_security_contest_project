@@ -41,7 +41,7 @@
 .endif
 
 .macro PASSED
-   __test_exit 0, TARGET
+   __test_exit 0x0A11C001, TARGET
 .endm
 
 .ifdef FAILED
