@@ -8,7 +8,6 @@ file(MAKE_DIRECTORY ${RTL_MODEL_BUILD_PATH})
 file(GLOB_RECURSE RTL_SRC_FILES
      ${RTL_SRC_PATH}/*.v
 )
-#set(RTL_SRC_FILES ${RTL_SRC_PATH}/soc.v)
 
 set(VERILOG_OUTPUT_LIB "${RTL_MODEL_BUILD_PATH}/V${MODULE_NAME}__ALL.a")
 
@@ -32,7 +31,6 @@ if (NOT DEFINED MEM_FILE)
     set(MEM_FILE ${CMAKE_BINARY_DIR}/tmp/mem_img.hex)
 endif()
 
-set(VERILATOR_FLAGS_POST "-Wno-MODDUP")
 separate_arguments(VERILATOR_ARGS_LIST
                    WINDOWS_COMMAND "${VERILATOR_FLAGS} -I${RTL_SRC_PATH}")
 separate_arguments(VERILATOR_ARGS_POST_LIST
@@ -46,7 +44,7 @@ add_custom_command(
         -Wall
         -cc
         -Mdir ${RTL_MODEL_BUILD_PATH}
-        ${RTL_SRC_FILES}
+        ${RTL_SRC_PATH}/soc.v
         --top-module ${MODULE_NAME}
         ${VERILATOR_ARGS_POST_LIST}
     COMMAND cd ${RTL_MODEL_BUILD_PATH} && make -f V${MODULE_NAME}.mk
