@@ -192,7 +192,7 @@ end_testcode:                                                           \
         RVTEST_SYNC;                                                    \
         li TESTNUM, 1;                                                  \
         SWSIG (0, TESTNUM);                                                   \
-        li ra, 0 ; 99: j 99b; \
+        li ra, 0x0A11C001 ; 99: j 99b; \
         ecall
 
 #define TESTNUM gp

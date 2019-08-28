@@ -122,7 +122,7 @@ class RiscVSoc:
               msg = "exit code <{}> indicates success, while tests expects failure".format(status)
               raise RuntimeError(msg)
         else:
-          if status != 0:
+          if status != 0x0A11C001:
               msg = "exit code <{}> indicates failure".format(status)
               raise RuntimeError(msg)
 
