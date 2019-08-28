@@ -1,0 +1,68 @@
+NET "clk_i" LOC = V10;
+NET "clk_i" PERIOD = 7.5ns;
+NET "clk_i" CLOCK_DEDICATED_ROUTE = TRUE;
+
+NET "clk_i" TNM_NET = tnm_clk_i;
+TIMESPEC TS_clk_i = PERIOD tnm_clk_i 7.5ns;
+
+NET "cs_i[0]" LOC = V5;
+NET "cs_i[1]" LOC = N3;
+NET "read_i" LOC = T6;
+NET "write_i" LOC = N4;
+NET "reset_i" LOC = B2;
+NET "irq_i" LOC = B3;
+NET "irq_o" LOC = B4;
+
+NET "data_io[0]" LOC = V9;
+NET "data_io[1]" LOC = R10;
+NET "data_io[2]" LOC = T11;
+NET "data_io[3]" LOC = V8;
+NET "data_io[4]" LOC = V7;
+NET "data_io[5]" LOC = T9;
+NET "data_io[6]" LOC = T10;
+NET "data_io[7]" LOC = U7;
+NET "data_io[8]" LOC = V6;
+NET "data_io[9]" LOC = T8;
+NET "data_io[10]" LOC = R8;
+NET "data_io[11]" LOC = M5;
+NET "data_io[12]" LOC = U5;
+NET "data_io[13]" LOC = P6;
+NET "data_io[14]" LOC = T7;
+NET "data_io[15]" LOC = R7;
+
+NET "addr_i[0]" LOC = N5;
+NET "addr_i[1]" LOC = P3;
+NET "addr_i[2]" LOC = U16;
+NET "addr_i[3]" LOC = T2;
+NET "addr_i[4]" LOC = L6;
+NET "addr_i[5]" LOC = V16;
+NET "addr_i[6]" LOC = T14;
+NET "addr_i[7]" LOC = T1;
+NET "addr_i[8]" LOC = R11;
+NET "addr_i[9]" LOC = P12;
+NET "addr_i[10]" LOC = V14;
+NET "addr_i[11]" LOC = U13;
+NET "addr_i[12]" LOC = V13;
+NET "addr_i[13]" LOC = U10;
+NET "addr_i[14]" LOC = V11;
+NET "addr_i[15]" LOC = U8;
+NET "addr_i[16]" LOC = R5;
+NET "addr_i[17]" LOC = V4;
+NET "addr_i[18]" LOC = U11;
+NET "addr_i[19]" LOC = H7;
+NET "addr_i[20]" LOC = P4;
+NET "addr_i[21]" LOC = T3;
+NET "addr_i[22]" LOC = U2;
+NET "addr_i[23]" LOC = T4;
+NET "addr_i[24]" LOC = U1;
+
+
+NET "data_o[0]" LOC = A15;
+NET "data_o[1]" LOC = A16;
+NET "data_o[2]" LOC = A14;
+NET "data_o[3]" LOC = A12;
+NET "data_o[4]" LOC = C11;
+NET "data_o[5]" LOC = A11;
+NET "data_o[6]" LOC = A10;
+
+
