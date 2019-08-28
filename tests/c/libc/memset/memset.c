@@ -31,5 +31,10 @@ int main () {
             return EXIT_FAILURE;
         }
     }
+    void* mst_result = memset(bla, 0x0a, sizeof(bla));
+    if (mst_result != bla) {
+        printf("the value returned by memset is not correct\n");
+        return EXIT_FAILURE;
+    }
     return EXIT_SUCCESS;
 }
