@@ -36,7 +36,7 @@ bool malloc_init(const struct init_ctx* ctx)
     else {
         printf("LIBC: MEMORY TAGGING is disabled\n");
     }
-    printf("LIBC: heap @[%p, %p]\n", ctx->heap_start, ctx->heap_end);
+    printf("LIBC: heap @[%p, %p]\n", (void*)ctx->heap_start, (void*)ctx->heap_end);
     // protect mem info
     struct memory_subsystem* s_info_ptr = (struct memory_subsystem*)
         _ossec_protect_ptr(&mem_info, sizeof(mem_info));
