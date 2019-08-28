@@ -47,9 +47,10 @@ void* memcpy(void *restrict dest, const void *restrict src, size_t count)
 void *memset( void *dest, int ch, size_t count )
 {
     unsigned char* d_ptr = dest;
+    unsigned char filler = (unsigned char)ch;
     for (size_t i = 0; i < count; ++i)
     {
-        *d_ptr++ = (unsigned char)ch;
+        *d_ptr++ = filler;
     }
     return dest;
 }
