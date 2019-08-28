@@ -10,6 +10,13 @@ import benchlibs.debug as debug
 
 PATH_tools_dir = os.environ['TOOLS_DIR']
 
+def extract_c_directives(filename, directives):
+  with open(filename) as f:
+    content = f.readlines()
+    for line in content:
+      if re.search(r'\s*SECURITY_CTRL:\s*DISABLE\s*', line):
+        directives.append('disable_security = true')
+
 def extract_uart_checker(filename):
   checker_data = []
   activated = False
@@ -81,21 +88,23 @@ def generate_make_c(soc):
   pattern = os.path.join(c_root, '*.c')
   print('searching for c files as <{}>'.format(pattern))
   c_files = glob.glob(pattern)
+  directives = ['disable_security = false']
+  for c_file in c_files:
+    extract_uart_checker(c_file)
+    extract_c_directives(c_file, directives)
+
+
   c_list = ' '.join(c_files)
   print('found results: {}'.format(c_list))
-
   cmd = ''.join([
-          '(echo \'<% input_c="{}"; %>\' && cat \'{}\') ',
+          '(echo \'<% input_c="{}"; {} %>\' && cat \'{}\') ',
           '| erb > Makefile.test'
-        ]).format(c_list, PATH_tools_dir + '/misc/Makefile_c.erb')
+        ]).format(c_list, ';'.join(directives), PATH_tools_dir + '/misc/Makefile_c.erb')
 
   print('running <{}>'.format(cmd))
   ret = os.system(cmd)
   if ret != 0:
     raise 'could not generate makefile'
-
-  for c_file in c_files:
-    extract_uart_checker(c_file)
 
   driver = None
   driver_path = os.path.join(c_root, "driver.py")
