@@ -11,6 +11,9 @@ void free(void*);
 
 void exit(int status) __attribute__ ((noreturn));
 
+unsigned long  strtoul(const char *restrict str, char **restrict str_end,
+                       int base);
+
 static inline int abs(int val) {
     return val < 0 ? -val : val;
 }

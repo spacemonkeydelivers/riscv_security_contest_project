@@ -6,15 +6,18 @@ OBJ_FILES=boot.o isr.o config.o libgcc_.o \
 LIBNAME=libc
 INSTALL_HEADERS=stdarg.h stdbool.h stddef.h stdint.h stdio.h stdlib.h string.h unistd.h
 INSTALL_SOC_HEADERS=traps.h timer.h
+INSTALL_MISC_HEADERS=printk.h toolchain.h
 INSTALL_SHARE_CONTENT=soc.ld
 
 I_HEADERS     := $(addprefix $(TOP)/include/,$(INSTALL_HEADERS))
 I_SOC_HEADERS := $(addprefix $(TOP)/include/soc/,$(INSTALL_SOC_HEADERS))
+I_MISC_HEADERS:= $(addprefix $(TOP)/include/misc/,$(INSTALL_MISC_HEADERS))
 I_SHARE       := $(addprefix $(TOP)/share/,$(INSTALL_SHARE_CONTENT))
-I_STRUCTURE   := $(addprefix $(INSTALL_DIR)/,lib include include/soc share)
+I_STRUCTURE   := $(addprefix $(INSTALL_DIR)/,lib include include/soc include/misc share)
 DEPS_INSTALL := $(LIBNAME).a
 DEPS_INSTALL += $(I_HEADERS)
 DEPS_INSTALL += $(I_SOC_HEADERS)
+DEPS_INSTALL += $(I_MISC_HEADERS)
 DEPS_INSTALL += $(I_SHARE)
 
 install: $(DEPS_INSTALL)
@@ -22,6 +25,7 @@ install: $(DEPS_INSTALL)
 	install -m 644 $(LIBNAME).a $(INSTALL_DIR)/lib
 	install -m 644 $(I_HEADERS) $(INSTALL_DIR)/include
 	install -m 644 $(I_SOC_HEADERS) $(INSTALL_DIR)/include/soc
+	install -m 644 $(I_MISC_HEADERS) $(INSTALL_DIR)/include/misc
 	install -m 644 $(I_SHARE) $(INSTALL_DIR)/share
 
 test_program: $(LIBNAME).a $(TOP)/tests/basic.c
