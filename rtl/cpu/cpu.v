@@ -652,6 +652,7 @@ module cpu
                         case(dec_imm[11:0])
                             `SYSTEM_ECALL:  csr[M_CAUSE] <= CAUSE_ECALL;
                             `SYSTEM_EBREAK: csr[M_CAUSE] <= CAUSE_BREAK;
+                            `SYSTEM_WFI:    nextstate <= STATE_FETCH;
                             `SYSTEM_MRET: begin
                                 csr[M_STATUS][3] <= csr[M_STATUS][7];
                                 pcnext <= csr[M_EPC];
