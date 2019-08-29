@@ -72,8 +72,8 @@ bool case4 () {
     char buff1[10];
     memset(buff1, 0xba, sizeof(buff1));
     char* sr4 = strncpy(buff1, "12", 3);
-    if (buff1[3] != 0) {
-        printf("case4: no terminating character detected at pos #3\n");
+    if (buff1[2] != 0) {
+        printf("case4: no terminating character detected at pos #2\n");
         return false;
     }
     if ((buff1[0] != '1') || (buff1[1] != '2')) {

@@ -55,7 +55,6 @@ array
 */
 char *strncat(char *restrict dest, const char *restrict src, size_t count) {
     char* restrict d_ptr = dest;
-    (void)dest;(void)src;(void)count;
     while (*d_ptr) {
         ++d_ptr;
     }
@@ -83,9 +82,21 @@ reached, additional null characters are written to dest until the total of
 count characters have been written.
  */
 char *strncpy(char *restrict dest, const char *restrict src, size_t count) {
-    (void)dest;(void)src;(void)count;
-    printf("LIBC: <PANIC> strncpy not implemented\n");
-    exit(42);
+
+    char* restrict d_ptr = dest;
+    while (count > 0) {
+        --count;
+        *d_ptr++ = *src;
+        if (*src == 0) {
+            break;
+        }
+        ++src;
+    }
+    while (count > 0) {
+        *d_ptr++ = 0;
+        --count;
+    }
+    return dest;
 }
 
 
