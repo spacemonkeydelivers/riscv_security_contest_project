@@ -36,11 +36,52 @@ char *strcat(char *restrict dest, const char *restrict src) {
     *ptr_d = *src;
     return dest;
 }
+/*
+strncat
+Appends at most count characters from the character array pointed to by src,
+stopping if the null character is found, to the end of the null-terminated byte
+string pointed to by dest.
+
+The character src[0] replaces the null terminator at the end of dest. The
+terminating null character is always appended in the end (so the maximum number
+of bytes the function may write is count+1).
+
+The behavior is undefined if the destination array does not have enough space for
+the contents of both dest and the first count characters of src, plus the
+terminating null character. The behavior is undefined if the source and
+destination objects overlap. The behavior is undefined if either dest is not a
+pointer to a null-terminated byte string or src is not a pointer to a character
+array
+*/
 char *strncat(char *restrict dest, const char *restrict src, size_t count) {
+    char* restrict d_ptr = dest;
     (void)dest;(void)src;(void)count;
-    printf("LIBC: <PANIC> strncat not implemented\n");
-    exit(42);
+    while (*d_ptr) {
+        ++d_ptr;
+    }
+    while (count > 0) {
+        *d_ptr++ = *src;
+        if (*src == 0) {
+            return dest;
+        }
+        ++src;
+        --count;
+    }
+    *d_ptr = 0;
+    return dest;
 }
+/*
+strncpy
+Copies at most count characters of the byte string pointed to by src (including
+the terminating null character) to character array pointed to by dest.
+
+If count is reached before the entire string src was copied, the resulting
+character array is not null-terminated.
+
+If, after copying the terminating null character from src, count is not
+reached, additional null characters are written to dest until the total of
+count characters have been written.
+ */
 char *strncpy(char *restrict dest, const char *restrict src, size_t count) {
     (void)dest;(void)src;(void)count;
     printf("LIBC: <PANIC> strncpy not implemented\n");
