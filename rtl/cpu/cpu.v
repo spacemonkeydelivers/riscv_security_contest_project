@@ -258,6 +258,8 @@ module cpu
             MSR_MTVEC:     csr_exists = 1;
             MSR_MSCRATCH:  csr_exists = 1;
             MSR_MTAGS:     csr_exists = 1;
+            MSR_MIE:       csr_exists = 1;
+            MSR_MIP:       csr_exists = 1;
             default:       csr_exists = 0;
         endcase
     end
