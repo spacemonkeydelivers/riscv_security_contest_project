@@ -66,3 +66,12 @@ eventually switch to ecall/scall.
     4.4. ./configure --prefix=<install path> --with-arch=rv32i --with-abi=ilp32  
     4.5. make newlib -j20  
     4.6. Get your toolchain with support for memory tagging instructions in <install path>  
+
+# Used open source components
+
+| name       | purpose  | git | license |
+| ----       | -------  | --- | ------- |
+| Tiny printf | libc: printf implementation | [github](https://github.com/mpaland/printf) | MIT |
+| __moddi3/__divdi3 | libc: sw division from libgcc | [github mirror](https://github.com/gcc-mirror/gcc/tree/master/libgcc) | GPL2+ |
+| __mulsi3 | libc: sw multiplication | [github mirror](https://github.com/gcc-mirror/gcc/blob/master/libgcc/config/epiphany/mulsi3.c) | GPL2+ |
+
