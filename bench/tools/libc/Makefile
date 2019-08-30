@@ -1,7 +1,7 @@
 INCLUDE=$(TOP)/include
-OBJ_FILES=boot.o isr.o config.o libgcc_.o \
+OBJ_FILES=boot.o isr.o config.o libgcc_.o mulsi3.o \
 	os.o malloc.o \
-	libc-start.o printf.o \
+	libc-start.o printf.o strtoul.o \
 	stdlib.o unistd.o string.o
 LIBNAME=libc
 NS_LIBNAME=libc_ns
@@ -39,6 +39,9 @@ all: $(LIBNAME).a $(NS_LIBNAME).a
 generated/esf.h: $(TOP)/src/internals/esf.h.erb
 	mkdir -p generated && erb -T 1 $(TOP)/src/internals/esf.h.erb >generated/esf.h
 
+mulsi3.o: $(TOP)/src/asm/mulsi3.c
+	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -I. -o $@ -c $<
+
 libgcc_.o: $(TOP)/src/asm/libgcc.S
 	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -I. -o $@ -c $<
 
@@ -64,6 +67,9 @@ config.o: $(TOP)/src/asm/config.S
 	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -o $@ -c $<
 
 libc-start.o: $(TOP)/src/libc-start.c
+	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -o $@ -c $<
+
+strtoul.o: $(TOP)/src/strtoul/strtoul.c
 	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -o $@ -c $<
 
 printf.o: $(TOP)/src/printf/printf.c
