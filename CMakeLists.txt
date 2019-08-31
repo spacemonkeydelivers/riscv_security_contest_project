@@ -47,6 +47,14 @@ if (NOT EXISTS "${RISCV_TOOLCHAIN_PATH}/bin/riscv32-unknown-elf-gcc")
     message(FATAL_ERROR "Could not find gcc for risc-v: ${RISCV_TOOLCHAIN_PATH}/riscv32-unknown-elf-gcc\nPlease set RISCV_TOOLCHAIN appropriately")
 endif()
 
+set(WEST_TEST_PATH "${CMAKE_SOURCE_DIR}/zephyrproject/.west/west/src/west/main.py")
+if(EXISTS "${WEST_TEST_PATH}")
+    set (ENABLE_ZEPHYR_APPS True)
+    message("working zephyr/west configuration detected, zephyr apps ENABLED")
+else()
+    set (ENABLE_ZEPHYR_APPS False)
+    message("WARNING: could not detect working zephyr/west configuration, zephyr apps DISABLED")
+endif()
 
 find_program(VERILATOR_BIN verilator)
 find_path(VERILATOR_INCLUDE verilated.h
@@ -82,5 +90,12 @@ if (BUILD_OVP_MODELS)
 endif()
 
 include(cmake/TestRunners.cmake)
+
+if (ENABLE_ZEPHYR_APPS)
+    include(cmake/ZephyrApplications.cmake)
+else()
+    set(ZEPHYR_APPS "")
+endif()
+
 include(tests/TestLists.txt)
 
