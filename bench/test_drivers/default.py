@@ -112,6 +112,24 @@ def generate_make_c(soc):
     driver = imp.load_source("custom_driver", driver_path)
   return driver
 
+def generate_zephyr_image(soc):
+  test = sys.argv[1].split("/")[1]
+  elf = os.path.join(os.environ['ZEPHYR_BUILDS'], test, 'zephyr', 'zephyr.elf')
+  print('elf image: {}'.format(elf))
+
+  cmd = ''.join([
+          '(echo \'<% elf="{}" %>\' && cat \'{}\') ',
+          '| erb > Makefile.test'
+        ]).format(elf, PATH_tools_dir + '/misc/Makefile_zephyr.erb')
+
+  print('running <{}>'.format(cmd))
+  ret = os.system(cmd)
+  if ret != 0:
+    raise 'could not generate makefile'
+
+  return None
+
+
 def build_test_image(soc):
   test_type = sys.argv[1].split("/")[0]
 
@@ -121,27 +139,17 @@ def build_test_image(soc):
     driver = generate_make_asm(soc)
   elif test_type == "compliance":
     driver = generate_make_compliance(soc)
+  elif test_type == "zephyr":
+    driver = generate_zephyr_image(soc)
   elif test_type == "debugger":
     driver = generate_make_asm(soc)
-  elif test_type == "v":
-    print sys.argv[1]
-    print os.path.join(os.environ['TESTS_DIR'], sys.argv[1])
-    driver = "verilog"
   else:
     raise Exception("unknown test type {}".format(test_type))
 
-  if driver == "verilog":
-    driver = None
-    print('copying image...')
-    src = os.path.join(os.environ['TESTS_DIR'], sys.argv[1].split("/")[0])
-    ret = os.system('cp -r {}/* ./'.format(src))
-    if ret != 0:
-      raise Exception('could not copy test image')
-  else:
-    print('running make...')
-    ret = os.system('make -f Makefile.test VERBOSE=1')
-    if ret != 0:
-      raise Exception('could not create test image')
+  print('running make...')
+  ret = os.system('make -f Makefile.test VERBOSE=1')
+  if ret != 0:
+    raise Exception('could not create test image')
 
   return driver
 
