@@ -108,6 +108,8 @@ int vprintf_(const char* format, va_list va);
  */
 int fctprintf(void (*out)(char character, void* arg), void* arg, const char* format, ...);
 
+#define fprintf fprintf_
+int fprintf_ (int stream, const char * format, ...);
 
 #ifdef __cplusplus
 }
