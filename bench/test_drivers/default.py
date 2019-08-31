@@ -97,9 +97,9 @@ def generate_make_c(soc):
   c_list = ' '.join(c_files)
   print('found results: {}'.format(c_list))
   cmd = ''.join([
-          '(echo \'<% input_c="{}"; {} %>\' && cat \'{}\') ',
+          '(echo \'<% input_c="{}"; c_root="{}"; {} %>\' && cat \'{}\') ',
           '| erb > Makefile.test'
-        ]).format(c_list, ';'.join(directives), PATH_tools_dir + '/misc/Makefile_c.erb')
+        ]).format(c_list, c_root, ';'.join(directives), PATH_tools_dir + '/misc/Makefile_c.erb')
 
   print('running <{}>'.format(cmd))
   ret = os.system(cmd)

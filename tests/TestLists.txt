@@ -73,7 +73,7 @@ test_add(c_isr_route_timer_base   c/libc/isr_route_timer_base)
 test_add(c_isr_route_ialign_base  c/libc/isr_route_ialign_base)
 
 test_add(c_fibonacci              c/fibo)
-
+test_add(c_ripe					c/ripe NIGHTLY)
 foreach(test ${ZEPHYR_APPS})
     string(REPLACE "/" "_" APP_NAME ${test})
     test_add(zephyr_${APP_NAME} zephyr/${APP_NAME} NIGHTLY)
