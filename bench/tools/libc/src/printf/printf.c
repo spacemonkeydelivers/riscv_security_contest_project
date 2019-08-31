@@ -869,6 +869,16 @@ int printf_(const char* format, ...)
   return ret;
 }
 
+int fprintf_ (int stream, const char * format, ...)
+{
+  (void)stream;
+  va_list va;
+  va_start(va, format);
+  char buffer[1];
+  const int ret = _vsnprintf(_out_char, buffer, (size_t)-1, format, va);
+  va_end(va);
+  return ret;
+}
 
 int sprintf_(char* buffer, const char* format, ...)
 {
