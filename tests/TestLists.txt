@@ -44,6 +44,7 @@ test_add(asm_csre_missing_csr   asm/csrr_missing.s)
 test_add(asm_csrrw_small   asm/csrrw_compliance.s)
 test_add(asm_csrrs_small   asm/csrrs_compliance.s)
 
+test_add(v_nation		     v/test.v)
 test_add(c_basic             c/basic)
 
 test_add(c_libc_exit_S       c/libc/exit_succ)

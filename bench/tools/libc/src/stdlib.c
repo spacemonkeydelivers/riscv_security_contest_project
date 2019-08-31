@@ -8,3 +8,7 @@ void exit(int status)
 
 // strtoul is implemented in a libc/src/strtoul
 
+int fprintf_(int stream, const char * format, ...) {
+	(void)stream; (void)format;
+	return 0;
+}

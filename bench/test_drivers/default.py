@@ -123,13 +123,25 @@ def build_test_image(soc):
     driver = generate_make_compliance(soc)
   elif test_type == "debugger":
     driver = generate_make_asm(soc)
+  elif test_type == "v":
+    print sys.argv[1]
+    print os.path.join(os.environ['TESTS_DIR'], sys.argv[1])
+    driver = "verilog"
   else:
     raise Exception("unknown test type {}".format(test_type))
 
-  print('running make...')
-  ret = os.system('make -f Makefile.test VERBOSE=1')
-  if ret != 0:
-    raise Exception('could not create test image')
+  if driver == "verilog":
+    driver = None
+    print('copying image...')
+    src = os.path.join(os.environ['TESTS_DIR'], sys.argv[1].split("/")[0])
+    ret = os.system('cp -r {}/* ./'.format(src))
+    if ret != 0:
+      raise Exception('could not copy test image')
+  else:
+    print('running make...')
+    ret = os.system('make -f Makefile.test VERBOSE=1')
+    if ret != 0:
+      raise Exception('could not create test image')
 
   return driver
 
