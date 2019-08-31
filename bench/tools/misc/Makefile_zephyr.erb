@@ -1,0 +1,18 @@
+include <%= ENV['TOOLS_DISTRIB'] %>/share/testsMakefile.include
+
+OBJCOPY = $(RISCV_OBJCOPY)
+
+ELF  = <%= elf %>
+
+.PHONY : all
+
+all: test.elf test.v tcl_copy
+
+tcl_copy: $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl
+	cp $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl filter_init.tcl
+
+test.v: $(ELF)
+	$(OBJCOPY) --target verilog $(ELF) test.v
+
+test.elf: $(ELF)
+	cp $(ELF) test.elf
