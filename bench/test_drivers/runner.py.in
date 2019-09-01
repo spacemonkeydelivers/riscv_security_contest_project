@@ -5,6 +5,7 @@
 import sys
 import os
 sys.path.append('@CMAKE_BINARY_DIR@/distrib/platform/lib')
+sys.path.append('@CMAKE_SOURCE_DIR@/bench/test_drivers')
 
 import libbench
 TESTS_DIR = "@CMAKE_SOURCE_DIR@/tests"
