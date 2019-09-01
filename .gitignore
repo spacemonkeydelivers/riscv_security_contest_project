@@ -3,3 +3,4 @@ zephyrproject/net-tools/
 zephyrproject/tools/
 zephyrproject/modules/
 zephyrproject/.west
+build
