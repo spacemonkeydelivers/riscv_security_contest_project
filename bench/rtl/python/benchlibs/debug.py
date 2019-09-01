@@ -104,6 +104,10 @@ class Debugger:
            self._trace['states'][str(new_state)] = 1
 
     def stepi(self, n):
+        i = 0
+        while i < n:
+           self._cmd['step'].run('1')
+           i = i + 1
         return None
 
     def preprocess_cmd(self, user_input):
