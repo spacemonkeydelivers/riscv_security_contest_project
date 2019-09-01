@@ -36,11 +36,11 @@ config RISCV_ROM_BASE_ADDR
 
 config RISCV_ROM_SIZE
 	hex
-	default 0x8000
+	default 0x8800
 
 config RISCV_RAM_BASE_ADDR
 	hex
-	default	0x8000
+	default	0x8800
 
 config RISCV_RAM_SIZE
 	hex
