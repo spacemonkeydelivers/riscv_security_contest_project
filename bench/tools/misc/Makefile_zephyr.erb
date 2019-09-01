@@ -8,6 +8,11 @@ ELF  = <%= elf %>
 
 all: test.elf test.v tcl_copy
 
+
+clean:
+	rm test.elf
+	rm test.v
+
 tcl_copy: $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl
 	cp $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl filter_init.tcl
 
