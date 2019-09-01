@@ -14,25 +14,28 @@ SECTIONS
         *(.__system.isr)
         *(.__system.os)
         *(.__libgcc_)
-        *(.__system.data)
-        *(.__system.secure_data)
     }
     /* User code mapping */
     .text : {
         *(.text)
-    }
-    .data : {
-        *(.data)
+        __text_end = . ;
     }
     .rodata : {
         *(.rodata)
     }
     .bss : {
+        . = ALIGN(16) ;
         __bss_start = .;
         *(.bss)
         *(.sbss)
         __bss_end = .;
-
+    }
+    .system_data : {
+        *(.__system.data)
+        *(.__system.secure_data)
+    }
+    .data : {
+        *(.data)
     }
 
     .heap (NOLOAD) : {
@@ -41,7 +44,6 @@ SECTIONS
         . =  . + HEAP_SIZE ;
         __heap_end = . ;
     }
-
 
     /* Stack code mapping */
     .application_stack __heap_end : {

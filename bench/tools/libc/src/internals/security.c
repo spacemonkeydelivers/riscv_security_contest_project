@@ -55,7 +55,7 @@ unsigned _ossec_generate_tag () {
 
     ctx_ptr_t ptr = (ctx_ptr_t)_ossec_get_protected_ptr((unsigned)&sec_cntx);
     unsigned new_tag = ++ptr->tag_gen;
-    if (new_tag > 15) {
+    if (new_tag > 14) { // we do not use 0b1111 as it reserved for .text/.system
         ptr->tag_gen = 1; // we do not use "0" tag
     }
     return new_tag;
