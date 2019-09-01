@@ -47,7 +47,7 @@ if (NOT EXISTS "${RISCV_TOOLCHAIN_PATH}/bin/riscv32-unknown-elf-gcc")
     message(FATAL_ERROR "Could not find gcc for risc-v: ${RISCV_TOOLCHAIN_PATH}/riscv32-unknown-elf-gcc\nPlease set RISCV_TOOLCHAIN appropriately")
 endif()
 
-set(WEST_TEST_PATH "${CMAKE_SOURCE_DIR}/zephyrproject/.west/west/src/west/main.py")
+set(WEST_TEST_PATH "${CMAKE_SOURCE_DIR}/zephyrproject/.west/config")
 if(EXISTS "${WEST_TEST_PATH}")
     set (ENABLE_ZEPHYR_APPS True)
     message("working zephyr/west configuration detected, zephyr apps ENABLED")
