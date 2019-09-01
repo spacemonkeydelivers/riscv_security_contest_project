@@ -44,6 +44,10 @@ class MakeFileBuilder:
     if ret != 0:
       raise Exception('could not generate makefile')
 
+    clean_cmd = 'make clean -f Makefile.test'
+    print('running {}... errors are expected'.format(clean_cmd))
+    os.system(clean_cmd)
+
     make_cmd = 'make -f Makefile.test VERBOSE=1'
     print('running {}...'.format(make_cmd))
     ret = os.system(make_cmd)
