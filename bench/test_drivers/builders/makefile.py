@@ -65,5 +65,5 @@ class MakeFileBuilder:
       extract_uart_checker(f)
 
   def find_driver(self):
-    self.driver
+    return self.driver
 

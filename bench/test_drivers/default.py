@@ -73,5 +73,5 @@ def run(libbench):
           raise Exception('UART output mismatch!, test failed')
   else:
     print "custom driver detected, control transfered"
-    driver.run(soc)
+    driver.run(libbench, soc)
 
