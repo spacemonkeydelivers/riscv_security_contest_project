@@ -4,6 +4,8 @@ set(ZEPHYR_APPS
     philosophers
     hello_world
     testing/integration
+    portability/cmsis_rtos_v1/timer_synchronization
+    portability/cmsis_rtos_v2/timer_synchronization
     # basic/threads # due too no SOURCES given to target: drivers__gpio
 )
 
