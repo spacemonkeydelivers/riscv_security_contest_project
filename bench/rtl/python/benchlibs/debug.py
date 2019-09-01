@@ -94,7 +94,7 @@ class Debugger:
 
                 self._trace['states'].clear()
                 pc = self._soc.pc()
-                msg = self._disasm.display(pc)
+                msg = self._disasm.display(pc, self._soc)
                 print(msg)
 
         self._trace['state'] = new_state

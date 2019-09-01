@@ -50,8 +50,8 @@ class CmdPrint:
         upc = self.soc.upc()
         print '--- CPU state ---'
         print 'step: #{}, utick: {}'.format(step_ctr, tick_ctr)
-        disasm = self.debugger._disasm.display(pc)
-        udisasm = self.debugger._disasm.display(upc)
+        disasm = self.debugger._disasm.display(pc, self.soc)
+        udisasm = self.debugger._disasm.display(upc, self.soc)
         if disasm != udisasm:
             print 'stale pc: {}'.format(disasm)
             print 'unstable pc: {}'.format(udisasm)
