@@ -36,7 +36,7 @@ class CmdStep:
                 for i in range(0, num):
                     self.stepi()
                 upc = self.soc.upc()
-                next_insn = self.debugger._disasm.display(upc)
+                next_insn = self.debugger._disasm.display(upc, self.soc)
                 print('next: {0}'.format(next_insn))
                 return 'step {}'.format(num)
             except ValueError:

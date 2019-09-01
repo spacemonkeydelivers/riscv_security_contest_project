@@ -107,7 +107,7 @@ class CmdExamine:
                     a = d[0]
                     d = d[1]
                     if out == 'i':
-                        d = self.debugger._disasm.display(a)
+                        d = self.debugger._disasm.display(a, self.soc)
                     print(fmts[out].format(a, d))
                 print('_______________________')
 

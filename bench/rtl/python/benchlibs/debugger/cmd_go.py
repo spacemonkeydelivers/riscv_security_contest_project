@@ -33,7 +33,7 @@ class CmdGo:
                 self.soc.run(10 ** 5, break_on = tgt_pc)
             except UserWarning:
                 print('target PC={} reached: <{}>'.format(
-                  tgt_pc_str, self.debugger._disasm.display(tgt_pc)))
+                  tgt_pc_str, self.debugger._disasm.display(tgt_pc, self.soc)))
             return None
         else:
             if len(args) == 0:

@@ -28,7 +28,7 @@ class Disassembler:
           filter_tmp.append('{} {}::{}'.format(format(raw, '032b'),
                                                 hex(addr), inst))
 
-          self._data[addr] = inst
+          self._data[addr] = { "disas": inst, "raw": raw }
 
         self.dump_filters(filter_tmp)
 
@@ -51,8 +51,17 @@ class Disassembler:
         for k in self._data:
             print('{}:{}'.format(hex(k), self._data[k]))
 
-    def display(self, address):
+    def display(self, address, soc):
         if self._data.has_key(address):
-            return '{}:{}'.format(hex(address), self._data[address])
+            info = self._data[address]
+            raw   = info["raw"]
+            disas = info["disas"]
+
+            data = soc.read_word_ram(word_index = address / 4)
+            if data == raw:
+              return '{}:{}'.format(hex(address), disas)
+            else:
+              return 'disasm failure. text CORRUPTION detected! content={:#x}, expected=[{:#x}, {}]'.format(
+                  data, raw, disas)
         else:
             '{}: UNDEFINED'.format(hex(address))
