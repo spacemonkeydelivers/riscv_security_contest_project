@@ -30,14 +30,14 @@ class CmdGo:
                 return None
 
             try:
-                self.soc.run(10 ** 5, break_on = tgt_pc)
+                self.soc.run(5 * 10 ** 6, break_on = tgt_pc)
             except UserWarning:
                 print('target PC={} reached: <{}>'.format(
                   tgt_pc_str, self.debugger._disasm.display(tgt_pc, self.soc)))
             return None
         else:
             if len(args) == 0:
-                ilimit = 10 ** 5
+                ilimit = 5 * 10 ** 6
             else:
                 try:
                     ilimit = int(args[0])
