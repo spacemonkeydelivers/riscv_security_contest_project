@@ -20,7 +20,7 @@ class RiscVSoc:
         self._fwd_cntr = 0
         self._braindead_threshold = 50
         self._stall_threshold = self._braindead_threshold / 2 * 3
-        self._ticks_to_run = 2 * 10 ** 5
+        self._ticks_to_run = 5 * 10 ** 6
 
         self._uart = None
         import atexit
