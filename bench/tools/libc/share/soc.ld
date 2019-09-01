@@ -1,7 +1,7 @@
 SECTIONS
 {
     STACK_SIZE = 4096;
-    HEAP_SIZE = 12288; /* 12K */
+    HEAP_SIZE = 32K; /* 12K */
     _start = 0;
     ENTRY(_start)
     /* BIOS mapping */
