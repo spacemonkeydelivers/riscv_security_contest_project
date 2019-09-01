@@ -16,6 +16,17 @@ bss_init:
 1:
 # .bss initialization end
 
+# set tags for code section
+    la t1, __cfg_enable_memtag
+    beq zero, t1, 1f
+    la t1, _start
+    la t2, __text_end
+    li t3, 15
+0:
+    st t3, 0(t1)
+    addi t1, t1, 15
+    blt t1, t2, 0b
+1:
     la sp, __APP_STACK_TOP
     la t1, __isr_wrapper
     csrw mtvec, t1
