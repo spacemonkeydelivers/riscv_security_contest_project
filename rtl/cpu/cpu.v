@@ -2,6 +2,7 @@
 `include "cpu/wb_cpu_bus.v"
 `include "cpu/decoder.v"
 `include "cpu/registers.v"
+`include "cpu/lfsr_rnd.v"
 
 
 module cpu
@@ -46,6 +47,15 @@ module cpu
     localparam CAUSE_TAG_MISMATCH           = 32'h80000010;
 
     localparam VENDOR_ID                    = 32'hC001F001;
+
+    // RND instance
+    wire[31:0] rnd_data;
+
+    lfsr_rnd lfsr_rnd_inst(
+        .I_clk(clk),
+        .I_reset(reset),
+        .O_rnd(rnd_data)
+    );
 
     // ALU instance
     reg alu_en = 0;
