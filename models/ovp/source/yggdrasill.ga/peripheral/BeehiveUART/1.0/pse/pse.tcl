@@ -5,7 +5,7 @@
 
 set vendor yggdrasill.ga
 set library peripheral
-set name LittleUART
+set name BeehiveUART
 set version 1.0
 
 imodelnewperipheral \
@@ -25,8 +25,8 @@ imodeladdaddressblock -name Reg -port port0 -size 0x4 -offset 0 -width 8
 
 set setup_off   0
 set fifo_off    1
-set tx_data_off 2
-set rx_data_off 3
+set rx_data_off 2
+set tx_data_off 3
 
 imodeladdmmregister -addressblock port0/Reg -name Setup \
     -width 8 -offset $setup_off \
