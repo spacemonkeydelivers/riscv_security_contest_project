@@ -1,0 +1,502 @@
+# Macro Assembler
+
+.macro ADD_R rd rs1 rs2
+    .int 0x00000033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro ADDI_I imm32 rd rs1
+    .int 0x00000013 | ((\imm32&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro AMOADD_W_R rd rs1 rs2
+    .int 0x0000202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOADD_W_AQ_R rd rs1 rs2
+    .int 0x0400202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOADD_W_AQRL_R rd rs1 rs2
+    .int 0x0600202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOADD_W_RL_R rd rs1 rs2
+    .int 0x0200202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOAND_W_R rd rs1 rs2
+    .int 0x6000202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOAND_W_AQ_R rd rs1 rs2
+    .int 0x6400202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOAND_W_AQRL_R rd rs1 rs2
+    .int 0x6600202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOAND_W_RL_R rd rs1 rs2
+    .int 0x6200202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOMAXU_W_R rd rs1 rs2
+    .int 0xe000202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOMAXU_W_AQ_R rd rs1 rs2
+    .int 0xe400202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOMAXU_W_AQRL_R rd rs1 rs2
+    .int 0xe600202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOMAXU_W_RL_R rd rs1 rs2
+    .int 0xe200202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOMAX_W_R rd rs1 rs2
+    .int 0xa000202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOMAX_W_AQ_R rd rs1 rs2
+    .int 0xa400202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOMAX_W_AQRL_R rd rs1 rs2
+    .int 0xa600202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOMAX_W_RL_R rd rs1 rs2
+    .int 0xa200202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOMINU_W_R rd rs1 rs2
+    .int 0xc000202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOMINU_W_AQ_R rd rs1 rs2
+    .int 0xc400202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOMINU_W_AQRL_R rd rs1 rs2
+    .int 0xc600202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOMINU_W_RL_R rd rs1 rs2
+    .int 0xc200202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOMIN_W_R rd rs1 rs2
+    .int 0x8000202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOMIN_W_AQ_R rd rs1 rs2
+    .int 0x8400202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOMIN_W_AQRL_R rd rs1 rs2
+    .int 0x8600202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOMIN_W_RL_R rd rs1 rs2
+    .int 0x8200202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOOR_W_R rd rs1 rs2
+    .int 0x4000202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOOR_W_AQ_R rd rs1 rs2
+    .int 0x4400202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOOR_W_AQRL_R rd rs1 rs2
+    .int 0x4600202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOOR_W_RL_R rd rs1 rs2
+    .int 0x4200202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOSWAP_W_R rd rs1 rs2
+    .int 0x0800202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOSWAP_W_AQ_R rd rs1 rs2
+    .int 0x0c00202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOSWAP_W_AQRL_R rd rs1 rs2
+    .int 0x0e00202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOSWAP_W_RL_R rd rs1 rs2
+    .int 0x0a00202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOXOR_W_R rd rs1 rs2
+    .int 0x2000202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOXOR_W_AQ_R rd rs1 rs2
+    .int 0x2400202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOXOR_W_AQRL_R rd rs1 rs2
+    .int 0x2600202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AMOXOR_W_RL_R rd rs1 rs2
+    .int 0x2200202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro AND_R rd rs1 rs2
+    .int 0x00007033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro ANDI_I imm32 rd rs1
+    .int 0x00007013 | ((\imm32&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro AUIPC_U2 imm32 rd
+    .int 0x00000017 | ((\imm32&0xffffffff)<<12) | ((\rd&0x1f)<<7)
+.endm
+
+.macro BEQ_SB imm32 rs1 rs2
+    .int 0x00000063 | ((\imm32&0x1fff)<<31) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro BGE_SB imm32 rs1 rs2
+    .int 0x00005063 | ((\imm32&0x1fff)<<31) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro BGEU_SB imm32 rs1 rs2
+    .int 0x00007063 | ((\imm32&0x1fff)<<31) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro BLT_SB imm32 rs1 rs2
+    .int 0x00004063 | ((\imm32&0x1fff)<<31) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro BLTU_SB imm32 rs1 rs2
+    .int 0x00006063 | ((\imm32&0x1fff)<<31) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro BNE_SB imm32 rs1 rs2
+    .int 0x00001063 | ((\imm32&0x1fff)<<31) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro CSRRC_CS CSR rd rs1
+    .int 0x00003073 | ((\CSR&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro CSRRCI_CSI CSR rd zimm
+    .int 0x00007073 | ((\CSR&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\zimm&0x1f)<<15)
+.endm
+
+.macro CSRRS_CS CSR rd rs1
+    .int 0x00002073 | ((\CSR&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro CSRRSI_CSI CSR rd zimm
+    .int 0x00006073 | ((\CSR&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\zimm&0x1f)<<15)
+.endm
+
+.macro CSRRW_CS CSR rd rs1
+    .int 0x00001073 | ((\CSR&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro CSRRWI_CSI CSR rd zimm
+    .int 0x00005073 | ((\CSR&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\zimm&0x1f)<<15)
+.endm
+
+.macro DIV_R rd rs1 rs2
+    .int 0x02004033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro DIVU_R rd rs1 rs2
+    .int 0x02005033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro EBREAK_SY
+    .int 0x00100073
+.endm
+
+.macro ECALL_SY
+    .int 0x00000073
+.endm
+
+.macro FADD_S_RRM rd rm rs1 rs2
+    .int 0x00000053 | ((\rd&0x1f)<<7) | ((\rm&0x7)<<12) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro FCLASS_S_RRM3 rd rs1
+    .int 0xe0001053 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro FCVT_S_W_RRM1 rd rm rs1
+    .int 0xd0000053 | ((\rd&0x1f)<<7) | ((\rm&0x7)<<12) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro FCVT_S_WU_RRM1 rd rm rs1
+    .int 0xd0100053 | ((\rd&0x1f)<<7) | ((\rm&0x7)<<12) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro FCVT_WU_S_RRM1 rd rm rs1
+    .int 0xc0100053 | ((\rd&0x1f)<<7) | ((\rm&0x7)<<12) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro FCVT_W_S_RRM1 rd rm rs1
+    .int 0xc0000053 | ((\rd&0x1f)<<7) | ((\rm&0x7)<<12) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro FDIV_S_RRM rd rm rs1 rs2
+    .int 0x18000053 | ((\rd&0x1f)<<7) | ((\rm&0x7)<<12) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro FENCE_FE pred succ
+    .int 0x0000000f | ((\pred&0xf)<<24) | ((\succ&0xf)<<20)
+.endm
+
+.macro FENCEI_SY
+    .int 0x0000100f
+.endm
+
+.macro FEQ_S_RRM2 rd rs1 rs2
+    .int 0xa0002053 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro FLE_S_RRM2 rd rs1 rs2
+    .int 0xa0000053 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro FLT_S_RRM2 rd rs1 rs2
+    .int 0xa0001053 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro FLW_I imm32 rd rs1
+    .int 0x00002007 | ((\imm32&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro FMADD_S_R4RM rd rm rs1 rs2 rs3
+    .int 0x00000043 | ((\rd&0x1f)<<7) | ((\rm&0x7)<<12) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20) | ((\rs3&0x1f)<<27)
+.endm
+
+.macro FMAX_S_RRM2 rd rs1 rs2
+    .int 0x28001053 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro FMIN_S_RRM2 rd rs1 rs2
+    .int 0x28000053 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro FMSUB_S_R4RM rd rm rs1 rs2 rs3
+    .int 0x00000047 | ((\rd&0x1f)<<7) | ((\rm&0x7)<<12) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20) | ((\rs3&0x1f)<<27)
+.endm
+
+.macro FMUL_S_RRM rd rm rs1 rs2
+    .int 0x10000053 | ((\rd&0x1f)<<7) | ((\rm&0x7)<<12) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro FMV_S_X_RRM3 rd rs1
+    .int 0xf0000053 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro FMV_X_S_RRM3 rd rs1
+    .int 0xe0000053 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro FNMADD_S_R4RM rd rm rs1 rs2 rs3
+    .int 0x0000004f | ((\rd&0x1f)<<7) | ((\rm&0x7)<<12) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20) | ((\rs3&0x1f)<<27)
+.endm
+
+.macro FNMSUB_S_R4RM rd rm rs1 rs2 rs3
+    .int 0x0000004b | ((\rd&0x1f)<<7) | ((\rm&0x7)<<12) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20) | ((\rs3&0x1f)<<27)
+.endm
+
+.macro FSGNJN_S_RRM2 rd rs1 rs2
+    .int 0x20001053 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro FSGNJX_S_RRM2 rd rs1 rs2
+    .int 0x20002053 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro FSGNJ_S_RRM2 rd rs1 rs2
+    .int 0x20000053 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro FSQRT_S_RRM1 rd rm rs1
+    .int 0x58000053 | ((\rd&0x1f)<<7) | ((\rm&0x7)<<12) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro FSUB_S_RRM rd rm rs1 rs2
+    .int 0x08000053 | ((\rd&0x1f)<<7) | ((\rm&0x7)<<12) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro FSW_S imm32 rs1 rs2
+    .int 0x00002027 | ((\imm32&0xfff)<<25) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro JAL_UJ imm32 rd
+    .int 0x0000006f | ((\imm32&0x1fffff)<<31) | ((\rd&0x1f)<<7)
+.endm
+
+.macro JALR_I2 imm32 rd rs1
+    .int 0x00000067 | ((\imm32&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro LB_I3 imm32 rd rs1
+    .int 0x00000003 | ((\imm32&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro LBU_I3 imm32 rd rs1
+    .int 0x00004003 | ((\imm32&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro LH_I3 imm32 rd rs1
+    .int 0x00001003 | ((\imm32&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro LHU_I3 imm32 rd rs1
+    .int 0x00005003 | ((\imm32&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro LR_W_R3 rd rs1
+    .int 0x1000202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro LR_W_AQ_R3 rd rs1
+    .int 0x1400202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro LR_W_AQRL_R3 rd rs1
+    .int 0x1600202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro LR_W_RL_R3 rd rs1
+    .int 0x1200202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro LUI_U imm32 rd
+    .int 0x00000037 | ((\imm32&0xffffffff)<<12) | ((\rd&0x1f)<<7)
+.endm
+
+.macro LW_I3 imm32 rd rs1
+    .int 0x00002003 | ((\imm32&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro MUL_R rd rs1 rs2
+    .int 0x02000033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro MULH_R rd rs1 rs2
+    .int 0x02001033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro MULHSU_R rd rs1 rs2
+    .int 0x02002033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro MULHU_R rd rs1 rs2
+    .int 0x02003033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro OR_R rd rs1 rs2
+    .int 0x00006033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro ORI_I imm32 rd rs1
+    .int 0x00006013 | ((\imm32&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro REM_R rd rs1 rs2
+    .int 0x02006033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro REMU_R rd rs1 rs2
+    .int 0x02007033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro SB_S imm32 rs1 rs2
+    .int 0x00000023 | ((\imm32&0xfff)<<25) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro SC_W_R rd rs1 rs2
+    .int 0x1800202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro SC_W_AQ_R rd rs1 rs2
+    .int 0x1c00202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro SC_W_AQRL_R rd rs1 rs2
+    .int 0x1e00202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro SC_W_RL_R rd rs1 rs2
+    .int 0x1a00202f | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro SH_S imm32 rs1 rs2
+    .int 0x00001023 | ((\imm32&0xfff)<<25) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro SLL_R rd rs1 rs2
+    .int 0x00001033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro SLLI_R2 rd rs1 shamt
+    .int 0x00001013 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\shamt&0x1f)<<20)
+.endm
+
+.macro SLT_R rd rs1 rs2
+    .int 0x00002033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro SLTI_I imm32 rd rs1
+    .int 0x00001013 | ((\imm32&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro SLTIU_I imm32 rd rs1
+    .int 0x00003013 | ((\imm32&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
+.macro SLTU_R rd rs1 rs2
+    .int 0x00003033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro SRA_R rd rs1 rs2
+    .int 0x40005033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro SRAI_R2 rd rs1 shamt
+    .int 0x40005013 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\shamt&0x1f)<<20)
+.endm
+
+.macro SRL_R rd rs1 rs2
+    .int 0x00005033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro SRLI_R2 rd rs1 shamt
+    .int 0x00005013 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\shamt&0x1f)<<20)
+.endm
+
+.macro SUB_R rd rs1 rs2
+    .int 0x40000033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro SW_S imm32 rs1 rs2
+    .int 0x00002023 | ((\imm32&0xfff)<<25) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro XOR_R rd rs1 rs2
+    .int 0x00004033 | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15) | ((\rs2&0x1f)<<20)
+.endm
+
+.macro XORI_I imm32 rd rs1
+    .int 0x00004013 | ((\imm32&0xfff)<<20) | ((\rd&0x1f)<<7) | ((\rs1&0x1f)<<15)
+.endm
+
