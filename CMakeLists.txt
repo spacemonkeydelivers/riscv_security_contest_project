@@ -70,7 +70,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -g")
 
 # VERILATOR_* is used to build verilator library and RLT simulator
 set(VERILATOR_FLAGS "--trace --trace-params --trace-structs")
-set(VERILATOR_FLAGS "${VERILATOR_FLAGS} -Wall --MMD --public")
+set(VERILATOR_FLAGS "${VERILATOR_FLAGS} -Wall --MMD --public -Wno-fatal")
 set(VERILATOR_FLAGS "${VERILATOR_FLAGS} -CFLAGS -g -CFLAGS -fpic")
 
 # This produce "verilated" library, consumed by RTL simulator
