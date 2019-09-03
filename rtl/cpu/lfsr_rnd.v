@@ -1,5 +1,5 @@
 module lfsr_rnd
-    #(parameter BITS = 32)
+    #(parameter POLY = 32'h80200003)
     (
         input        I_clk,
         input        I_reset,
@@ -13,18 +13,13 @@ module lfsr_rnd
     reg[31:0] result;
     assign O_rnd = result;
 
-    integer i;
-    localparam POLY = 32'h80200003;
+    wire[31:0] to_xor = POLY & {32{result[31]}};
     always @(posedge clk) begin
         if(I_reset) begin
             result <= 32'hbed4dead;
         end
         else begin
-            result[0] <= result[31];
-            for (i = 1; i < BITS; i = i + 1) begin
-                if (POLY & (1 << i)) result[i] <= result[i - 1] ^ result[31];
-                else result[i] <= result[i - 1];
-            end
+            result <= {result[30:0], result[31]} ^ to_xor;
         end
     end
 
