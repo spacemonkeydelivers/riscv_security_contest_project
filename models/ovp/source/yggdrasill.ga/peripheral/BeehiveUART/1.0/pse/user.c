@@ -80,7 +80,7 @@ PPM_NBYTE_WRITE_CB(TxDataWrite) {
                    bytes);                                                           
     }
     Uns8* cptr = (Uns8*)data;
-    bhmPrintf("UART write: %c", *cptr);
+    bhmPrintf("UART write: %c\n", *cptr);
 
     // YOUR CODE HERE (TxDataWrite)
     Uns32 i;
