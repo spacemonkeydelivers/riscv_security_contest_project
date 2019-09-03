@@ -22,11 +22,11 @@ iadddocumentation -name Description -text "The operating system Paradise"
 #### PROCESSOR
 ihwaddprocessor \
   -instancename hart0 \
-  -vendor microsemi.ovpworld.org \
+  -vendor yggdrasill.ga \
   -library processor \
   -type riscv \
-  -version 1.0 \
-  -variant MiV_RV32IMA
+  -variant RV32IMC \
+  -version 1.0
 
 ihwaddbus \
   -instancename bus0 -addresswidth 32
