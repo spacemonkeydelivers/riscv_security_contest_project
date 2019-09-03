@@ -279,6 +279,10 @@ static void applyParamsSMP(riscvP riscv, riscvParamValuesP params) {
     cfg->Zvamo             = params->Zvamo;
     cfg->Zvediv            = params->Zvediv;
 
+#ifdef BEEHIVE
+    cfg->test_exit         = params->test_exit;
+#endif // BEEHIVE
+
     // force VLEN >= ELEN
     if(cfg->VLEN<cfg->ELEN) {
         vmiMessage("W", CPU_PREFIX"_IVLEN",

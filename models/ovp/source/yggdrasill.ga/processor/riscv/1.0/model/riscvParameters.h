@@ -26,6 +26,9 @@
 // model header files
 #include "riscvTypeRefs.h"
 
+#ifdef BEEHIVE
+#include "riscvBeehive.h"
+#endif // BEEHIVE
 
 //
 // Define model parameters
@@ -87,6 +90,10 @@ typedef struct riscvParamValuesS {
     VMI_BOOL_PARAM(Zvlsseg);
     VMI_BOOL_PARAM(Zvamo);
     VMI_BOOL_PARAM(Zvediv);
+
+#ifdef BEEHIVE
+    VMI_ENUM_PARAM(test_exit);
+#endif // BEEHIVE
 
 } riscvParamValues;
 

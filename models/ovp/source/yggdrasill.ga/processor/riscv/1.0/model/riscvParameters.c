@@ -37,6 +37,9 @@
 #include "riscvVariant.h"
 #include "riscvVMConstants.h"
 
+#ifdef BEEHIVE
+#include "riscvBeehive.h"
+#endif // BEEHIVE
 
 //
 // Restrictions on parameters
@@ -113,6 +116,16 @@ static vmiEnumParameter vectorVariants[RVVV_LAST+1] = {
     // KEEP LAST: terminator
     {0}
 };
+
+#ifdef BEEHIVE
+static vmiEnumParameter beehiveTestExitValues[] = {
+    {"NONE", TE_NONE},
+    {"WFI",  TE_WFI},
+    {"LOOP", TE_LOOP},
+    // KEEP LAST: terminator
+    {0},
+};
+#endif // BEEHIVE
 
 //
 // This function type is used to specify the default value for a parameter
@@ -207,6 +220,10 @@ static void setUns64ParamDefault(vmiParameterP param, Uns64 value) {
 //
 static RISCV_ENUM_PDEFAULT_CFG_FN(user_version);
 static RISCV_ENUM_PDEFAULT_CFG_FN(priv_version);
+
+#ifdef BEEHIVE
+static RISCV_ENUM_PDEFAULT_CFG_FN(test_exit);
+#endif // BEEHIVE
 
 //
 // Set default value of raw Bool parameters
@@ -408,6 +425,10 @@ static riscvParameter formals[] = {
     {  RVPV_ALL,     default_Zvlsseg,              VMI_BOOL_PARAM_SPEC  (riscvParamValues, Zvlsseg,              False,                     "Specify that Zvlsseg is implemented (vector extension)")},
     {  RVPV_ALL,     default_Zvamo,                VMI_BOOL_PARAM_SPEC  (riscvParamValues, Zvamo,                False,                     "Specify that Zvamo is implemented (vector extension)")},
     {  RVPV_ALL,     default_Zvediv,               VMI_BOOL_PARAM_SPEC  (riscvParamValues, Zvediv,               False,                     "Specify that Zvediv is implemented (vector extension)")},
+
+#ifdef BEEHIVE
+    {  RVPV_ALL,     default_test_exit,            VMI_ENUM_PARAM_SPEC  (riscvParamValues, test_exit,            beehiveTestExitValues,     "Selects test exit sequence. Can be NONE, WFI, LOOP.")},
+#endif // BEEHIVE
 
     // KEEP LAST
     {  RVPV_ALL,     0,                            VMI_END_PARAM}
