@@ -31,7 +31,11 @@ VMI_PROC_INFO_FN(riscvProcInfo) {
     riscvP riscv = (riscvP) processor;
 
     static const vmiProcessorInfo info32 = {
+#ifdef BEEHIVE
+        .vlnv.vendor      = "yggdrasill.ga",
+#else  // BEEHIVE
         .vlnv.vendor      = "riscv.ovpworld.org",
+#endif // BEEHIVE
         .vlnv.library     = "processor",
         .vlnv.name        = "riscv",
         .vlnv.version     = "1.0",
@@ -56,7 +60,11 @@ VMI_PROC_INFO_FN(riscvProcInfo) {
     };
 
     static const vmiProcessorInfo info64 = {
+#ifdef BEEHIVE
+        .vlnv.vendor      = "yggdrasill.ga",
+#else  // BEEHIVE
         .vlnv.vendor      = "riscv.ovpworld.org",
+#endif // BEEHIVE
         .vlnv.library     = "processor",
         .vlnv.name        = "riscv",
         .vlnv.version     = "1.0",

@@ -231,6 +231,26 @@ static riscvArchitecture getCurrentArch(riscvP riscv) {
     return riscv->currentArch;
 }
 
+#ifdef BEEHIVE
+//
+// Test exit handler
+//
+static void testExit(riscvP riscv, Uns32 cause, Uns32 status) {
+    switch (cause) {
+    case TE_LOOP:
+        vmiPrintf("Test exit (LOOP), status: %d\n", status);
+        break;
+    case TE_WFI:
+        vmiPrintf("Test exit (WFI), status: %d\n", status);
+        break;
+    default:
+        vmiPrintf("Unknown test exit cause: %d\n", cause);
+        vmirtFinish(13);
+        break;
+    }
+    vmirtFinish(status);
+}
+#endif // BEEHIVE
 
 ////////////////////////////////////////////////////////////////////////////////
 // ILLEGAL INSTRUCTION HANDLING (REQUIRING PROCESSOR ONLY)
@@ -1132,6 +1152,15 @@ static RISCV_MORPH_FN(emitJAL) {
         emitTargetAddressUnalignedC(riscv, tgt);
     }
 
+#ifdef BEEHIVE
+    if(riscv->configInfo.test_exit == TE_LOOP) {
+        if (tgt == getPC(riscv)) {
+            // TODO(RovingStone): exit status
+            testExit(riscv, TE_LOOP, 0);
+        }
+    }
+#endif // BEEHIVE
+
     // emit call using calculated linkPC and adjusted lr
     Uns64 linkPC = getLinkPC(state, &lr);
     vmimtUncondJump(linkPC, tgt, lr, hint|vmi_JH_RELATIVE);
@@ -1518,6 +1547,13 @@ static RISCV_MORPH_FN(emitWFI) {
 
     riscvP            riscv = state->riscv;
     riscvArchitecture arch  = getCurrentArch(riscv);
+
+#ifdef BEEHIVE
+    if(riscv->configInfo.test_exit == TE_WFI) {
+        // TODO(RovingStone): exit status
+        testExit(riscv, TE_WFI, 0);
+    }
+#endif // BEEHIVE
 
     // this instruction must be executed in Machine mode or Supervisor mode
     // unless User mode interrupts are implemented

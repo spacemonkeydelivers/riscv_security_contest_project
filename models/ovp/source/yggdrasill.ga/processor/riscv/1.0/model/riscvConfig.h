@@ -30,6 +30,10 @@
 #include "riscvTypeRefs.h"
 #include "riscvVariant.h"
 
+#ifdef BEEHIVE
+#include "riscvBeehive.h"
+#endif // BEEHIVE
+
 //
 // Function type for adding documentation
 //
@@ -105,6 +109,10 @@ typedef struct riscvConfigS {
     const char      **specificDocs;     // extension-specific documentation
     riscvDocFn        restrictionsCB;   // extension-specific restrictions
     const void       *extensionConfig;  // extension-specific configuration
+
+#ifdef BEEHIVE
+    beehiveTestExitE test_exit;         // test exit sequence
+#endif // BEEHIVE
 
 } riscvConfig;
 
