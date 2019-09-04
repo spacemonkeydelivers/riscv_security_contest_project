@@ -121,8 +121,8 @@ module cpu
     reg dec_en;
 
     wire [4:0] dec_alu_oper;
-    wire exec_mux_alu_s1_sel_o;
-    wire [1:0] exec_mux_alu_s2_sel_o;
+    wire exec_mux_alu_s1_sel;
+    wire [1:0] exec_mux_alu_s2_sel;
     wire [2:0] exec_next_stage;
     wire exec_writeback_from_alu;
     wire exec_writeback_from_imm;
@@ -139,8 +139,8 @@ module cpu
         .O_imm(dec_imm),
         .O_branchmask(dec_branchmask),
         .alu_oper_o(dec_alu_oper),
-        .exec_mux_alu_s1_sel_o(exec_mux_alu_s1_sel_o),
-        .exec_mux_alu_s2_sel_o(exec_mux_alu_s2_sel_o),
+        .exec_mux_alu_s1_sel_o(exec_mux_alu_s1_sel),
+        .exec_mux_alu_s2_sel_o(exec_mux_alu_s2_sel),
         .exec_next_stage_o(exec_next_stage),
         .exec_writeback_from_alu_o(exec_writeback_from_alu),
         .exec_writeback_from_imm_o(exec_writeback_from_imm),
@@ -161,17 +161,21 @@ module cpu
         .O_regval2(reg_val2)
     );
 
+    wire mux_alu_s1_sel_f;
     reg mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
+    assign mux_alu_s1_sel_f = (new_state == STATE_EXEC) ? exec_mux_alu_s1_sel : mux_alu_s1_sel;
     always @(*) begin
-        case(mux_alu_s1_sel)
+        case(mux_alu_s1_sel_f)
             `MUX_ALUDAT1_REGVAL1: alu_dataS1 = reg_val1;
             default:             alu_dataS1 = pc; // MUX_ALUDAT1_PC
         endcase
     end
 
+    wire [1:0] mux_alu_s2_sel_f;
     reg[1:0] mux_alu_s2_sel = `MUX_ALUDAT2_REGVAL2;
+    assign mux_alu_s2_sel_f = (new_state == STATE_EXEC) ? exec_mux_alu_s2_sel : mux_alu_s2_sel;
     always @(*) begin
-        case(mux_alu_s2_sel)
+        case(mux_alu_s2_sel_f)
             `MUX_ALUDAT2_REGVAL2: alu_dataS2 = reg_val2;
             `MUX_ALUDAT2_IMM:     alu_dataS2 = dec_imm;
             default:             alu_dataS2 = 4; // MUX_ALUDAT2_INSTLEN
@@ -369,12 +373,15 @@ module cpu
             next_new_state = STATE_FETCH;
             bus_en = 1;
             bus_op = `BUSOP_READW;
+            
+            mux_reg_input_sel = (writeback_from_alu || exec_writeback_from_alu) ? `MUX_REGINPUT_ALU :
+                                 exec_writeback_from_imm                        ?  exec_mux_reg_input_sel :
+                                                                                  `MUX_REGINPUT_BUS;
+            reg_we = writeback_from_alu || writeback_from_bus || exec_writeback_from_imm || exec_writeback_from_alu;
          end
          STATE_FETCH: begin
             next_new_state = STATE_DECODE;
 
-            mux_reg_input_sel = writeback_from_alu ? `MUX_REGINPUT_ALU : `MUX_REGINPUT_BUS;
-            reg_we = writeback_from_alu | writeback_from_bus;
             
             // ALU is unused... let's compute PC+4!
             alu_en = 1;
@@ -400,6 +407,7 @@ module cpu
                default:         next_new_state = STATE_DEAD;
             endcase
             update_pc = 1;
+            alu_en = 1;
          end
          STATE_LOAD2: begin
             next_new_state = STATE_PRE_FETCH;
