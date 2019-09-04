@@ -6,18 +6,26 @@
 
 volatile struct secure_context_t {
     volatile int32_t tag_gen;
+    volatile int32_t sec_tag;
     int32_t pad0;
     int32_t pad1;
-    int32_t pad2;
 } sec_cntx __attribute__((section(".__system.secure_data"), aligned (16)));
-
 
 __attribute__((section(".__system.init")))
 unsigned _ossec_init       (const struct init_ctx* ctx) {
     (void)ctx;
     _Static_assert (sizeof(sec_cntx) == 16, "secure context must be 16 bytes");
     memset((void*)&sec_cntx, 0, sizeof(sec_cntx));
-    sec_cntx.tag_gen = 1; // TODO: we should HW support for this one
+
+    int32_t sec_tag = 0;
+    do {
+        sec_tag = rand() & 0xf;
+    }while(sec_tag == 0);
+    sec_cntx.sec_tag = sec_tag;
+
+    do {
+       sec_cntx.tag_gen = rand() & 0xf;
+    } while (sec_cntx.tag_gen == 0 || sec_cntx.tag_gen == sec_tag);
 
     int en_value = 1;
     unsigned ptr = (unsigned)&sec_cntx;
@@ -25,11 +33,12 @@ unsigned _ossec_init       (const struct init_ctx* ctx) {
             "csrw tags, %[en_value]\n\t"
             "li t0, (~(0xf << 26))\n\t"
             "and t1, %[ptr], t0\n\t"
-            "li t0, 15\n\t" //TODO: we need HW support for this one
+            "or t0, %[sec_tag], x0\n\t"
             "st t0, 0(t1)"
             : /* No outputs. */
             : [en_value]"r" (en_value),
-              [ptr]"r" (ptr)
+              [ptr]"r" (ptr),
+              [sec_tag]"r" (sec_tag)
             : "t0", "t1",  "memory");
     return 1;
 }
@@ -52,14 +61,17 @@ static unsigned _ossec_get_protected_ptr(unsigned ptr) {
 typedef volatile struct secure_context_t* volatile ctx_ptr_t;
 __attribute__((section(".__system.os")))
 unsigned _ossec_generate_tag () {
-
     ctx_ptr_t ptr = (ctx_ptr_t)_ossec_get_protected_ptr((unsigned)&sec_cntx);
-    unsigned new_tag = ++ptr->tag_gen;
-    if (new_tag > 14) { // we do not use 0b1111 as it reserved for .text/.system
-        ptr->tag_gen = 1; // we do not use "0" tag
-    }
+    int32_t new_tag = ptr->tag_gen;
+
+    // we do not use "0" and secure tags
+    do {
+        ptr->tag_gen = (ptr->tag_gen + 1) & 0xf; // TODO: rework to use rand() instead of '+1' in future
+    } while(ptr->tag_gen == 0 || ptr->tag_gen == ptr->sec_tag);
+
     return new_tag;
 }
+
 __attribute__((section(".__system.os")))
 unsigned _ossec_alignment_assert(unsigned ptr) {
     printf("PANIC: ALIGNMENT VIOLATION @[0x%x]\n", ptr);
