@@ -77,7 +77,9 @@ module decoder
    assign exec_next_pc_from_alu_o = exec_next_pc_from_alu;
    assign exec_mux_reg_input_sel_o = exec_mux_reg_input_sel;
 
-   always @ (opcode) begin
+   always @ (*) begin
+      exec_writeback_from_imm = 0;
+      exec_writeback_from_alu = 0;
       case(opcode)
          `OP_OP: begin
             exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
