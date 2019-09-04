@@ -3,7 +3,7 @@
 `include "cpu/decoder.v"
 `include "cpu/registers.v"
 `include "cpu/lfsr_rnd.v"
-
+`include "cpu/cpudefs.vh"
 
 module cpu
 #(
@@ -115,11 +115,17 @@ module cpu
     // Decoder instance
     wire[4:0] dec_rs1, dec_rs2, dec_rd;
     wire[31:0] dec_imm;
-    wire[4:0] dec_opcode;
-    wire[2:0] dec_funct3;
-    wire[6:0] dec_funct7;
     wire[5:0] dec_branchmask;
     reg dec_en;
+
+    wire [4:0] dec_alu_oper;
+    wire exec_mux_alu_s1_sel_o;
+    wire [1:0] exec_mux_alu_s2_sel_o;
+    wire [2:0] exec_next_stage;
+    wire exec_writeback_from_alu;
+    wire exec_writeback_from_imm;
+    wire exec_next_pc_from_alu;
+    wire [1:0] exec_mux_reg_input_sel;
 
     decoder dec_inst(
         .I_clk(clk),
@@ -129,10 +135,15 @@ module cpu
         .O_rs2(dec_rs2),
         .O_rd(dec_rd),
         .O_imm(dec_imm),
-        .O_opcode(dec_opcode),
-        .O_funct3(dec_funct3),
-        .O_funct7(dec_funct7),
-        .O_branchmask(dec_branchmask)
+        .O_branchmask(dec_branchmask),
+        .alu_oper_o(dec_alu_oper),
+        .exec_mux_alu_s1_sel_o(exec_mux_alu_s1_sel_o),
+        .exec_mux_alu_s2_sel_o(exec_mux_alu_s2_sel_o),
+        .exec_next_stage_o(exec_next_stage),
+        .exec_writeback_from_alu_o(exec_writeback_from_alu),
+        .exec_writeback_from_imm_o(exec_writeback_from_imm),
+        .exec_next_pc_from_alu_o(exec_next_pc_from_alu),
+        .exec_mux_reg_input_sel_o(exec_mux_reg_input_sel)
 	);
 
     // Registers instance
@@ -148,37 +159,27 @@ module cpu
         .O_regval2(reg_val2)
     );
 
-    // Muxer for first operand of ALU
-    localparam MUX_ALUDAT1_REGVAL1 = 1'd0;
-    localparam MUX_ALUDAT1_PC      = 1'd1;
-    reg mux_alu_s1_sel = MUX_ALUDAT1_REGVAL1;
+    reg mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
     always @(*) begin
         case(mux_alu_s1_sel)
-            MUX_ALUDAT1_REGVAL1: alu_dataS1 = reg_val1;
+            `MUX_ALUDAT1_REGVAL1: alu_dataS1 = reg_val1;
             default:             alu_dataS1 = pc; // MUX_ALUDAT1_PC
         endcase
     end
 
-    // Muxer for second operand of ALU
-    localparam MUX_ALUDAT2_REGVAL2 = 2'd0;
-    localparam MUX_ALUDAT2_IMM     = 2'd1;
-    localparam MUX_ALUDAT2_INSTLEN = 2'd2;
-    reg[1:0] mux_alu_s2_sel = MUX_ALUDAT2_REGVAL2;
+    reg[1:0] mux_alu_s2_sel = `MUX_ALUDAT2_REGVAL2;
     always @(*) begin
         case(mux_alu_s2_sel)
-            MUX_ALUDAT2_REGVAL2: alu_dataS2 = reg_val2;
-            MUX_ALUDAT2_IMM:     alu_dataS2 = dec_imm;
+            `MUX_ALUDAT2_REGVAL2: alu_dataS2 = reg_val2;
+            `MUX_ALUDAT2_IMM:     alu_dataS2 = dec_imm;
             default:             alu_dataS2 = 4; // MUX_ALUDAT2_INSTLEN
         endcase
     end
 
-    // Muxer for bus address
-    localparam MUX_BUSADDR_ALU = 1'd0;
-    localparam MUX_BUSADDR_PC  = 1'd1;
-    reg mux_bus_addr_sel = MUX_BUSADDR_ALU;
+    reg mux_bus_addr_sel = `MUX_BUSADDR_ALU;
     always @(*) begin
         case(mux_bus_addr_sel)
-            MUX_BUSADDR_ALU: bus_addr = alu_dataout;
+            `MUX_BUSADDR_ALU: bus_addr = alu_dataout;
             default:         bus_addr = new_pc; // MUX_BUSADDR_PC
         endcase
     end
@@ -278,19 +279,14 @@ module cpu
             default:       csr_exists = 0;
         endcase
     end
-    assign csr_ro = (mux_msr_sel[11:10] == 2'b11) && ((`FUNC_CSRRW == dec_funct3) || (`FUNC_CSRRWI) == dec_funct3);
+    assign csr_ro = 0;
 
-    // Muxer for register data input
-    localparam MUX_REGINPUT_ALU = 2'd0;
-    localparam MUX_REGINPUT_BUS = 2'd1;
-    localparam MUX_REGINPUT_IMM = 2'd2;
-    localparam MUX_REGINPUT_MSR = 2'd3;
-    reg[1:0] mux_reg_input_sel = MUX_REGINPUT_ALU;
+    reg[1:0] mux_reg_input_sel = `MUX_REGINPUT_ALU;
     always @(*) begin
         case(mux_reg_input_sel)
-            MUX_REGINPUT_ALU: reg_datain = alu_dataout;
-            MUX_REGINPUT_BUS: reg_datain = bus_dataout;
-            MUX_REGINPUT_IMM: reg_datain = dec_imm;
+            `MUX_REGINPUT_ALU: reg_datain = alu_dataout;
+            `MUX_REGINPUT_BUS: reg_datain = bus_dataout;
+            `MUX_REGINPUT_IMM: reg_datain = dec_imm;
             default:          reg_datain = msr_data; // MUX_REGINPUT_MSR
         endcase
     end
@@ -357,7 +353,7 @@ module cpu
       reg_re = 0;
 
       bus_op = `BUSOP_READW;
-      mux_bus_addr_sel = MUX_BUSADDR_ALU;
+      mux_bus_addr_sel = `MUX_BUSADDR_ALU;
             
       writeback_from_alu = 0;
       writeback_from_bus = 0;
@@ -367,7 +363,7 @@ module cpu
             next_new_state = STATE_PRE_FETCH;
          end
          STATE_PRE_FETCH: begin
-            mux_bus_addr_sel = MUX_BUSADDR_PC;
+            mux_bus_addr_sel = `MUX_BUSADDR_PC;
             next_new_state = STATE_FETCH;
             bus_en = 1;
             bus_op = `BUSOP_READW;
@@ -375,13 +371,13 @@ module cpu
          STATE_FETCH: begin
             next_new_state = STATE_DECODE;
 
-            mux_reg_input_sel = writeback_from_alu ? MUX_REGINPUT_ALU : MUX_REGINPUT_BUS;
+            mux_reg_input_sel = writeback_from_alu ? `MUX_REGINPUT_ALU : `MUX_REGINPUT_BUS;
             reg_we = writeback_from_alu | writeback_from_bus;
             
             // ALU is unused... let's compute PC+4!
             alu_en = 1;
-            mux_alu_s1_sel = MUX_ALUDAT1_PC;
-            mux_alu_s2_sel = MUX_ALUDAT2_INSTLEN;
+            mux_alu_s1_sel = `MUX_ALUDAT1_PC;
+            mux_alu_s2_sel = `MUX_ALUDAT2_INSTLEN;
          end
          STATE_DECODE: begin
             dec_en = 1;
