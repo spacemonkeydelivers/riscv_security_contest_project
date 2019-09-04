@@ -88,6 +88,12 @@ test_add(c_ripe_a3   c/ripe --cmd="./cfg/attack_3.cfg" NIGHTLY)
 test_add(c_ripe_a4   c/ripe --cmd="./cfg/attack_4.cfg" NIGHTLY)
 test_add(c_ripe_a5   c/ripe --cmd="./cfg/attack_5.cfg" NIGHTLY)
 
+test_add(c_ns_ripe_a1   c/ripe --cmd="./cfg/attack_1.cfg" NIGHTLY DISABLE_SECURITY)
+test_add(c_ns_ripe_a2   c/ripe --cmd="./cfg/attack_2.cfg" NIGHTLY DISABLE_SECURITY)
+test_add(c_ns_ripe_a3   c/ripe --cmd="./cfg/attack_3.cfg" NIGHTLY DISABLE_SECURITY)
+test_add(c_ns_ripe_a4   c/ripe --cmd="./cfg/attack_4.cfg" NIGHTLY DISABLE_SECURITY)
+test_add(c_ns_ripe_a5   c/ripe --cmd="./cfg/attack_5.cfg" NIGHTLY DISABLE_SECURITY)
+
 foreach(test ${ZEPHYR_APPS})
     string(REPLACE "/" "_" APP_NAME ${test})
     test_add(zephyr_${APP_NAME} zephyr/${APP_NAME} NIGHTLY)
