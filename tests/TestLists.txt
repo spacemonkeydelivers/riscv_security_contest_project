@@ -69,8 +69,8 @@ test_add(c_libc_strcmp       c/libc/strcmp)
 
 test_add(c_Slibc_s_malloc     c/libc_sec/s_malloc)
 test_add(c_Slibc_s_free       c/libc_sec/s_free NIGHTLY)
-test_add(c_Slibc_ns_malloc    c/libc_sec/ns_malloc)
-test_add(c_Slibc_ns_free      c/libc_sec/ns_free)
+test_add(c_Slibc_ns_malloc    c/libc_sec/ns_malloc DISABLE_SECURITY)
+test_add(c_Slibc_ns_free      c/libc_sec/ns_free DISABLE_SECURITY)
 
 test_add(c_isr_route_timer_base   c/libc/isr_route_timer_base)
 test_add(c_isr_route_ialign_base  c/libc/isr_route_ialign_base)

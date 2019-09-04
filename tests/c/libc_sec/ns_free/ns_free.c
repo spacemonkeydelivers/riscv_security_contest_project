@@ -11,7 +11,6 @@ void secure_monitor(int n, void* context)
     }
 }
 
-/* SECURITY_CTRL: DISABLE */
 int main () {
 
     register_int_handler(RISCV_INT_SM_PANIC, &secure_monitor);
