@@ -5,10 +5,9 @@ import re
 import os
 
 def extract_c_directives(filename, directives):
-  with open(filename) as f:
-    content = f.readlines()
-    for line in content:
-      if re.search(r'\s*SECURITY_CTRL:\s*DISABLE\s*', line):
+
+  for arg in sys.argv:
+    if arg == '--nonsecure-libc':
         directives.append('disable_security = true')
 
 def make_command_line():
