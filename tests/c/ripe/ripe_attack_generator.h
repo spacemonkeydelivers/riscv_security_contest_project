@@ -101,7 +101,7 @@ struct attackme {
  * -o set output stream
  */
 // ASA int main(int argc, char **argv);
-void main(void);
+// void main(void);
 
 void perform_attack(
              		int (*stack_func_ptr_param)(const char *),

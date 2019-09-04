@@ -13,6 +13,11 @@
  */
 #include "ripe_attack_generator.h"
 
+#include <soc/traps.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+
 static boolean output_debug_info = TRUE;
 
 // JM: shellcode is generated in perform_attack()
@@ -96,41 +101,67 @@ try_attack(void)
 
 }
 
+void simple_secure_monitor(int n, void* context)
+{
+    if (n == RISCV_INT_SM_PANIC) {
+        printf("\nRIPE_RESULT=SUCCESS security violation was detected successfully\n");
+        exit(EXIT_FAILURE);
+    }
+}
 //
 // Initial main taking argument on the commande line has been replaced by a simple function call
 // You have to update the ATTACK_NR to mimic the command line arguments
 //
-void
-main(void)
+bool hardened_mode = false;
+
+int
+main(int argc, char* argv[])
 {
-#define ATTACK_NR   2
+    register_int_handler(RISCV_INT_SM_PANIC, &simple_secure_monitor);
+
+    hardened_mode = false;
+    bool scan_number = false;
+    int attack_number = 0;
+    for(int i = 0; i < argc; ++i) {
+        if (scan_number) {
+            attack_number = strtoul(argv[i], 0, 0);
+            scan_number = false;
+            continue;
+        }
+        if (strcmp(argv[i], "--attack-number") == 0) {
+            scan_number = true;
+            continue;
+        }
+    }
 
     printk("RIPE is alive! %s\n", CONFIG_BOARD);
-
-#if ATTACK_NR == 1
-	printk("-t direct -i shellcode -c funcptrheap -l heap -f memcpy");
-    attack.technique = DIRECT; attack.inject_param = INJECTED_CODE_NO_NOP; attack.code_ptr= FUNC_PTR_HEAP; attack.location = HEAP;  attack.function = HOMEBREW;
-#endif
-
-#if ATTACK_NR == 2
-	printk("-t direct -i shellcode -c longjmpstackparam -l stack -f homebrew");
-    attack.technique = DIRECT; attack.inject_param = INJECTED_CODE_NO_NOP; attack.code_ptr= LONGJMP_BUF_STACK_VAR; attack.location = STACK;  attack.function = HOMEBREW;
-#endif
-
-#if ATTACK_NR == 3
-	printk("-t indirect -i returnintolibc -c ret -l stack -f memcpy");
-    attack.technique = INDIRECT; attack.inject_param = RETURN_INTO_LIBC; attack.code_ptr= RET_ADDR; attack.location = STACK;  attack.function = HOMEBREW;
-#endif
-
-#if ATTACK_NR == 4
-	printk("-t indirect -i returnintolibc -c funcptrstackvar -l stack -f memcpy");
-    attack.technique = INDIRECT; attack.inject_param = RETURN_INTO_LIBC; attack.code_ptr= FUNC_PTR_STACK_VAR; attack.location = STACK;  attack.function = HOMEBREW;
-#endif
-
-#if ATTACK_NR == 5
-	printk("-t indirect -i shellcode -c funcptrheap -l heap -f memcpy");
-    attack.technique = INDIRECT; attack.inject_param = INJECTED_CODE_NO_NOP; attack.code_ptr= STRUCT_FUNC_PTR_HEAP; attack.location = HEAP;  attack.function = HOMEBREW;
-#endif
+    printk("selected attack number = %d\n", attack_number);
+    switch(attack_number) {
+    case 1:
+        printk("-t direct -i shellcode -c funcptrheap -l heap -f memcpy");
+        attack.technique = DIRECT; attack.inject_param = INJECTED_CODE_NO_NOP; attack.code_ptr= FUNC_PTR_HEAP; attack.location = HEAP;  attack.function = HOMEBREW;
+        break;
+    case 2:
+        printk("-t direct -i shellcode -c longjmpstackparam -l stack -f homebrew");
+        attack.technique = DIRECT; attack.inject_param = INJECTED_CODE_NO_NOP; attack.code_ptr= LONGJMP_BUF_STACK_VAR; attack.location = STACK;  attack.function = HOMEBREW;
+        break;
+    case 3:
+        printk("-t indirect -i returnintolibc -c ret -l stack -f memcpy");
+        attack.technique = INDIRECT; attack.inject_param = RETURN_INTO_LIBC; attack.code_ptr= RET_ADDR; attack.location = STACK;  attack.function = HOMEBREW;
+        break;
+    case 4:
+        printk("-t indirect -i returnintolibc -c funcptrstackvar -l stack -f memcpy");
+        attack.technique = INDIRECT; attack.inject_param = RETURN_INTO_LIBC; attack.code_ptr= FUNC_PTR_STACK_VAR; attack.location = STACK;  attack.function = HOMEBREW;
+        break;
+    case 5:
+        printk("-t indirect -i shellcode -c funcptrheap -l heap -f memcpy");
+        attack.technique = INDIRECT; attack.inject_param = INJECTED_CODE_NO_NOP; attack.code_ptr = STRUCT_FUNC_PTR_HEAP; attack.location = HEAP; attack.function = HOMEBREW;
+        break;
+    default:
+        printf("\nFATAL_ERROR! could not figure out the attack to use\n");
+        exit(EXIT_FAILURE);
+        break;
+    }
 
     try_attack();
 

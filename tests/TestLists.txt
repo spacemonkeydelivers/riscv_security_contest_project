@@ -80,8 +80,14 @@ test_add(c_example_prrel   c/examples/cmd_line --cmd="c/examples/cmd_line/cmd.li
 test_add(c_example_abs     c/examples/cmd_line
          --cmd="${CMAKE_SOURCE_DIR}/tests/c/examples/cmd_line/cmd.line")
 
-test_add(c_fibonacci              c/fibo)
-test_add(c_ripe                 c/ripe NIGHTLY)
+test_add(c_fibonacci c/fibo)
+
+test_add(c_ripe_a1   c/ripe --cmd="./cfg/attack_1.cfg" NIGHTLY)
+test_add(c_ripe_a2   c/ripe --cmd="./cfg/attack_2.cfg" NIGHTLY)
+test_add(c_ripe_a3   c/ripe --cmd="./cfg/attack_3.cfg" NIGHTLY)
+test_add(c_ripe_a4   c/ripe --cmd="./cfg/attack_4.cfg" NIGHTLY)
+test_add(c_ripe_a5   c/ripe --cmd="./cfg/attack_5.cfg" NIGHTLY)
+
 foreach(test ${ZEPHYR_APPS})
     string(REPLACE "/" "_" APP_NAME ${test})
     test_add(zephyr_${APP_NAME} zephyr/${APP_NAME} NIGHTLY)
