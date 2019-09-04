@@ -33,7 +33,6 @@ def extract_uart_checker(filename):
     if os.path.isfile('uart.expected'):
       os.remove('uart.expected')
 
-
 class MakeFileBuilder:
   def __init__(self, erb_data, erb_template, custom_driver_path):
     cmd = '(echo \'{}\' && cat \'{}\') | erb > Makefile.test'.format(

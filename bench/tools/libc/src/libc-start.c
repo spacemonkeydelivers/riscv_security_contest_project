@@ -1,12 +1,12 @@
 #include <stdlib.h>
 
-int __libc_start_main(int (*main)(void)) __attribute__ ((noreturn));
+int __libc_start_main(int (*main)(int, char**), int argc, char* argv[]) \
+        __attribute__ ((noreturn));
 
-int __libc_start_main(int (*main)(void))
-{
+int __libc_start_main(int (*main)(int, char**), int argc, char* argv[]) {
     int result;
 
-    result = main();
+    result = main(argc, argv);
 
     exit(result);
 }

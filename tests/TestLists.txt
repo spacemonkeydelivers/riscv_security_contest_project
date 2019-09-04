@@ -74,8 +74,13 @@ test_add(c_Slibc_ns_free      c/libc_sec/ns_free)
 test_add(c_isr_route_timer_base   c/libc/isr_route_timer_base)
 test_add(c_isr_route_ialign_base  c/libc/isr_route_ialign_base)
 
+test_add(c_example_cmdln   c/examples/cmd_line --cmd="./cmd.line")
+test_add(c_example_prrel   c/examples/cmd_line --cmd="c/examples/cmd_line/cmd.line")
+test_add(c_example_abs     c/examples/cmd_line
+         --cmd="${CMAKE_SOURCE_DIR}/tests/c/examples/cmd_line/cmd.line")
+
 test_add(c_fibonacci              c/fibo)
-test_add(c_ripe					c/ripe NIGHTLY)
+test_add(c_ripe                 c/ripe NIGHTLY)
 foreach(test ${ZEPHYR_APPS})
     string(REPLACE "/" "_" APP_NAME ${test})
     test_add(zephyr_${APP_NAME} zephyr/${APP_NAME} NIGHTLY)

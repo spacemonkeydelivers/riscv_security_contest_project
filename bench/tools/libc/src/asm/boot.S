@@ -45,7 +45,9 @@ bss_init:
     csrw mstatus, s0
 
     # setup main app stack
-    mv s0, zero
+    la a1, __ARGS_INFO
+    addi a2, a1, 4
+    lw a1, 0(a1)
     la sp, __APP_STACK_TOP
     la a0, main
     call __libc_start_main

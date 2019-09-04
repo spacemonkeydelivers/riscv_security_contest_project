@@ -30,7 +30,7 @@ install: $(DEPS_INSTALL)
 	install -m 644 $(I_SHARE) $(INSTALL_DIR)/share
 
 test_program: $(LIBNAME).a $(TOP)/tests/basic.c
-	$(CC) $(CFLAGS) $(TOP)/tests/basic.c -static -L. -lc \
+	$(CC) $(CFLAGS) $(TOP)/tests/cmd_line.s $(TOP)/tests/basic.c -static -L. -lc \
 		-Xlinker --defsym=__SOC_MEM_SIZE=999999 \
 		-T$(TOP)/share/soc.ld -I$(TOP)/include -o test_program
 
