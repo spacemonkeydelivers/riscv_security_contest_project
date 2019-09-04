@@ -46,7 +46,6 @@ module cpu
     localparam CAUSE_EXTERNAL_INTERRUPT     = 32'h8000000b;
     localparam CAUSE_TAG_MISMATCH           = 32'h80000010;
 
-
     // RND instance
     wire[31:0] rnd_data;
 
@@ -58,7 +57,10 @@ module cpu
 
     // ALU instance
     reg alu_en = 0;
+    wire [4:0] alu_op_final;
     reg[4:0] alu_op = 0;
+    assign alu_op_final = (new_state == STATE_EXEC) ? dec_alu_oper : alu_op;
+
     wire[31:0] alu_dataout;
     reg[31:0] alu_dataS1, alu_dataS2;
     wire alu_busy, alu_lt, alu_ltu, alu_eq;
@@ -69,7 +71,7 @@ module cpu
         .I_reset(reset),
         .I_dataS1(alu_dataS1),
         .I_dataS2(alu_dataS2),
-        .I_aluop(alu_op),
+        .I_aluop(alu_op_final),
         .O_busy(alu_busy),
         .O_data(alu_dataout),
         .O_lt(alu_lt),
@@ -388,8 +390,31 @@ module cpu
          end
          STATE_EXEC: begin
             // ALU output when coming from decode is PC+4... store it in pcnext
-            next_new_state = STATE_PRE_FETCH;
+            case (exec_next_stage)
+               `EXEC_TO_FETCH:  next_new_state = STATE_PRE_FETCH;
+               `EXEC_TO_LOAD:   next_new_state = STATE_LOAD2;
+               `EXEC_TO_STORE:  next_new_state = STATE_STORE2;
+               `EXEC_TO_BRANCH: next_new_state = STATE_BRANCH2;
+               `EXEC_TO_SYSTEM: next_new_state = STATE_SYSTEM;
+               `EXEC_TO_TRAP:   next_new_state = STATE_TRAP1;
+               default:         next_new_state = STATE_DEAD;
+            endcase
             update_pc = 1;
+         end
+         STATE_LOAD2: begin
+            next_new_state = STATE_PRE_FETCH;
+         end
+         STATE_STORE2: begin
+            next_new_state = STATE_PRE_FETCH;
+         end
+         STATE_BRANCH2: begin
+            next_new_state = STATE_PRE_FETCH;
+         end
+         STATE_SYSTEM: begin
+            next_new_state = STATE_PRE_FETCH;
+         end
+         STATE_TRAP1: begin
+            next_new_state = STATE_PRE_FETCH;
          end
          default: begin
             next_new_state = STATE_DEAD;
