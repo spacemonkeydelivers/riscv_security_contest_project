@@ -12,21 +12,21 @@ module cpu
     )
     (
         input CLK_I,
-	    input ACK_I,
-	    input[31:0] DAT_I,
-	    input RST_I,
+        input ACK_I,
+        input[31:0] DAT_I,
+        input RST_I,
         input TIMER_INTERRUPT_I,
         input TAGS_INTERRUPT_I,
-	    output[31:0] ADR_O,
-	    output[31:0] DAT_O,
-       output[3:0] SEL_O,
-	    output CYC_O,
-	    output STB_O,
-	    output WE_O,
-       output check_tags_o,
-       output clear_tag_mismatch_o
+        output[31:0] ADR_O,
+        output[31:0] DAT_O,
+        output[3:0] SEL_O,
+        output CYC_O,
+        output STB_O,
+        output WE_O,
+        output check_tags_o,
+        output clear_tag_mismatch_o
     );
-   
+
     /*verilator public_module*/
     /*verilator no_inline_module*/
 
@@ -77,7 +77,7 @@ module cpu
         .O_ltu(alu_ltu),
         .O_eq(alu_eq)
     );
-    
+
     reg bus_en = 0;
     reg[3:0] bus_op = 0;
     wire[31:0] bus_dataout;
@@ -195,7 +195,7 @@ module cpu
     localparam MSR_MARCHID   = 12'hF12;
     localparam MSR_MIMPID    = 12'hF13;
     localparam MSR_MHARTID   = 12'hF14;
-    
+
     localparam MSR_MSTATUS    = 12'h300;
     localparam MSR_MISA       = 12'h301;
     localparam MSR_MEDELEG    = 12'h302;
@@ -210,6 +210,7 @@ module cpu
     localparam MSR_MTVAL      = 12'h343;
     localparam MSR_MIP        = 12'h344;
     localparam MSR_MTAGS      = 12'h345;
+    localparam MSR_RND        = 12'h346;
 
     localparam [4:0] M_VENDOR_ID = 0,
                      M_ARCH_ID   = 1,
@@ -228,9 +229,10 @@ module cpu
                      M_TVAL      = 14,
                      M_IP        = 15,
                      M_TAGS      = 16,
-                     M_LAST      = 17;
-    
-    reg [31:0] csr [0:16];
+                     M_RND       = 17,
+                     M_LAST      = 18;
+
+    reg [31:0] csr [0:17];
     reg [4:0]  csr_index;
 
     always @(*) begin
@@ -248,17 +250,19 @@ module cpu
           MSR_MTVAL:      csr_index = M_TVAL;
           MSR_MIP:        csr_index = M_IP;
           MSR_MTAGS:      csr_index = M_TAGS;
+          MSR_RND:        csr_index = M_RND;
           default:        csr_index = M_LAST;
        endcase
     end
 
+    assign csr[M_RND] = rnd_data;
     assign msr_data = csr[csr_index];
 
     always @(*) begin
         case(mux_msr_sel)
             MSR_MVENDORID: csr_exists = 1;
             MSR_MHARTID:   csr_exists = 1;
-            
+
             MSR_MSTATUS:   csr_exists = 1;
             MSR_MCAUSE:    csr_exists = 1;
             MSR_MEPC:      csr_exists = 1;
@@ -270,6 +274,7 @@ module cpu
             MSR_MTAGS:     csr_exists = 1;
             MSR_MIE:       csr_exists = 1;
             MSR_MIP:       csr_exists = 1;
+            MSR_RND:       csr_exists = 1;
             default:       csr_exists = 0;
         endcase
     end
@@ -314,11 +319,11 @@ module cpu
     assign branch = (dec_branchmask & {!alu_ltu, alu_ltu, !alu_lt, alu_lt, !alu_eq, alu_eq}) != 0;
 
 
-    // only transition to new state if not busy    
+    // only transition to new state if not busy
     always @(negedge clk) begin
-        /* verilator lint_off BLKSEQ */        
-        state = busy ? state : nextstate; 
-        /* verilator lint_off BLKSEQ */        
+        /* verilator lint_off BLKSEQ */
+        state = busy ? state : nextstate;
+        /* verilator lint_off BLKSEQ */
     end
 
     wire addr_misaligned = | (pc[1:0] & 2'b11);
@@ -391,7 +396,7 @@ module cpu
                 pc <= nextpc_from_alu ? alu_dataout : pcnext;
                 pc[0] <= 0;
 
-                // fetch next instruction 
+                // fetch next instruction
                 bus_en <= 1;
                 bus_op <= `BUSOP_READW;
                 mux_bus_addr_sel <= MUX_BUSADDR_PC;
@@ -748,7 +753,7 @@ module cpu
             default: begin
                nextstate <= STATE_DEAD;
             end
-            
+
         endcase
 
 
@@ -759,7 +764,5 @@ module cpu
 
 
     end
-
-
 
 endmodule
