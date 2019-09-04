@@ -33,6 +33,8 @@ SECTIONS
     .system_data : {
         *(.__system.data)
         *(.__system.secure_data)
+        . = ALIGN(16) ;
+        *(.__command_line)
     }
     .data : {
         *(.data)
