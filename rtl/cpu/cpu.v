@@ -6,27 +6,27 @@
 
 
 module cpu
-    #(
-        parameter VECTOR_RESET = 32'd0,
-        parameter VECTOR_EXCEPTION = 32'd16
-    )
-    (
-        input CLK_I,
-        input ACK_I,
-        input[31:0] DAT_I,
-        input RST_I,
-        input TIMER_INTERRUPT_I,
-        input TAGS_INTERRUPT_I,
-        output[31:0] ADR_O,
-        output[31:0] DAT_O,
-        output[3:0] SEL_O,
-        output CYC_O,
-        output STB_O,
-        output WE_O,
-        output check_tags_o,
-        output clear_tag_mismatch_o
-    );
-
+#(
+   parameter VECTOR_RESET = 32'd0,
+   parameter VECTOR_EXCEPTION = 32'd16
+)
+(
+   input CLK_I,
+   input ACK_I,
+   input[31:0] DAT_I,
+   input RST_I,
+   input TIMER_INTERRUPT_I,
+   input TAGS_INTERRUPT_I,
+   output[31:0] ADR_O,
+   output[31:0] DAT_O,
+   output[3:0] SEL_O,
+   output CYC_O,
+   output STB_O,
+   output WE_O,
+   output check_tags_o,
+   output clear_tag_mismatch_o
+);
+   
     /*verilator public_module*/
     /*verilator no_inline_module*/
 
@@ -36,7 +36,7 @@ module cpu
     assign reset = RST_I;
 
     // MSRS
-    reg[31:0] pc, pcnext;
+    reg[31:0] pc; //, pcnext;
     reg nextpc_from_alu, writeback_from_alu, writeback_from_bus;
 
     localparam CAUSE_INSTRUCTION_MISALIGNED = 32'h00000000;
@@ -46,7 +46,6 @@ module cpu
     localparam CAUSE_EXTERNAL_INTERRUPT     = 32'h8000000b;
     localparam CAUSE_TAG_MISMATCH           = 32'h80000010;
 
-    localparam VENDOR_ID                    = 32'hC001F001;
 
     // RND instance
     wire[31:0] rnd_data;
@@ -79,9 +78,10 @@ module cpu
     );
 
     reg bus_en = 0;
+    reg next_bus_en;
+
     reg[3:0] bus_op = 0;
     wire[31:0] bus_dataout;
-    reg[31:0] bus_dataout_stored;
     reg[31:0] bus_addr;
     wire bus_busy;
 
@@ -124,7 +124,7 @@ module cpu
     decoder dec_inst(
         .I_clk(clk),
         .I_en(dec_en),
-        .I_instr(bus_dataout_stored),
+        .I_instr(bus_dataout),
         .O_rs1(dec_rs1),
         .O_rs2(dec_rs2),
         .O_rd(dec_rd),
@@ -179,7 +179,7 @@ module cpu
     always @(*) begin
         case(mux_bus_addr_sel)
             MUX_BUSADDR_ALU: bus_addr = alu_dataout;
-            default:         bus_addr = pc; // MUX_BUSADDR_PC
+            default:         bus_addr = new_pc; // MUX_BUSADDR_PC
         endcase
     end
 
@@ -307,6 +307,7 @@ module cpu
     localparam STATE_CSR1           = 4'd10;
     localparam STATE_CSR2           = 4'd11;
     localparam STATE_DEAD           = 4'd12;
+    localparam STATE_PRE_FETCH      = 4'd13;
 
 
     reg[3:0] state, prevstate = STATE_RESET, nextstate = STATE_RESET;
@@ -319,11 +320,196 @@ module cpu
     assign branch = (dec_branchmask & {!alu_ltu, alu_ltu, !alu_lt, alu_lt, !alu_eq, alu_eq}) != 0;
 
 
-    // only transition to new state if not busy
-    always @(negedge clk) begin
-        /* verilator lint_off BLKSEQ */
-        state = busy ? state : nextstate;
-        /* verilator lint_off BLKSEQ */
+   reg [3:0] new_state;
+   reg [3:0] next_new_state;
+
+   reg [31:0] new_pc;
+   wire [31:0] next_new_pc = new_pc + 4;
+
+   wire stall = bus_busy;
+   reg update_pc;
+
+   reg [31:0] pcnext;
+   reg [31:0] next_pcnext;
+
+   always @ (posedge clk) begin
+      if (reset) begin
+         new_state <= STATE_RESET;
+         new_pc <= (VECTOR_RESET);
+         pcnext <= 0;
+      end
+      else begin
+         new_state <= stall ? new_state : next_new_state;
+         new_pc <= update_pc ? next_new_pc : new_pc;
+         pcnext <= (busy) ? pcnext : next_pcnext;
+      end
+   end
+
+   always @ (*) begin
+      update_pc = 0;
+      
+      bus_en = 0;
+      dec_en = 0;
+
+      next_pcnext = 0;
+
+      reg_we = 0;
+      reg_re = 0;
+
+      bus_op = `BUSOP_READW;
+      mux_bus_addr_sel = MUX_BUSADDR_ALU;
+            
+      writeback_from_alu = 0;
+      writeback_from_bus = 0;
+
+      case (new_state)
+         STATE_RESET: begin
+            next_new_state = STATE_PRE_FETCH;
+         end
+         STATE_PRE_FETCH: begin
+            mux_bus_addr_sel = MUX_BUSADDR_PC;
+            next_new_state = STATE_FETCH;
+            bus_en = 1;
+            bus_op = `BUSOP_READW;
+         end
+         STATE_FETCH: begin
+            next_new_state = STATE_DECODE;
+
+            mux_reg_input_sel = writeback_from_alu ? MUX_REGINPUT_ALU : MUX_REGINPUT_BUS;
+            reg_we = writeback_from_alu | writeback_from_bus;
+            
+            // ALU is unused... let's compute PC+4!
+            alu_en = 1;
+            mux_alu_s1_sel = MUX_ALUDAT1_PC;
+            mux_alu_s2_sel = MUX_ALUDAT2_INSTLEN;
+         end
+         STATE_DECODE: begin
+            dec_en = 1;
+            reg_re = 1;
+            next_pcnext = alu_dataout;
+
+            next_new_state = STATE_EXEC;
+         end
+         STATE_EXEC: begin
+            // ALU output when coming from decode is PC+4... store it in pcnext
+            next_new_state = STATE_PRE_FETCH;
+            update_pc = 1;
+         end
+         default: begin
+            next_new_state = STATE_DEAD;
+         end
+      endcase
+   end
+/*
+            case(dec_opcode)
+               `OP_OP: begin
+                  alu_en <= 1;
+                  mux_alu_s1_sel <= MUX_ALUDAT1_REGVAL1;
+                  mux_alu_s2_sel <= MUX_ALUDAT2_REGVAL2;
+                  case(dec_funct3)
+                     `FUNC_ADD_SUB:  begin
+                        case(dec_funct7)
+                           7'b0100000:     alu_op <= `ALUOP_SUB;
+                           `FUNC7_MUL_DIV: alu_op <= `ALUOP_MUL;
+                           default:        alu_op <= `ALUOP_ADD;
+                        endcase
+                     end
+                     `FUNC_SLL:      begin
+                        case(dec_funct7)
+                           `FUNC7_MUL_DIV: alu_op <= `ALUOP_MULH;
+                           default:        alu_op <= `ALUOP_SLL;
+                        endcase
+                     end
+                     `FUNC_SLT:      begin
+                        case(dec_funct7)
+                           `FUNC7_MUL_DIV: alu_op <= `ALUOP_MULHSU;
+                           default:        alu_op <= `ALUOP_SLT;
+                        endcase
+                     end
+                     `FUNC_SLTU:     begin
+                        case(dec_funct7)
+                           `FUNC7_MUL_DIV: alu_op <= `ALUOP_MULHU;
+                           default:        alu_op <= `ALUOP_SLTU;
+                        endcase
+                     end
+                     `FUNC_XOR:      begin
+                        case(dec_funct7)
+                           `FUNC7_MUL_DIV: alu_op <= `ALUOP_DIV;
+                           default:        alu_op <= `ALUOP_XOR;
+                        endcase
+                     end
+                     `FUNC_SRL_SRA:  begin
+                        case(dec_funct7)
+                           7'b0100000:     alu_op <= `ALUOP_SRA;
+                           `FUNC7_MUL_DIV: alu_op <= `ALUOP_DIVU;
+                           default:        alu_op <= `ALUOP_SRL;
+                        endcase
+                     end
+                     `FUNC_OR:       begin
+                        case(dec_funct7)
+                           `FUNC7_MUL_DIV: alu_op <= `ALUOP_REM;
+                           default:        alu_op <= `ALUOP_OR;
+                        endcase
+                     end
+                     `FUNC_AND:      begin
+                        case(dec_funct7)
+                           `FUNC7_MUL_DIV: alu_op <= `ALUOP_REMU;
+                           default:        alu_op <= `ALUOP_AND;
+                        endcase
+                     end
+                     default:        alu_op <= `ALUOP_ADD;
+                  endcase
+                  // do register writeback in FETCH
+                  writeback_from_alu <= 1;
+                  nextstate <= STATE_PRE_FETCH;
+               end
+
+               `OP_OPIMM: begin
+                  alu_en <= 1;
+                  mux_alu_s1_sel <= MUX_ALUDAT1_REGVAL1;
+                  mux_alu_s2_sel <= MUX_ALUDAT2_IMM;
+                  case(dec_funct3)
+                     `FUNC_ADDI:         alu_op <= `ALUOP_ADD;
+                     `FUNC_SLLI:         alu_op <= `ALUOP_SLL;
+                     `FUNC_SLTI:         alu_op <= `ALUOP_SLT;
+                     `FUNC_SLTIU:        alu_op <= `ALUOP_SLTU;
+                     `FUNC_XORI:         alu_op <= `ALUOP_XOR;
+                     `FUNC_SRLI_SRAI:    alu_op <= dec_funct7[5] ? `ALUOP_SRA : `ALUOP_SRL;
+                     `FUNC_ORI:          alu_op <= `ALUOP_OR;
+                     `FUNC_ANDI:         alu_op <= `ALUOP_AND;
+                     default:            alu_op <= `ALUOP_ADD;
+                  endcase
+                  // do register writeback in FETCH
+                  writeback_from_alu <= 1;
+                  nextstate <= STATE_PRE_FETCH;
+               end
+
+               `OP_LOAD: begin // compute load address on ALU
+               alu_en <= 1;
+               alu_op <= `ALUOP_ADD;
+               mux_alu_s1_sel <= MUX_ALUDAT1_REGVAL1;
+               mux_alu_s2_sel <= MUX_ALUDAT2_IMM;
+               nextstate <= STATE_LOAD2;
+            end
+
+            `OP_STORE:  begin // compute store address on ALU
+            alu_en <= 1;
+            alu_op <= `ALUOP_ADD;
+            mux_alu_s1_sel <= MUX_ALUDAT1_REGVAL1;
+            mux_alu_s2_sel <= MUX_ALUDAT2_IMM;
+            nextstate <= STATE_STORE2;
+         end
+      endcase
+         end
+         default: begin
+         end
+      endcase
+   end
+
+
+    // only transition to new state if not busy    
+    always @(posedge clk) begin
+        state <= busy ? state : nextstate; 
     end
 
     wire addr_misaligned = | (pc[1:0] & 2'b11);
@@ -342,8 +528,11 @@ module cpu
          default:       csr_to_write = 0;
       endcase
     end
+*/
 
-    always @(negedge clk) begin
+
+/*
+    always @(posedge clk) begin
 
         alu_en <= 0;
         bus_en <= 0;
@@ -374,7 +563,7 @@ module cpu
                 csr[M_STATUS][3] <= 0; // disable machine-mode external interrupt
                 csr[M_TAGS][0] <= 0;
                 csr[M_TAGS][2] <= 0;
-                nextstate <= STATE_FETCH;
+                nextstate <= STATE_PRE_FETCH;
                 csr[M_TVEC] <= VECTOR_EXCEPTION;
                 csr[M_VENDOR_ID] <= VENDOR_ID;
                 nextpc_from_alu <= 0;
@@ -383,7 +572,13 @@ module cpu
                 bus_dataout_stored <= 0;
                 check_tag_on_fetch <= 0;
             end
-
+            STATE_PRE_FETCH: begin
+                bus_en <= 1;
+                bus_op <= `BUSOP_READW;
+                mux_bus_addr_sel <= MUX_BUSADDR_PC;
+               nextstate <= STATE_FETCH;
+                pc <= nextpc_from_alu ? alu_dataout : pcnext;
+            end
             STATE_FETCH: begin
                 check_tag_on_fetch <= csr[M_TAGS][2];
                 // write result of previous instruction to registers if requested
@@ -393,13 +588,13 @@ module cpu
                 writeback_from_bus <= 0;
 
                 // update PC
-                pc <= nextpc_from_alu ? alu_dataout : pcnext;
-                pc[0] <= 0;
+//                pc <= nextpc_from_alu ? alu_dataout : pcnext;
+                bus_dataout_stored <= bus_dataout;
 
-                // fetch next instruction
-                bus_en <= 1;
-                bus_op <= `BUSOP_READW;
-                mux_bus_addr_sel <= MUX_BUSADDR_PC;
+                // fetch next instruction 
+//                bus_en <= 1;
+//                bus_op <= `BUSOP_READW;
+//                mux_bus_addr_sel <= MUX_BUSADDR_PC;
                 if (addr_misaligned) begin
                    nextstate <= STATE_TRAP1;
                    csr[M_CAUSE] <= CAUSE_INSTRUCTION_MISALIGNED;
@@ -415,7 +610,7 @@ module cpu
 
                 dec_en <= 1;
                 nextstate <= STATE_EXEC;
-                bus_dataout_stored <= bus_dataout;
+//                bus_dataout_stored <= bus_dataout;
 
                 // read registers
                 reg_re <= 1;
@@ -503,7 +698,7 @@ module cpu
                         endcase
                         // do register writeback in FETCH
                         writeback_from_alu <= 1;
-                        nextstate <= STATE_FETCH;
+                        nextstate <= STATE_PRE_FETCH;
                     end
 
                     `OP_OPIMM: begin
@@ -523,7 +718,7 @@ module cpu
                         endcase
                         // do register writeback in FETCH
                         writeback_from_alu <= 1;
-                        nextstate <= STATE_FETCH;
+                        nextstate <= STATE_PRE_FETCH;
                     end
 
                     `OP_LOAD: begin // compute load address on ALU
@@ -554,7 +749,7 @@ module cpu
                         mux_alu_s2_sel <= MUX_ALUDAT2_IMM;
 
                         nextpc_from_alu <= 1;
-                        nextstate <= STATE_FETCH;
+                        nextstate <= STATE_PRE_FETCH;
                     end
 
                     `OP_BRANCH: begin // use ALU for comparisons
@@ -572,7 +767,7 @@ module cpu
                         mux_alu_s2_sel <= MUX_ALUDAT2_IMM;
                         // do register writeback in FETCH
                         writeback_from_alu <= 1;
-                        nextstate <= STATE_FETCH;
+                        nextstate <= STATE_PRE_FETCH;
                     end
 
                     `OP_LUI: begin
@@ -764,5 +959,7 @@ module cpu
 
 
     end
+*/
+
 
 endmodule
