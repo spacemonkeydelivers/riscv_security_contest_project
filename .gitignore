@@ -4,3 +4,6 @@ zephyrproject/tools/
 zephyrproject/modules/
 zephyrproject/.west
 build
+**.swp
+**.swo
+**.swn
