@@ -58,54 +58,59 @@ module wb_cpu_bus(
 		endcase
 	end
 
-	reg ack_rcvd = 0;
+   reg [31:0] test = 0;
+
+   reg [31:0] data_from_bus;
+
+   always @ (*) begin
+      case (mem_sel)
+         4'b1111: begin
+            data_from_bus = DAT_I;
+         end
+         4'b0011: begin
+            data_from_bus = {{16{DAT_I[15] & signextend}}, DAT_I[15:0]};
+         end
+         4'b0001: begin
+            data_from_bus = {{24{DAT_I[7] & signextend}}, DAT_I[7:0]};
+         end
+         4'b0101: begin
+            data_from_bus = {28'b0, DAT_I[3:0]};
+         end
+         default: begin
+            data_from_bus = 32'hDEADF001;
+         end
+      endcase
+   end
 
 	always @(posedge CLK_I) begin
-		WE_O <= 0;
-      SEL_O <= 0;
-      WE_O <= write;
-      busy <= I_en;
+		WE_O <= WE_O;
+      SEL_O <= SEL_O;
+      ADR_O <= ADR_O;
+      DAT_O <= DAT_O;
+      CYC_O <= CYC_O;
+      STB_O <= STB_O;
+      busy <= busy;
 
-		if(I_en)
-      begin
-         CYC_O <= !ack_rcvd;
-         STB_O <= !ack_rcvd;
-			WE_O <= write & !ack_rcvd;
+      buffer <= (ACK_I) ? data_from_bus : buffer;
+
+      if (I_en) begin
+			WE_O <= write;
          SEL_O <= mem_sel;
          ADR_O <= busaddr;
          DAT_O <= I_data;
-     end
+         CYC_O <= !ACK_I;
+         STB_O <= !ACK_I;
+         busy <= 1;
+      end
 
-      if (ACK_I)
-      begin
+      if (ACK_I) begin
          CYC_O <= 0;
          STB_O <= 0;
-         ack_rcvd <= 1;
          WE_O <= 0;
-      end
-
-      if (ack_rcvd) begin
-         ack_rcvd <= 0;
          busy <= 0;
+         SEL_O <= 0;
       end
 
-      case (mem_sel)
-         4'b1111: begin
-            buffer <= DAT_I;
-         end
-         4'b0011: begin
-            buffer <= {{16{DAT_I[15] & signextend}}, DAT_I[15:0]};
-         end
-         4'b0001: begin
-            buffer <= {{24{DAT_I[7] & signextend}}, DAT_I[7:0]};
-         end
-         4'b0101: begin
-            buffer <= {28'b0, DAT_I[3:0]};
-         end
-         default: begin
-            buffer <= 32'hDEAD;
-         end
-      endcase
    end
 
 endmodule
