@@ -130,4 +130,21 @@ int memcmp(const void* lhs, const void* rhs, size_t count) {
     }
     return 0;
 }
+int strcmp(const char *lhs, const char *rhs) {
+    const unsigned char* l = (const unsigned char*)lhs;
+    const unsigned char* r = (const unsigned char*)rhs;
+    int offset = 0;
+    int diff = 0;
+    while (l[offset] && r[offset]) {
+        diff = l[offset] - r[offset];
+        if (diff != 0) {
+            return (diff > 0) ? 1 : -1;
+        }
+        ++offset;
+    }
+    diff = l[offset] - r[offset];
+    if (diff == 0)
+        return 0;
+    return (diff > 0) ? 1 : -1;
+}
 
