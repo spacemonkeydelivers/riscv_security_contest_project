@@ -26,15 +26,5 @@ static inline long long int llabs(long long int val) {
     return val < 0ll ? -val : val;
 }
 
-static inline unsigned rand(void) {
-    unsigned result = 0;
-    __asm__ __volatile__(
-            "csrr %[result], rnd\n\t"
-            : [result]"=r"(result)
-            : /* No Input */
-            : );
-    return result;
-}
-
 #endif /* end of include guard: __INCLUDE_GUARD_RISCV_STDLIB__ */
 
