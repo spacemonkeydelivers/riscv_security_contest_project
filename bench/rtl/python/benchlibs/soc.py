@@ -117,12 +117,13 @@ class RiscVSoc:
         print("hart does not make forward progress for too long. Assume test exit")
         status = self.read_register(1) # exit status is in ra
 
+        SUCCESS_CODE = 0x0A11C001
         if expect_failure:
-          if status == 0:
+          if status == SUCCESS_CODE:
               msg = "exit code <{}> indicates success, while tests expects failure".format(status)
               raise RuntimeError(msg)
         else:
-          if status != 0x0A11C001:
+          if status != SUCCESS_CODE:
               msg = "exit code <{}> indicates failure".format(status)
               raise RuntimeError(msg)
 
