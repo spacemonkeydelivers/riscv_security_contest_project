@@ -20,7 +20,8 @@ module decoder
    output wire        exec_writeback_from_imm_o,
    output wire        exec_next_pc_from_alu_o,
    output wire [1:0]  exec_mux_reg_input_sel_o,
-   output wire [2:0]  funct3_o
+   output wire [2:0]  funct3_o,
+   output wire        write_reg_o
 );
    /*verilator public_module*/ 
 
@@ -71,6 +72,7 @@ module decoder
    reg exec_writeback_from_imm;
    reg exec_next_pc_from_alu;
    reg [1:0] exec_mux_reg_input_sel;
+   reg write_reg;
    assign alu_oper_o = alu_oper;
    assign exec_mux_alu_s1_sel_o = exec_mux_alu_s1_sel;
    assign exec_mux_alu_s2_sel_o = exec_mux_alu_s2_sel;
@@ -79,10 +81,13 @@ module decoder
    assign exec_writeback_from_imm_o = exec_writeback_from_imm;
    assign exec_next_pc_from_alu_o = exec_next_pc_from_alu;
    assign exec_mux_reg_input_sel_o = exec_mux_reg_input_sel;
+   assign write_reg_o = write_reg;
 
    always @ (*) begin
       exec_writeback_from_imm = 0;
       exec_writeback_from_alu = 0;
+      exec_next_pc_from_alu = 0;
+      write_reg = 0;
       case(opcode)
          `OP_OP: begin
             exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
@@ -180,7 +185,7 @@ module decoder
 
          `OP_JAL, `OP_JALR: begin
             // return address computed during decode, write to register
-            exec_writeback_from_alu = 1;
+            write_reg = 1;
             exec_mux_reg_input_sel = `MUX_REGINPUT_ALU;
       
             // compute jal/jalr address
