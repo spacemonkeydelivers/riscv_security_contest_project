@@ -128,11 +128,12 @@ module cpu
     wire exec_writeback_from_imm;
     wire exec_next_pc_from_alu;
     wire [1:0] exec_mux_reg_input_sel;
+    wire [2:0] dec_funct3;
 
     decoder dec_inst(
         .I_clk(clk),
         .I_en(dec_en),
-        .I_instr(bus_dataout),
+        .I_instr(bus_dataout_stored),
         .O_rs1(dec_rs1),
         .O_rs2(dec_rs2),
         .O_rd(dec_rd),
@@ -145,7 +146,8 @@ module cpu
         .exec_writeback_from_alu_o(exec_writeback_from_alu),
         .exec_writeback_from_imm_o(exec_writeback_from_imm),
         .exec_next_pc_from_alu_o(exec_next_pc_from_alu),
-        .exec_mux_reg_input_sel_o(exec_mux_reg_input_sel)
+        .exec_mux_reg_input_sel_o(exec_mux_reg_input_sel),
+        .funct3_o(dec_funct3)
 	);
 
     // Registers instance
@@ -310,6 +312,8 @@ module cpu
     localparam STATE_CSR2           = 4'd11;
     localparam STATE_DEAD           = 4'd12;
     localparam STATE_PRE_FETCH      = 4'd13;
+    localparam STATE_STORE1         = 4'd14;
+    localparam STATE_LOAD1          = 4'd15;
 
 
     reg[3:0] state, prevstate = STATE_RESET, nextstate = STATE_RESET;
@@ -334,16 +338,24 @@ module cpu
    reg [31:0] pcnext;
    reg [31:0] next_pcnext;
 
+   reg next_writeback_from_bus;
+
+   reg [31:0] bus_dataout_stored;
+
    always @ (posedge clk) begin
       if (reset) begin
          new_state <= STATE_RESET;
          new_pc <= (VECTOR_RESET);
          pcnext <= 0;
+         writeback_from_bus <= 0;
+         bus_dataout_stored <= 0;
       end
       else begin
          new_state <= stall ? new_state : next_new_state;
-         new_pc <= update_pc ? next_new_pc : new_pc;
+         new_pc <= (update_pc && !busy) ? next_new_pc : new_pc;
          pcnext <= (busy) ? pcnext : next_pcnext;
+         writeback_from_bus <= (busy) ? writeback_from_bus : next_writeback_from_bus;
+         bus_dataout_stored <= (new_state == STATE_FETCH) ? bus_dataout : bus_dataout_stored;
       end
    end
 
@@ -362,7 +374,7 @@ module cpu
       mux_bus_addr_sel = `MUX_BUSADDR_ALU;
             
       writeback_from_alu = 0;
-      writeback_from_bus = 0;
+      next_writeback_from_bus = 0;
 
       case (new_state)
          STATE_RESET: begin
@@ -381,8 +393,6 @@ module cpu
          end
          STATE_FETCH: begin
             next_new_state = STATE_DECODE;
-
-            
             // ALU is unused... let's compute PC+4!
             alu_en = 1;
             mux_alu_s1_sel = `MUX_ALUDAT1_PC;
@@ -392,28 +402,76 @@ module cpu
             dec_en = 1;
             reg_re = 1;
             next_pcnext = alu_dataout;
-
             next_new_state = STATE_EXEC;
          end
          STATE_EXEC: begin
             // ALU output when coming from decode is PC+4... store it in pcnext
             case (exec_next_stage)
-               `EXEC_TO_FETCH:  next_new_state = STATE_PRE_FETCH;
-               `EXEC_TO_LOAD:   next_new_state = STATE_LOAD2;
-               `EXEC_TO_STORE:  next_new_state = STATE_STORE2;
+               `EXEC_TO_FETCH: begin
+                  next_new_state = STATE_PRE_FETCH;
+                  update_pc = 1;
+               end
+               `EXEC_TO_LOAD:   next_new_state = STATE_LOAD1;
+               `EXEC_TO_STORE:  next_new_state = STATE_STORE1;
                `EXEC_TO_BRANCH: next_new_state = STATE_BRANCH2;
                `EXEC_TO_SYSTEM: next_new_state = STATE_SYSTEM;
                `EXEC_TO_TRAP:   next_new_state = STATE_TRAP1;
                default:         next_new_state = STATE_DEAD;
             endcase
-            update_pc = 1;
             alu_en = 1;
+         end
+         STATE_LOAD1: begin
+            next_new_state = STATE_LOAD2;
+            bus_en = 1;
+            mux_bus_addr_sel = `MUX_BUSADDR_ALU;
+            case(dec_funct3)
+               `FUNC_LB: begin
+                  bus_op = `BUSOP_READB;
+               end
+               `FUNC_LH: begin
+                  bus_op = `BUSOP_READH;
+               end
+               `FUNC_LW: begin
+                  bus_op = `BUSOP_READW;
+               end
+               `FUNC_LBU: begin
+                  bus_op = `BUSOP_READBU;
+               end
+               `FUNC_LT: begin
+                  bus_op = `BUSOP_READT;
+               end
+               default: begin
+                  bus_op = `BUSOP_READHU; // FUNC_LHU
+               end
+            endcase
          end
          STATE_LOAD2: begin
             next_new_state = STATE_PRE_FETCH;
+            next_writeback_from_bus = 1;
+            update_pc = 1;
+         end
+         STATE_STORE1: begin
+            next_new_state = STATE_STORE2;
+            bus_en = 1;
+            mux_bus_addr_sel = `MUX_BUSADDR_ALU;
+            case(dec_funct3)
+               `FUNC_SB: begin
+                  bus_op = `BUSOP_WRITEB;
+               end
+               `FUNC_SH: begin
+                  bus_op = `BUSOP_WRITEH;
+               end
+               `FUNC_ST: begin
+                  bus_op = `BUSOP_WRITET;
+               end
+               default: begin
+                  bus_op = `BUSOP_WRITEW; // FUNC_SW
+               end
+            endcase
          end
          STATE_STORE2: begin
             next_new_state = STATE_PRE_FETCH;
+            update_pc = 1;
          end
          STATE_BRANCH2: begin
             next_new_state = STATE_PRE_FETCH;

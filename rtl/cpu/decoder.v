@@ -19,7 +19,8 @@ module decoder
    output wire        exec_writeback_from_alu_o,
    output wire        exec_writeback_from_imm_o,
    output wire        exec_next_pc_from_alu_o,
-   output wire [1:0]  exec_mux_reg_input_sel_o
+   output wire [1:0]  exec_mux_reg_input_sel_o,
+   output wire [2:0]  funct3_o
 );
    /*verilator public_module*/ 
 
@@ -32,6 +33,8 @@ module decoder
    assign O_rs1 = I_instr[19:15];
    assign O_rs2 = I_instr[24:20];
    assign O_rd = I_instr[11:7];
+
+   assign funct3_o = funct3;
 
    reg isbranch = 0;
 
