@@ -193,7 +193,7 @@ module wb_ram
             if (ram_accessed) begin
                next_state = (done_in_one_tick) ? STATE_STOP : STATE_WRITE_WORD;
                next_ack = 1'b1;
-               next_ram_we_r = done_in_one_tick && wb_we_i;
+               next_ram_we_r = wb_we_i;
             end
             if (tag_accessed) begin
                next_ack = 1'b1;
@@ -203,7 +203,7 @@ module wb_ram
          end
          STATE_WRITE_WORD: begin
             next_tag_we_r = 0;
-            next_ram_we_r = wb_we_i;
+            next_ram_we_r = 0;
             next_state = STATE_STOP;
             next_ack = 1'b0;
          end
