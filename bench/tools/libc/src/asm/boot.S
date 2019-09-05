@@ -52,10 +52,9 @@ bss_init:
     la a0, main
     call __libc_start_main
 
-    mv ra, a0
-1:
-    j 1b
-    wfi
+    mv a1, a0
+    call exit
+.4byte 0xffffffff
 
 .section ".__application_stack", "a", @nobits
 

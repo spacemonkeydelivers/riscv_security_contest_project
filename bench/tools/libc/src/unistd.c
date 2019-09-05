@@ -3,13 +3,17 @@
 void _exit(int status)
 {
     if (status != 0 ) {
+      unsigned int ustat = status;
+      if (ustat > 256) {
+         ustat = 256;
+      }
       __asm__ __volatile__(
-              "li ra, 1\n\t"
+              "mv ra, %[status]\n\t"
               "1:\n\t"
               "j 1b\n\t"
               "wfi"
               : /* No outputs. */
-              : /* TODO: figure out how to pass *status* to this *ecall* properly */
+              : [status]"r"(status)
               : "memory");
     }
     else {
@@ -19,10 +23,10 @@ void _exit(int status)
               "j 1b\n\t"
               "wfi\n\t"
               : /* No outputs. */
-              : /* TODO: figure out how to pass *status* to this *ecall* properly */
+              :
               : "memory");
     }
-    __asm__ __volatile__(".4byte 0xffffffff");
+    __asm__ __volatile__(".4byte 0xffffffff" ::: "memory");
     __builtin_unreachable();
 }
 
