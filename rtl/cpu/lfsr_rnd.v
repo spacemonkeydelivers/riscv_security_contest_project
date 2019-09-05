@@ -19,7 +19,7 @@ module lfsr_rnd
             result <= 32'hbed4dead;
         end
         else begin
-            result <= {result[30:0], result[31]} ^ to_xor;
+            result <= {result[30:0] ^ to_xor[31:1], result[31]};
         end
     end
 
