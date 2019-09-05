@@ -11,22 +11,24 @@ set(DEBUGGER_TEST_RUNNER ${CMAKE_SOURCE_DIR}/tests/debugger/run.sh)
 
 function(test_add name)
 
-    set(options NIGHTLY DISABLE_SECURITY REVERT_RESULT)
+    set(options NIGHTLY DISABLE_SECURITY INVERT_RESULT)
     cmake_parse_arguments(PARSE_ARGV 1 TEST_DESCR "${options}" "" "")
 
     set(TEST_DIR "${CMAKE_BINARY_DIR}/tests/${name}")
     # This is a hack. Stupid cmake won't create working directories if not exist
     file(MAKE_DIRECTORY "${TEST_DIR}")
 
+    if (${TEST_DESCR_INVERT_RESULT})
+        set(RINVERT "--driver-invert-result")
+    endif()
+
     if (${TEST_DESCR_DISABLE_SECURITY})
-        set(AUX_CMD "--nonsecure-libc")
-    else()
-        set(AUX_CMD "")
+        set(NSC "--nonsecure-libc")
     endif()
 
     add_test(NAME "${name}"
-        COMMAND "${TEST_RUNNER}" ${TEST_DESCR_UNPARSED_ARGUMENTS} ${AUX_CMD}
-             WORKING_DIRECTORY "${TEST_DIR}")
+        COMMAND "${TEST_RUNNER}" ${TEST_DESCR_UNPARSED_ARGUMENTS} ${RINVERT} ${NSC}
+        WORKING_DIRECTORY "${TEST_DIR}")
 
     if (${TEST_DESCR_NIGHTLY})
         set_tests_properties("${name}" PROPERTIES LABELS nightly)
