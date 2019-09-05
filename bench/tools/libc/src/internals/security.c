@@ -20,7 +20,7 @@ unsigned _ossec_init       (const struct init_ctx* ctx) {
     int32_t sec_tag = 0;
     do {
         sec_tag = rand() & 0xf;
-    }while(sec_tag == 0);
+    } while(sec_tag == 0);
     sec_cntx.sec_tag = sec_tag;
 
     do {
@@ -33,8 +33,7 @@ unsigned _ossec_init       (const struct init_ctx* ctx) {
             "csrw tags, %[en_value]\n\t"
             "li t0, (~(0xf << 26))\n\t"
             "and t1, %[ptr], t0\n\t"
-            "or t0, %[sec_tag], x0\n\t"
-            "st t0, 0(t1)"
+            "st %[sec_tag], 0(t1)"
             : /* No outputs. */
             : [en_value]"r" (en_value),
               [ptr]"r" (ptr),
@@ -64,9 +63,10 @@ unsigned _ossec_generate_tag () {
     ctx_ptr_t ptr = (ctx_ptr_t)_ossec_get_protected_ptr((unsigned)&sec_cntx);
     int32_t new_tag = ptr->tag_gen;
 
-    // we do not use "0" and secure tags
+    // we do not use tag "0" and a dediacted "secure_tag"
     do {
-        ptr->tag_gen = (ptr->tag_gen + 1) & 0xf; // TODO: rework to use rand() instead of '+1' in future
+        // TODO: consider reworking to use rand() instead of '+1' in future
+        ptr->tag_gen = (ptr->tag_gen + 1) & 0xf;
     } while(ptr->tag_gen == 0 || ptr->tag_gen == ptr->sec_tag);
 
     return new_tag;
