@@ -5,6 +5,8 @@
 
 void secure_monitor(int n, void* context)
 {
+    (void)context;
+
     if (n == RISCV_INT_SM_PANIC) {
         printf("security panic detected! Great success!\n");
         exit(EXIT_SUCCESS);

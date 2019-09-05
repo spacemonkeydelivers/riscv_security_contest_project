@@ -82,17 +82,17 @@ test_add(c_example_abs     c/examples/cmd_line
 
 test_add(c_fibonacci c/fibo)
 
-test_add(c_ripe_a1   c/ripe --cmd="./cfg/attack_1.cfg" NIGHTLY INVERT_RESULT)
-test_add(c_ripe_a2   c/ripe --cmd="./cfg/attack_2.cfg" NIGHTLY INVERT_RESULT)
-test_add(c_ripe_a3   c/ripe --cmd="./cfg/attack_3.cfg" NIGHTLY INVERT_RESULT)
-test_add(c_ripe_a4   c/ripe --cmd="./cfg/attack_4.cfg" NIGHTLY INVERT_RESULT)
-test_add(c_ripe_a5   c/ripe --cmd="./cfg/attack_5.cfg" NIGHTLY INVERT_RESULT)
+test_add(c_ripe_a1   c/ripe --cmd="./cfg/attack_1.cfg" NIGHTLY WARN_DISABLE INVERT_RESULT)
+test_add(c_ripe_a2   c/ripe --cmd="./cfg/attack_2.cfg" NIGHTLY WARN_DISABLE INVERT_RESULT)
+test_add(c_ripe_a3   c/ripe --cmd="./cfg/attack_3.cfg" NIGHTLY WARN_DISABLE INVERT_RESULT)
+test_add(c_ripe_a4   c/ripe --cmd="./cfg/attack_4.cfg" NIGHTLY WARN_DISABLE INVERT_RESULT)
+test_add(c_ripe_a5   c/ripe --cmd="./cfg/attack_5.cfg" NIGHTLY WARN_DISABLE INVERT_RESULT)
 
-test_add(c_ns_ripe_a1   c/ripe --cmd="./cfg/attack_1.cfg" NIGHTLY DISABLE_SECURITY)
-test_add(c_ns_ripe_a2   c/ripe --cmd="./cfg/attack_2.cfg" NIGHTLY DISABLE_SECURITY)
-test_add(c_ns_ripe_a3   c/ripe --cmd="./cfg/attack_3.cfg" NIGHTLY DISABLE_SECURITY)
-test_add(c_ns_ripe_a4   c/ripe --cmd="./cfg/attack_4.cfg" NIGHTLY DISABLE_SECURITY)
-test_add(c_ns_ripe_a5   c/ripe --cmd="./cfg/attack_5.cfg" NIGHTLY DISABLE_SECURITY)
+test_add(c_ns_ripe_a1   c/ripe --cmd="./cfg/attack_1.cfg" NIGHTLY WARN_DISABLE DISABLE_SECURITY)
+test_add(c_ns_ripe_a2   c/ripe --cmd="./cfg/attack_2.cfg" NIGHTLY WARN_DISABLE DISABLE_SECURITY)
+test_add(c_ns_ripe_a3   c/ripe --cmd="./cfg/attack_3.cfg" NIGHTLY WARN_DISABLE DISABLE_SECURITY)
+test_add(c_ns_ripe_a4   c/ripe --cmd="./cfg/attack_4.cfg" NIGHTLY WARN_DISABLE DISABLE_SECURITY)
+test_add(c_ns_ripe_a5   c/ripe --cmd="./cfg/attack_5.cfg" NIGHTLY WARN_DISABLE DISABLE_SECURITY)
 
 foreach(test ${ZEPHYR_APPS})
     string(REPLACE "/" "_" APP_NAME ${test})

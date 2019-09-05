@@ -6,9 +6,14 @@ import os
 
 def extract_c_directives(filename, directives):
 
+  directives.append('disable_security = false')
+  directives.append('disable_warnings = false')
+
   for arg in sys.argv:
     if arg == '--nonsecure-libc':
         directives.append('disable_security = true')
+    if arg == '--disable-c-warnings':
+        directives.append('disable_warnings = true')
 
 def make_command_line():
   cmd_file = None
@@ -42,6 +47,7 @@ def make_command_line():
   asm.append('.4byte {}'.format(args_n))
   asm.extend(['.4byte ._arg_{}'.format(ind) for ind, x in enumerate(content)])
   asm.extend(['._arg_{}: .string "{}"'.format(ind, x) for ind, x in enumerate(content)])
+  asm.append('');
 
   with open("command_line.s", "w") as f:
     f.write('\n'.join(asm))
@@ -53,7 +59,7 @@ class BuilderC(MakeFileBuilder):
     print('searching for c files as <{}>'.format(pattern))
     c_files = glob.glob(pattern)
 
-    directives = ['disable_security = false']
+    directives = []
     for c_file in c_files:
       # extract_uart_checker(c_file)
       extract_c_directives(c_file, directives)
