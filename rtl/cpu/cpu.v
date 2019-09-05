@@ -29,6 +29,8 @@ module cpu
    
     /*verilator public_module*/
     /*verilator no_inline_module*/
+   
+   reg [31:0] bus_dataout_stored;
 
     wire interrupt_occured = TIMER_INTERRUPT_I || TAGS_INTERRUPT_I;
     wire clk, reset;
@@ -129,6 +131,7 @@ module cpu
     wire exec_next_pc_from_alu;
     wire [1:0] exec_mux_reg_input_sel;
     wire [2:0] dec_funct3;
+    wire write_reg;
 
     decoder dec_inst(
         .I_clk(clk),
@@ -147,7 +150,8 @@ module cpu
         .exec_writeback_from_imm_o(exec_writeback_from_imm),
         .exec_next_pc_from_alu_o(exec_next_pc_from_alu),
         .exec_mux_reg_input_sel_o(exec_mux_reg_input_sel),
-        .funct3_o(dec_funct3)
+        .funct3_o(dec_funct3),
+        .write_reg_o(write_reg)
 	);
 
     // Registers instance
@@ -169,7 +173,7 @@ module cpu
     always @(*) begin
         case(mux_alu_s1_sel_f)
             `MUX_ALUDAT1_REGVAL1: alu_dataS1 = reg_val1;
-            default:             alu_dataS1 = pc; // MUX_ALUDAT1_PC
+            default:             alu_dataS1 = new_pc; // MUX_ALUDAT1_PC
         endcase
     end
 
@@ -289,13 +293,14 @@ module cpu
     end
     assign csr_ro = 0;
 
-    reg[1:0] mux_reg_input_sel = `MUX_REGINPUT_ALU;
+    reg [1:0] mux_reg_input_sel = `MUX_REGINPUT_ALU;
     always @(*) begin
         case(mux_reg_input_sel)
-            `MUX_REGINPUT_ALU: reg_datain = alu_dataout;
-            `MUX_REGINPUT_BUS: reg_datain = bus_dataout;
-            `MUX_REGINPUT_IMM: reg_datain = dec_imm;
-            default:          reg_datain = msr_data; // MUX_REGINPUT_MSR
+            `MUX_REGINPUT_ALU:     reg_datain = alu_dataout;
+            `MUX_REGINPUT_BUS:     reg_datain = bus_dataout;
+            `MUX_REGINPUT_IMM:     reg_datain = dec_imm;
+            `MUX_REGINPUT_MSR:     reg_datain = msr_data;
+            default:               reg_datain = 32'hFFFFFFFF;
         endcase
     end
 
@@ -308,7 +313,7 @@ module cpu
     localparam STATE_BRANCH2        = 4'd7;
     localparam STATE_TRAP1          = 4'd8;
     localparam STATE_SYSTEM         = 4'd9;
-    localparam STATE_CSR1           = 4'd10;
+    localparam STATE_UPDATE_PC      = 4'd10;
     localparam STATE_CSR2           = 4'd11;
     localparam STATE_DEAD           = 4'd12;
     localparam STATE_PRE_FETCH      = 4'd13;
@@ -330,7 +335,7 @@ module cpu
    reg [3:0] next_new_state;
 
    reg [31:0] new_pc;
-   wire [31:0] next_new_pc = new_pc + 4;
+   reg [31:0] next_new_pc;
 
    wire stall = bus_busy;
    reg update_pc;
@@ -340,7 +345,6 @@ module cpu
 
    reg next_writeback_from_bus;
 
-   reg [31:0] bus_dataout_stored;
 
    always @ (posedge clk) begin
       if (reset) begin
@@ -352,8 +356,9 @@ module cpu
       end
       else begin
          new_state <= stall ? new_state : next_new_state;
+//         new_pc <= (update_pc && !busy) ? next_new_pc : new_pc;
          new_pc <= (update_pc && !busy) ? next_new_pc : new_pc;
-         pcnext <= (busy) ? pcnext : next_pcnext;
+         pcnext <= ((new_state == STATE_DECODE) && !busy) ? next_pcnext : pcnext;
          writeback_from_bus <= (busy) ? writeback_from_bus : next_writeback_from_bus;
          bus_dataout_stored <= (new_state == STATE_FETCH) ? bus_dataout : bus_dataout_stored;
       end
@@ -375,10 +380,22 @@ module cpu
             
       writeback_from_alu = 0;
       next_writeback_from_bus = 0;
+      next_new_pc = 0;
+
+      mux_reg_input_sel = 0;
 
       case (new_state)
          STATE_RESET: begin
             next_new_state = STATE_PRE_FETCH;
+         end
+         STATE_UPDATE_PC: begin
+            update_pc = 1;
+            next_new_state = STATE_PRE_FETCH;
+            next_new_pc = (exec_next_pc_from_alu) ? alu_dataout : pcnext;
+            mux_reg_input_sel = (writeback_from_alu || exec_writeback_from_alu) ? `MUX_REGINPUT_ALU :
+                                (exec_writeback_from_imm                      ) ?  exec_mux_reg_input_sel :
+                                                                                  `MUX_REGINPUT_BUS;
+            reg_we = writeback_from_alu || writeback_from_bus || exec_writeback_from_imm || exec_writeback_from_alu;
          end
          STATE_PRE_FETCH: begin
             mux_bus_addr_sel = `MUX_BUSADDR_PC;
@@ -386,10 +403,6 @@ module cpu
             bus_en = 1;
             bus_op = `BUSOP_READW;
             
-            mux_reg_input_sel = (writeback_from_alu || exec_writeback_from_alu) ? `MUX_REGINPUT_ALU :
-                                 exec_writeback_from_imm                        ?  exec_mux_reg_input_sel :
-                                                                                  `MUX_REGINPUT_BUS;
-            reg_we = writeback_from_alu || writeback_from_bus || exec_writeback_from_imm || exec_writeback_from_alu;
          end
          STATE_FETCH: begin
             next_new_state = STATE_DECODE;
@@ -401,16 +414,12 @@ module cpu
          STATE_DECODE: begin
             dec_en = 1;
             reg_re = 1;
-            next_pcnext = alu_dataout;
             next_new_state = STATE_EXEC;
+            next_pcnext = alu_dataout;
          end
          STATE_EXEC: begin
-            // ALU output when coming from decode is PC+4... store it in pcnext
             case (exec_next_stage)
-               `EXEC_TO_FETCH: begin
-                  next_new_state = STATE_PRE_FETCH;
-                  update_pc = 1;
-               end
+               `EXEC_TO_FETCH:  next_new_state = STATE_UPDATE_PC;
                `EXEC_TO_LOAD:   next_new_state = STATE_LOAD1;
                `EXEC_TO_STORE:  next_new_state = STATE_STORE1;
                `EXEC_TO_BRANCH: next_new_state = STATE_BRANCH2;
@@ -418,6 +427,7 @@ module cpu
                `EXEC_TO_TRAP:   next_new_state = STATE_TRAP1;
                default:         next_new_state = STATE_DEAD;
             endcase
+            reg_we = write_reg;
             alu_en = 1;
          end
          STATE_LOAD1: begin
@@ -446,9 +456,8 @@ module cpu
             endcase
          end
          STATE_LOAD2: begin
-            next_new_state = STATE_PRE_FETCH;
+            next_new_state = STATE_UPDATE_PC;
             next_writeback_from_bus = 1;
-            update_pc = 1;
          end
          STATE_STORE1: begin
             next_new_state = STATE_STORE2;
@@ -470,17 +479,16 @@ module cpu
             endcase
          end
          STATE_STORE2: begin
-            next_new_state = STATE_PRE_FETCH;
-            update_pc = 1;
+            next_new_state = STATE_UPDATE_PC;
          end
          STATE_BRANCH2: begin
-            next_new_state = STATE_PRE_FETCH;
+            next_new_state = STATE_UPDATE_PC;
          end
          STATE_SYSTEM: begin
-            next_new_state = STATE_PRE_FETCH;
+            next_new_state = STATE_UPDATE_PC;
          end
          STATE_TRAP1: begin
-            next_new_state = STATE_PRE_FETCH;
+            next_new_state = STATE_UPDATE_PC;
          end
          default: begin
             next_new_state = STATE_DEAD;
