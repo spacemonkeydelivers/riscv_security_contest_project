@@ -12,7 +12,7 @@ build_project:
   artifacts:
     paths:
       - build/
-    expire_in: 1 day
+    expire_in: 2h
 
 test_project:
   stage: test
