@@ -1,6 +1,5 @@
 add_debugger_test(debugger_sanity debugger/debugger_sanity.s
-                  ${CMAKE_SOURCE_DIR}/tests/debugger/sanity.input
-                  --driver_arg=--repl)
+                  ${CMAKE_SOURCE_DIR}/tests/debugger/sanity.input --repl)
 
 test_add(basic_mem         basic/mem.py)
 test_add(store_byte_issue  basic/store_byte_issue.py)
@@ -49,9 +48,9 @@ test_add(asm_csrrs_small   asm/csrrs_compliance.s)
 test_add(c_basic             c/basic)
 
 test_add(c_libc_exit_S       c/libc/exit_succ)
-test_add(c_libc_exit_F       c/libc/exit_fail --driver_arg=--expect-failure)
+test_add(c_libc_exit_F       c/libc/exit_fail INVERT_RESULT)
 test_add(c_libc_main_ret_S   c/libc/main_ret_succ)
-test_add(c_libc_main_ret_F   c/libc/main_ret_fail --driver_arg=--expect-failure)
+test_add(c_libc_main_ret_F   c/libc/main_ret_fail INVERT_RESULT)
 test_add(c_libc_printf4      c/libc/printf4)
 test_add(c_libc_printf5      c/libc/printf5)
 test_add(c_libc_printf_int   c/libc/printf_int)
@@ -83,11 +82,11 @@ test_add(c_example_abs     c/examples/cmd_line
 
 test_add(c_fibonacci c/fibo)
 
-test_add(c_ripe_a1   c/ripe --cmd="./cfg/attack_1.cfg" NIGHTLY)
-test_add(c_ripe_a2   c/ripe --cmd="./cfg/attack_2.cfg" NIGHTLY)
-test_add(c_ripe_a3   c/ripe --cmd="./cfg/attack_3.cfg" NIGHTLY)
-test_add(c_ripe_a4   c/ripe --cmd="./cfg/attack_4.cfg" NIGHTLY)
-test_add(c_ripe_a5   c/ripe --cmd="./cfg/attack_5.cfg" NIGHTLY)
+test_add(c_ripe_a1   c/ripe --cmd="./cfg/attack_1.cfg" NIGHTLY INVERT_RESULT)
+test_add(c_ripe_a2   c/ripe --cmd="./cfg/attack_2.cfg" NIGHTLY INVERT_RESULT)
+test_add(c_ripe_a3   c/ripe --cmd="./cfg/attack_3.cfg" NIGHTLY INVERT_RESULT)
+test_add(c_ripe_a4   c/ripe --cmd="./cfg/attack_4.cfg" NIGHTLY INVERT_RESULT)
+test_add(c_ripe_a5   c/ripe --cmd="./cfg/attack_5.cfg" NIGHTLY INVERT_RESULT)
 
 test_add(c_ns_ripe_a1   c/ripe --cmd="./cfg/attack_1.cfg" NIGHTLY DISABLE_SECURITY)
 test_add(c_ns_ripe_a2   c/ripe --cmd="./cfg/attack_2.cfg" NIGHTLY DISABLE_SECURITY)

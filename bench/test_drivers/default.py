@@ -47,14 +47,12 @@ def run(libbench):
 
     expect_failure = False
     enforce_repl = False
+
     for arg in sys.argv:
-        m = re.search('--driver_arg=(.*)', arg)
-        if m:
-            found = m.group(1)
-            if found == "--expect-failure":
-                expect_failure = True
-            if found == '--repl':
-                enforce_repl = True
+      if arg == '--driver-invert-result':
+        expect_failure = True
+      if arg == '--repl':
+        enforce_repl = True
 
     dbg = debug.Debugger(libbench, soc)
     ticks = soc.get_ticks_to_run()
