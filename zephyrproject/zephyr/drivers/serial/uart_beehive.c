@@ -8,11 +8,10 @@
     ((const struct uart_device_config * const)  \
      (dev)->config->config_info)
 
-static unsigned char uart_beehive_poll_out(struct device *dev,
-                          unsigned char c)
+static void uart_beehive_poll_out(struct device *dev, unsigned char c)
 {
     sys_write8(c, DEV_CFG(dev)->regs);
-    return c;
+    return;
 }
 
 static int uart_beehive_poll_in(struct device *dev, unsigned char *c)
