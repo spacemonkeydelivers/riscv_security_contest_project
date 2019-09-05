@@ -73,7 +73,7 @@ test_add(c_Slibc_ns_free      c/libc_sec/ns_free DISABLE_SECURITY)
 
 test_add(c_soc_isr_route_timer_base   c/soc/isr_route_timer_base)
 test_add(c_soc_isr_route_ialign_base  c/soc/isr_route_ialign_base)
-test_add(c_soc_hwrand                 c/soc/hwrand NIGTHLY)
+test_add(c_soc_hwrand                 c/soc/hwrand NIGHTLY)
 
 test_add(c_example_cmdln   c/examples/cmd_line --cmd="./cmd.line")
 test_add(c_example_prrel   c/examples/cmd_line --cmd="c/examples/cmd_line/cmd.line")
