@@ -5,7 +5,11 @@
 
 void ialign_handler(int n, void* context)
 {
-    exit(0);
+    (void)context;
+    if (n == RISCV_EXC_I_ALIGN) {
+        exit(EXIT_SUCCESS);
+    }
+    exit(EXIT_FAILURE);
 }
 
 int main () {

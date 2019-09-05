@@ -11,7 +11,7 @@ set(DEBUGGER_TEST_RUNNER ${CMAKE_SOURCE_DIR}/tests/debugger/run.sh)
 
 function(test_add name)
 
-    set(options NIGHTLY DISABLE_SECURITY INVERT_RESULT)
+    set(options NIGHTLY DISABLE_SECURITY INVERT_RESULT WARN_DISABLE)
     cmake_parse_arguments(PARSE_ARGV 1 TEST_DESCR "${options}" "" "")
 
     set(TEST_DIR "${CMAKE_BINARY_DIR}/tests/${name}")
@@ -26,8 +26,12 @@ function(test_add name)
         set(NSC "--nonsecure-libc")
     endif()
 
+    if (${TEST_DESCR_WARN_DISABLE})
+        set(NOWARN "--disable-c-warnings")
+    endif()
+
     add_test(NAME "${name}"
-        COMMAND "${TEST_RUNNER}" ${TEST_DESCR_UNPARSED_ARGUMENTS} ${RINVERT} ${NSC}
+        COMMAND "${TEST_RUNNER}" ${TEST_DESCR_UNPARSED_ARGUMENTS} ${RINVERT} ${NSC} ${NOWARN}
         WORKING_DIRECTORY "${TEST_DIR}")
 
     if (${TEST_DESCR_NIGHTLY})

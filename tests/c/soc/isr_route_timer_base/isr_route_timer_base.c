@@ -10,6 +10,11 @@ volatile int unused = 0;
 #define D_TIMEOUT 30
 void timer_handler(int n, void* context)
 {
+    (void)context;
+    if (n != RISCV_INT_EXT_M) {
+        printf("\nERROR: interrupt number is not correct!\n");
+        exit(42);
+    }
     ++global;
 
     if (global < 100) {

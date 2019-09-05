@@ -5,7 +5,7 @@ LIBC_INCLUDES = $(RISCV_PSEUDOLIBC_INCLUDES)
 
 CC         = $(RISCV_CC)
 OBJCOPY    = $(RISCV_OBJCOPY)
-CFLAGS     = $(RISCV_CFLAGS_COMMON) -march=rv32i -mabi=ilp32
+CFLAGS     = $(RISCV_CFLAGS_COMMON) -march=rv32i -mabi=ilp32 <%= disable_warnings ? "-w" : "" %>
 LDFLAGS    = $(RISCV_LDFLAGS_COMMON)
 LDSCRIPT   = $(RISCV_C_LD_SCRIPT)
 
