@@ -53,6 +53,9 @@ class Debugger:
         if '+trace' in DBG:
             self.set_tracing_enabled(True)
 
+        if '+vcd' in DBG:
+            self._soc.enable_vcd_trace()
+
         for arg in DBG:
             if '+ticks_to_run' in arg:
                 tick_num = int(arg.split('=')[1])
