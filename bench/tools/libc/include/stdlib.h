@@ -29,11 +29,10 @@ static inline long long int llabs(long long int val) {
 static inline unsigned rand(void) {
     unsigned result = 0;
     __asm__ __volatile__(
-            "csrr t0, rnd\n\t"
-            "or %[result], t0, x0"
+            "csrr %[result], rnd\n\t"
             : [result]"=r"(result)
             : /* No Input */
-            : "t0", "memory");
+            : );
     return result;
 }
 
