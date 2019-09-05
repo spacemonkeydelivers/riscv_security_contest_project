@@ -1,5 +1,7 @@
 #include "security.h"
 
+#include <soc/hwrand.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -19,12 +21,12 @@ unsigned _ossec_init       (const struct init_ctx* ctx) {
 
     int32_t sec_tag = 0;
     do {
-        sec_tag = rand() & 0xf;
+        sec_tag = soc_hwrand() & 0xf;
     } while(sec_tag == 0);
     sec_cntx.sec_tag = sec_tag;
 
     do {
-       sec_cntx.tag_gen = rand() & 0xf;
+       sec_cntx.tag_gen = soc_hwrand() & 0xf;
     } while (sec_cntx.tag_gen == 0 || sec_cntx.tag_gen == sec_tag);
 
     int en_value = 1;
@@ -65,7 +67,7 @@ unsigned _ossec_generate_tag () {
 
     // we do not use tag "0" and a dediacted "secure_tag"
     do {
-        // TODO: consider reworking to use rand() instead of '+1' in future
+        // TODO: consider reworking to use soc_hwrand() instead of '+1' in future
         ptr->tag_gen = (ptr->tag_gen + 1) & 0xf;
     } while(ptr->tag_gen == 0 || ptr->tag_gen == ptr->sec_tag);
 
