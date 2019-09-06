@@ -17,10 +17,9 @@ inject_params     = ['shellcode', 'returnintolibc', 'rop', 'dataonly'];
 
 
 techniques_en     = ['DIRECT', 'INDIRECT']
-code_ptrs_en      = ['RET_ADDR', 'FUNC_PTR_STACK_VAR', 'FUNC_PTR_STACK_PARAM', 'FUNC_PTR_HEAP', 'FUNC_PTR_BSS', 'FUNC_PTR_DATA',
-                    'STRUCT_FUNC_PTR_STACK','STRUCT_FUNC_PTR_HEAP', 'STRUCT_FUNC_PTR_DATA', 'STRUCT_FUNC_PTR_BSS',
-                    'LONGJMP_BUF_STACK_VAR', 'LONGJMP_BUF_STACK_PARAM', 'LONGJMP_BUF_HEAP', 'LONGJMP_BUF_BSS', 'LONGJMP_BUF_DATA',
-                    'VAR_BOF', 'VAR_IOF', 'VAR_LEAK']
+code_ptrs_en      = ['RET_ADDR', 'FUNC_PTR_STACK_VAR', 'FUNC_PTR_STACK_PARAM', 'FUNC_PTR_HEAP', 'FUNC_PTR_BSS', 'FUNC_PTR_DATA', 'STRUCT_FUNC_PTR_STACK',
+                    'STRUCT_FUNC_PTR_HEAP', 'STRUCT_FUNC_PTR_DATA', 'STRUCT_FUNC_PTR_BSS', 'LONGJMP_BUF_STACK_VAR', 'LONGJMP_BUF_STACK_PARAM', 
+                    'LONGJMP_BUF_HEAP', 'LONGJMP_BUF_DATA', 'LONGJMP_BUF_BSS', 'VAR_BOF', 'VAR_IOF', 'VAR_LEAK']
 functions_en      = ['MEMCPY', 'STRCPY', 'STRNCPY', 'SPRINTF', 'SNPRINTF', 'STRCAT', 'STRNCAT', 'SSCANF', 'HOMEBREW']
 locations_en      = ['STACK', 'HEAP', 'BSS', 'DATA']
 inject_params_en  = ['INJECTED_CODE_NO_NOP', 'RETURN_INTO_LIBC', 'RETURN_ORIENTED_PROGRAMMING', 'DATA_ONLY']
@@ -28,6 +27,7 @@ inject_params_en  = ['INJECTED_CODE_NO_NOP', 'RETURN_INTO_LIBC', 'RETURN_ORIENTE
 def generate_test(technique, code_ptr, func, location, attack):
     # Generating test name from parameters.
     test_name = 'c_ripe_'
+    test_name += technique[0]  + '_'
     test_name += code_ptr[0]   + '_'
     test_name += func[0]       + '_'
     test_name += location[0]   + '_'
@@ -54,26 +54,25 @@ def generate_test(technique, code_ptr, func, location, attack):
     test_string = 'test_add(' + test_name + ' --cmd="' + test_path + test_name + '.cfg' + '" NIGHTLY WARN_DISABLE INVERT_RESULT)'
     test_list.append(test_string)
 
-techniques      = zip(techniques, techniques_en)
-code_ptrs       = zip(code_ptrs, code_ptrs_en)
-functions       = zip(functions, functions_en)
-locations       = zip(locations, locations_en)
-inject_params   = zip(inject_params, inject_params_en)
+techniques      = list(zip(techniques, techniques_en))
+code_ptrs       = list(zip(code_ptrs, code_ptrs_en))
+functions       = list(zip(functions, functions_en))
+locations       = list(zip(locations, locations_en))
+inject_params   = list(zip(inject_params, inject_params_en))
 
 if os.path.exists(repository_path + test_path):
-    print("it does")
+    print("Path exists")
 else:
     print(repository_path + test_path)
     os.makedirs(repository_path + test_path)
-    print("it does not")
+    print("Path does not exist, being created")
 
-for tech in techniques:
-    for ptr in code_ptrs:
-        for func in functions:
-            for loc in locations:
-                for param in inject_params:
+for tech in techniques[0:2]:
+    for ptr in code_ptrs[0:2]:
+        for func in functions[0:2]:
+            for loc in locations[0:2]:
+                for param in inject_params[0:2]:
                     generate_test(tech, ptr, func, loc, param)
-
 with open('TestLists.txt', 'w') as tests_file:
     for each in test_list:
         tests_file.write(each)
