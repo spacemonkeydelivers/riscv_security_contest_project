@@ -94,6 +94,13 @@ test_add(c_ns_ripe_a3   c/ripe --cmd="./cfg/attack_3.cfg" NIGHTLY WARN_DISABLE D
 test_add(c_ns_ripe_a4   c/ripe --cmd="./cfg/attack_4.cfg" NIGHTLY WARN_DISABLE DISABLE_SECURITY)
 test_add(c_ns_ripe_a5   c/ripe --cmd="./cfg/attack_5.cfg" NIGHTLY WARN_DISABLE DISABLE_SECURITY)
 
+test_add(c_ripe_cfg_parser_unit0   c/ripe --cmd="./cfg_unit/attack_0.cfg" NIGHTLY WARN_DISABLE)
+test_add(c_ripe_cfg_parser_unit1   c/ripe --cmd="./cfg_unit/attack_1.cfg" NIGHTLY WARN_DISABLE INVERT_RESULT)
+test_add(c_ripe_cfg_parser_unit2   c/ripe --cmd="./cfg_unit/attack_2.cfg" NIGHTLY WARN_DISABLE INVERT_RESULT)
+test_add(c_ripe_cfg_parser_unit3   c/ripe --cmd="./cfg_unit/attack_3.cfg" NIGHTLY WARN_DISABLE)
+test_add(c_ripe_cfg_parser_unit4   c/ripe --cmd="./cfg_unit/attack_4.cfg" NIGHTLY WARN_DISABLE INVERT_RESULT)
+test_add(c_ripe_cfg_parser_unit5   c/ripe --cmd="./cfg_unit/attack_5.cfg" NIGHTLY WARN_DISABLE INVERT_RESULT)
+
 foreach(test ${ZEPHYR_APPS})
     string(REPLACE "/" "_" APP_NAME ${test})
     test_add(zephyr_${APP_NAME} zephyr/${APP_NAME} NIGHTLY)
