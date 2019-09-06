@@ -51,7 +51,7 @@ def generate_test(technique, code_ptr, func, location, attack):
             config_file.write(each)
             config_file.write('\n')
     # Generating CTest string.
-    test_string = 'test_add(' + test_name + ' --cmd="' + test_path + test_name + '.cfg' + '" NIGHTLY WARN_DISABLE INVERT_RESULT)'
+    test_string = 'test_add(' + test_name + '   c/ripe --cmd="' + test_path + test_name + '.cfg' + '" NIGHTLY WARN_DISABLE INVERT_RESULT)'
     test_list.append(test_string)
 
 techniques      = list(zip(techniques, techniques_en))
