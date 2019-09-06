@@ -187,5 +187,7 @@ const char *hex_to_bin(char c) {
 	if (c >= 'a' && c <= 'f') return bin4b[10 + c - 'a'];
 	return NULL;
 }
+int argument_parse(int argc, char* argv[]);
+int check_attack_struct();
 
 #endif /* !RIPE_ATTACK_GENERATOR_H */

@@ -17,7 +17,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-
+int is_unit_test = {0};
 static boolean output_debug_info = TRUE;
 
 // JM: shellcode is generated in perform_attack()
@@ -108,10 +108,180 @@ void simple_secure_monitor(int n, void* context)
         exit(EXIT_FAILURE);
     }
 }
+int 
+check_attack_struct()
+{
+	if (attack.technique == NULL) return -1;
+	if (attack.inject_param == NULL) return -1;
+	if (attack.code_ptr == NULL) return -1;
+	if (attack.location == NULL) return -1;
+	if (attack.function == NULL) return -1;
+	return 1;
+}
+
+int
+argument_parse(int argc, char* argv[])
+{
+    for(int i = 0; i < argc; ++i) {
+        if (strcmp(argv[i], "--technique") == 0) {
+            ++i;
+            if (i > argc) {
+                printf("[-] Invalid number of parameters: %s\n", argv[i]);
+				return -1;
+            }
+            if (strcmp(argv[i], "DIRECT") == 0) {
+                attack.technique = DIRECT;  
+            } else if (strcmp(argv[i], "INDIRECT") == 0) {
+                attack.technique = INDIRECT;  
+            } else {
+                printf("[-] Invalid parameter: %s\n", argv[i]);
+				return -1;
+            }
+            printf("[+] attack.technique: %s\n", argv[i]);
+            continue;
+        }
+
+        if (strcmp(argv[i], "--inject_param") == 0) {
+            ++i;
+            if (i > argc) {
+                printf("[-] Invalid number of parameters: %s\n", argv[i]);
+				return -1;
+            }
+            if (strcmp(argv[i], "INJECTED_CODE_NO_NOP") == 0) {
+                attack.inject_param = INJECTED_CODE_NO_NOP;  
+            } else if (strcmp(argv[i], "RETURN_INTO_LIBC") == 0) {
+                attack.inject_param = RETURN_INTO_LIBC;  
+            } else if (strcmp(argv[i], "RETURN_ORIENTED_PROGRAMMING") == 0) {
+                attack.inject_param = RETURN_ORIENTED_PROGRAMMING;  
+            } else if (strcmp(argv[i], "DATA_ONLY") == 0) {
+                attack.inject_param = DATA_ONLY;  
+            } else {
+                printf("[-] Invalid parameter: %s\n", argv[i]);
+				return -1;
+            }
+            printf("[+] attack.inject_param: %s\n", argv[i]);
+            continue;
+        }
+        if (strcmp(argv[i], "--code_ptr") == 0) {
+            ++i;
+            if (i > argc) {
+                printf("[-] Invalid number of parameters: %s\n", argv[i]);
+				return -1;
+            }
+            if (strcmp(argv[i], "RET_ADDR") == 0) {
+                attack.code_ptr = RET_ADDR;  
+            } else if (strcmp(argv[i], "FUNC_PTR_STACK_VAR") == 0) {
+                attack.code_ptr = FUNC_PTR_STACK_VAR;  
+            } else if (strcmp(argv[i], "FUNC_PTR_STACK_PARAM") == 0) {
+                attack.code_ptr = FUNC_PTR_STACK_PARAM;  
+            } else if (strcmp(argv[i], "FUNC_PTR_HEAP") == 0) {
+                attack.code_ptr = FUNC_PTR_HEAP;  
+            } else if (strcmp(argv[i], "FUNC_PTR_BSS") == 0) {
+                attack.code_ptr = FUNC_PTR_BSS;  
+            } else if (strcmp(argv[i], "FUNC_PTR_DATA") == 0) {
+                attack.code_ptr = FUNC_PTR_DATA;  
+            } else if (strcmp(argv[i], "LONGJMP_BUF_STACK_VAR") == 0) {
+                attack.code_ptr = LONGJMP_BUF_STACK_VAR;  
+            } else if (strcmp(argv[i], "LONGJMP_BUF_STACK_PARAM") == 0) {
+                attack.code_ptr = LONGJMP_BUF_STACK_PARAM;  
+            } else if (strcmp(argv[i], "LONGJMP_BUF_HEAP") == 0) {
+                attack.code_ptr = LONGJMP_BUF_HEAP;  
+            } else if (strcmp(argv[i], "LONGJMP_BUF_BSS") == 0) {
+                attack.code_ptr = LONGJMP_BUF_BSS;  
+            } else if (strcmp(argv[i], "LONGJMP_BUF_DATA") == 0) {
+                attack.code_ptr = LONGJMP_BUF_DATA;  
+            } else if (strcmp(argv[i], "STRUCT_FUNC_PTR_STACK") == 0) {
+                attack.code_ptr = STRUCT_FUNC_PTR_STACK;  
+            } else if (strcmp(argv[i], "STRUCT_FUNC_PTR_HEAP") == 0) {
+                attack.code_ptr = STRUCT_FUNC_PTR_HEAP;  
+            } else if (strcmp(argv[i], "STRUCT_FUNC_PTR_DATA") == 0) {
+                attack.code_ptr = STRUCT_FUNC_PTR_DATA;  
+            } else if (strcmp(argv[i], "STRUCT_FUNC_PTR_BSS") == 0) {
+                attack.code_ptr = STRUCT_FUNC_PTR_BSS;  
+            } else if (strcmp(argv[i], "VAR_BOF") == 0) {
+                attack.code_ptr = VAR_BOF;  
+            } else if (strcmp(argv[i], "VAR_IOF") == 0) {
+                attack.code_ptr = VAR_IOF;  
+            } else if (strcmp(argv[i], "VAR_LEAK") == 0) {
+                attack.code_ptr = VAR_LEAK;  
+            } else {
+                printf("[-] Invalid parameter: %s\n", argv[i]);
+				return -1;
+            }
+            printf("[+] attack.code_ptr: %s\n", argv[i]);
+            continue;
+        }
+
+        if (strcmp(argv[i], "--location") == 0) {
+            ++i;
+            if (i > argc) {
+                printf("[-] Invalid number of parameters: %s\n", argv[i]);
+				return -1;
+            }
+            if (strcmp(argv[i], "STACK") == 0) {
+                attack.location = STACK;  
+            } else if (strcmp(argv[i], "HEAP") == 0) {
+                attack.location = HEAP;  
+            } else if (strcmp(argv[i], "BSS") == 0) {
+                attack.location = BSS;  
+            } else if (strcmp(argv[i], "DATA") == 0) {
+                attack.location = DATA;  
+            } else {
+                printf("[-] Invalid parameter: %s\n", argv[i]);
+				return -1;
+            }
+            printf("[+] attack.location: %s\n", argv[i]);
+            continue;
+        }
+
+        if (strcmp(argv[i], "--function") == 0) {
+            ++i;
+            if (i > argc) {
+                printf("[-] Invalid number of parameters: %s\n", argv[i]);
+				return -1;
+            }
+            if (strcmp(argv[i], "MEMCPY") == 0) {
+                attack.function = MEMCPY;  
+            } else if (strcmp(argv[i], "STRCPY") == 0) {
+                attack.function = STRCPY;  
+            } else if (strcmp(argv[i], "STRNCPY") == 0) {
+                attack.function = STRNCPY;  
+            } else if (strcmp(argv[i], "SPRINTF") == 0) {
+                attack.function = SPRINTF;  
+            } else if (strcmp(argv[i], "SNPRINTF") == 0) {
+                attack.function = SNPRINTF;  
+            } else if (strcmp(argv[i], "STRCAT") == 0) {
+                attack.function = STRCAT;  
+            } else if (strcmp(argv[i], "SPRINTF") == 0) {
+                attack.function = SPRINTF;  
+            } else if (strcmp(argv[i], "STRCAT") == 0) {
+                attack.function = STRCAT;  
+            } else if (strcmp(argv[i], "STRNCAT") == 0) {
+                attack.function = STRNCAT;  
+            } else if (strcmp(argv[i], "SSCANF") == 0) {
+                attack.function = SSCANF;  
+            } else if (strcmp(argv[i], "HOMEBREW") == 0) {
+                attack.function = HOMEBREW;  
+            } else {
+                printf("[-] Invalid parameter: %s\n", argv[i]);
+				return -1;
+            }
+            printf("[+] attack.function: %s\n", argv[i]);
+            continue;
+        }
+        if (strcmp(argv[i], "--unit_testing") == 0) {
+            printf("[*] This is unit-test run. No actuall attack happens\n");
+            is_unit_test = 1; 
+            continue;
+        }
+    }
+	return 0;
+}
 //
 // Initial main taking argument on the commande line has been replaced by a simple function call
 // You have to update the ATTACK_NR to mimic the command line arguments
 //
+
 bool hardened_mode = false;
 
 int
@@ -122,50 +292,19 @@ main(int argc, char* argv[])
     hardened_mode = false;
     bool scan_number = false;
     int attack_number = 0;
-    for(int i = 0; i < argc; ++i) {
-        if (scan_number) {
-            attack_number = strtoul(argv[i], 0, 0);
-            scan_number = false;
-            continue;
-        }
-        if (strcmp(argv[i], "--attack-number") == 0) {
-            scan_number = true;
-            continue;
-        }
-    }
-
+	if (argument_parse(argc, argv) == -1) {
+		printf("[-] Parsing went wrong. Exiting\n");
+		exit(EXIT_FAILURE);
+	}	
+	if (check_attack_struct() == -1) {
+		printf("[-] Some parameters are messed up. Check cfg file \n");
+		exit(EXIT_FAILURE);
+	}
     printk("RIPE is alive! %s\n", CONFIG_BOARD);
-    printk("selected attack number = %d\n", attack_number);
-    switch(attack_number) {
-    case 1:
-        printk("-t direct -i shellcode -c funcptrheap -l heap -f memcpy");
-        attack.technique = DIRECT; attack.inject_param = INJECTED_CODE_NO_NOP; attack.code_ptr= FUNC_PTR_HEAP; attack.location = HEAP;  attack.function = HOMEBREW;
-        break;
-    case 2:
-        printk("-t direct -i shellcode -c longjmpstackparam -l stack -f homebrew");
-        attack.technique = DIRECT; attack.inject_param = INJECTED_CODE_NO_NOP; attack.code_ptr= LONGJMP_BUF_STACK_VAR; attack.location = STACK;  attack.function = HOMEBREW;
-        break;
-    case 3:
-        printk("-t indirect -i returnintolibc -c ret -l stack -f memcpy");
-        attack.technique = INDIRECT; attack.inject_param = RETURN_INTO_LIBC; attack.code_ptr= RET_ADDR; attack.location = STACK;  attack.function = HOMEBREW;
-        break;
-    case 4:
-        printk("-t indirect -i returnintolibc -c funcptrstackvar -l stack -f memcpy");
-        attack.technique = INDIRECT; attack.inject_param = RETURN_INTO_LIBC; attack.code_ptr= FUNC_PTR_STACK_VAR; attack.location = STACK;  attack.function = HOMEBREW;
-        break;
-    case 5:
-        printk("-t indirect -i shellcode -c funcptrheap -l heap -f memcpy");
-        attack.technique = INDIRECT; attack.inject_param = INJECTED_CODE_NO_NOP; attack.code_ptr = STRUCT_FUNC_PTR_HEAP; attack.location = HEAP; attack.function = HOMEBREW;
-        break;
-    default:
-        printf("\nFATAL_ERROR! could not figure out the attack to use\n");
-        exit(EXIT_FAILURE);
-        break;
-    }
-
+    if (is_unit_test == 1) return EXIT_SUCCESS;
     try_attack();
 
-    printf("Unexpected back in main\n");
+    printf("[-] Unexpected back in main\n");
     return 0;
 
 }
@@ -180,35 +319,35 @@ perform_attack(
 {
     jmp_buf stack_jmp_buffer;
 
-	/* STACK TARGETS */
-	/*
-	Function Pointer
-	Two general pointers for indirect attack
-	DOP flag
-	Arbitrary read data
-	Overflow buffer
-	Vulnerable struct
-	*/
+    /* STACK TARGETS */
+    /*
+    Function Pointer
+    Two general pointers for indirect attack
+    DOP flag
+    Arbitrary read data
+    Overflow buffer
+    Vulnerable struct
+    */
     int (* stack_func_ptr)(const char *);
     long * stack_mem_ptr;
     long * stack_mem_ptr_aux;
     int stack_flag;
-	char stack_secret[32];
-	strcpy(stack_secret, data_secret);
+    char stack_secret[32];
+    strcpy(stack_secret, data_secret);
     char stack_buffer[1024];
     struct attackme stack_struct;
     stack_struct.func_ptr = &dummy_function;
 
     /* HEAP TARGETS */
-	/*
-	Vulnerable struct
-	Overflow buffers
-	DOP flag
-	Two general pointers for indirect attack
-	Arbitrary read data
-	Function pointer array
-	Longjmp buffer
-	*/
+    /*
+    Vulnerable struct
+    Overflow buffers
+    DOP flag
+    Two general pointers for indirect attack
+    Arbitrary read data
+    Function pointer array
+    Longjmp buffer
+    */
     struct attackme * heap_struct =
       (struct attackme *) malloc(sizeof(struct attackme));
     heap_struct->func_ptr = dummy_function;
@@ -223,20 +362,20 @@ perform_attack(
     int * heap_flag = (int *) malloc(sizeof(int *));
     long * heap_mem_ptr_aux;
     long * heap_mem_ptr;
-	char * heap_secret;
+    char * heap_secret;
     int(**heap_func_ptr)(const char *) = 0;
     jmp_buf * heap_jmp_buffer;
 
     /* BSS TARGETS */
-	/*
-	Function pointer
-	DOP flag
-	Two general pointers for indirect attack
-	Arbitrary read data
-	Overflow buffer
-	Longjmp buffer
-	Vulnerable Struct
-	*/
+    /*
+    Function pointer
+    DOP flag
+    Two general pointers for indirect attack
+    Arbitrary read data
+    Overflow buffer
+    Longjmp buffer
+    Vulnerable Struct
+    */
     static int (* bss_func_ptr)(const char *);
     static int * bss_flag;
     static long * bss_mem_ptr_aux;
@@ -266,7 +405,7 @@ perform_attack(
     // JM: assigning value to bss buffers
     //  to place them 'behind' other locals
     bss_buffer[0]  = 'a';
-  	strcpy(bss_secret, data_secret);
+    strcpy(bss_secret, data_secret);
 
     // write shellcode with correct jump address
     build_shellcode(shellcode_nonop);
@@ -316,10 +455,10 @@ perform_attack(
                 heap_mem_ptr_aux = (long *) heap_buffer2;
                 heap_mem_ptr     = (long *) heap_buffer3;
 
-				if (attack.code_ptr == VAR_LEAK) {
-					heap_secret = heap_buffer2;
-					strcpy(heap_secret, data_secret);
-				}
+                if (attack.code_ptr == VAR_LEAK) {
+                    heap_secret = heap_buffer2;
+                    strcpy(heap_secret, data_secret);
+                }
                 // Also set the location of the function pointer and the
                 // longjmp buffer on the heap (the same since only choose one)
                 heap_func_ptr = malloc(sizeof(void *));
@@ -465,7 +604,7 @@ perform_attack(
                             break;
                     }
                     break;
-				case VAR_LEAK:
+                case VAR_LEAK:
                     switch (attack.location) {
                         case STACK:
                             target_addr = &stack_secret;
@@ -481,7 +620,7 @@ perform_attack(
                             break;
                     }
                     break;
-					
+                    
             }
             break;
 
@@ -632,10 +771,10 @@ perform_attack(
                 case LONGJMP_BUF_BSS:
                     payload.overflow_ptr = bss_jmp_buffer;
                     break;
-				// JM: indirect attacks don't apply to int overflows or leaks
+                // JM: indirect attacks don't apply to int overflows or leaks
                 case VAR_BOF:
                 case VAR_IOF:
-				case VAR_LEAK:
+                case VAR_LEAK:
                     payload.overflow_ptr = &dop_dest;
                     break;
                 default:
@@ -845,9 +984,9 @@ perform_attack(
                     break;
             }
             break;
-		case VAR_LEAK:
-			data_leak(buffer);
-			break;
+        case VAR_LEAK:
+            data_leak(buffer);
+            break;
     }
 } /* perform_attack */
 
@@ -860,7 +999,7 @@ build_payload(CHARPAYLOAD * payload)
     size_t size_shellcode, bytes_to_pad;
     char * shellcode, * temp_char_buffer, * temp_char_ptr;
     
-	switch (attack.inject_param) {
+    switch (attack.inject_param) {
         case INJECTED_CODE_NO_NOP:
             if (payload->size < (size_shellcode_nonop + sizeof(long))) {
                 return FALSE;
@@ -872,17 +1011,17 @@ build_payload(CHARPAYLOAD * payload)
             // JM: 256 padding bytes for unsigned 8bit IOF
             if (attack.code_ptr == VAR_IOF)
                 payload->size = 256 + sizeof(long) + sizeof(char);
-			
-			if (attack.code_ptr == VAR_LEAK) {
-				// JM: simulated packet with length included
-				payload->size += 32 - sizeof(long);
-				payload->buffer[0] = payload->size & 0xFF;
-				payload->buffer[1] = payload->size / 0x100;
-				payload->buffer[2] = 'A';
-				payload->buffer[3] = '\0';
-				payload->size = 4;
-				return TRUE;
-			}
+            
+            if (attack.code_ptr == VAR_LEAK) {
+                // JM: simulated packet with length included
+                payload->size += 32 - sizeof(long);
+                payload->buffer[0] = payload->size & 0xFF;
+                payload->buffer[1] = payload->size / 0x100;
+                payload->buffer[2] = 'A';
+                payload->buffer[3] = '\0';
+                payload->size = 4;
+                return TRUE;
+            }
         case RETURN_ORIENTED_PROGRAMMING:
         case RETURN_INTO_LIBC:
             if (payload->size < sizeof(long))
@@ -926,11 +1065,11 @@ build_payload(CHARPAYLOAD * payload)
     /* Finally, add the terminating null character at the end */
     memset((payload->buffer + payload->size - 1), '\0', 1);
     
-	if (output_debug_info)
+    if (output_debug_info)
         fprintf(stderr, "payload: %s\n", payload->buffer);
     return TRUE;
 
-	
+    
 } /* build_payload */
 
 // JM: call longjmp on a buffer in perform_attack()
@@ -1017,16 +1156,16 @@ iof(char * buf, uint32_t iv)
 
 void
 data_leak(char *buf) {
-	uint16_t size = buf[0] + (buf[1] * 0x100), i;
-	char *msg = (char *)malloc(size);
+    uint16_t size = buf[0] + (buf[1] * 0x100), i;
+    char *msg = (char *)malloc(size);
 
-	memcpy(msg, buf + 2, size);
-	for (i = 0; i < size; i++) {
-		if (msg[i] >= 0x20) printf("%c",msg[i]);
-	}
+    memcpy(msg, buf + 2, size);
+    for (i = 0; i < size; i++) {
+        if (msg[i] >= 0x20) printf("%c",msg[i]);
+    }
 
-	printf("\n");
-}			
+    printf("\n");
+}           
 
 /*********************/
 /* BUILD_SHELLCODE() */
@@ -1047,11 +1186,11 @@ build_shellcode(char * shellcode)
     memset(lui_s,       0, sizeof(lui_s) );
     memset(addi_s,      0, sizeof(addi_s) );
 
-	// fix shellcode when lower bits become negative
-	if (((unsigned long)&shellcode_target & 0x00000fff) >= 0x800)
-		hex_to_string(attack_addr, &shellcode_target + 0x1000);
+    // fix shellcode when lower bits become negative
+    if (((unsigned long)&shellcode_target & 0x00000fff) >= 0x800)
+        hex_to_string(attack_addr, &shellcode_target + 0x1000);
     else
-		hex_to_string(attack_addr, &shellcode_target);
+        hex_to_string(attack_addr, &shellcode_target);
 
     // split attack address into low and high bit strings
     memcpy(low_bits, &attack_addr[5], 3);
@@ -1144,31 +1283,31 @@ is_attack_possible()
 
     if (attack.inject_param == DATA_ONLY) {
         if (attack.code_ptr != VAR_BOF &&
-          	attack.code_ptr != VAR_IOF &&
-			attack.code_ptr != VAR_LEAK)
+            attack.code_ptr != VAR_IOF &&
+            attack.code_ptr != VAR_LEAK)
         {
             fprintf(stderr, "Error: Misused DOP code pointer parameters.\n");
-			return FALSE;
+            return FALSE;
         }
 
         if ((attack.code_ptr == VAR_LEAK || attack.code_ptr == VAR_IOF) && attack.technique == INDIRECT) {
             fprintf(stderr,
               "Error: Impossible to do an indirect int overflow attack.\n");
-			return FALSE;
+            return FALSE;
         }
 
         if (attack.location == HEAP && attack.technique == INDIRECT) {
             fprintf(stderr,
               "Error: Impossible to indirect attack the heap flag.\n");
-        	return FALSE;
-		}
+            return FALSE;
+        }
     } else if (attack.code_ptr == VAR_BOF ||
-			   attack.code_ptr == VAR_IOF ||
-			   attack.code_ptr == VAR_LEAK) {
+               attack.code_ptr == VAR_IOF ||
+               attack.code_ptr == VAR_LEAK) {
         fprintf(stderr,
           "Error: Must use \"dataonly\" injection parameter for DOP attacks.\n");
-    	return FALSE;
-	}
+        return FALSE;
+    }
 
     // JM: attacks targeting another memory location must be indirect
     switch (attack.location) {
