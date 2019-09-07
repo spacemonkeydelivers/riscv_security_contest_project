@@ -39,9 +39,9 @@ test_add(asm_mext_rem           asm/mext/rem.s)
 test_add(asm_mext_remu          asm/mext/remu.s)
 test_add(asm_mext_zero          asm/mext/zerodiv.s)
 
-test_add(asm_csrr_vendorid      asm/csrr_vendor.s)
-test_add(asm_csrw_vendorid      asm/csrw_vendor.s)
-test_add(asm_csre_missing_csr   asm/csrr_missing.s)
+test_add(asm_csrr_vendorid      asm/csrr_vendor.s NIGHTLY)
+test_add(asm_csrw_vendorid      asm/csrw_vendor.s NIGHTLY)
+test_add(asm_csre_missing_csr   asm/csrr_missing.s NIGHTLY)
 test_add(asm_csrrw_small   asm/csrrw_compliance.s)
 test_add(asm_csrrs_small   asm/csrrs_compliance.s)
 
