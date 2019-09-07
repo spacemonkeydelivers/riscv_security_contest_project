@@ -1,4 +1,5 @@
 `include "cpu/csrdefs.vh"
+`include "cpu/lfsr_rnd.v"
 //`include "ram/generic_ram.v"
 
 module csr
@@ -22,6 +23,16 @@ module csr
    output wire                        csr_tags_if_en_o,
    output wire                        csr_tags_irq_clear_o
 );
+   // RND instance
+   wire [CSR_DATA_WIDTH - 1:0] rnd_data;
+
+   lfsr_rnd lfsr_rnd_inst
+   (
+      .I_clk (clk_i),
+      .I_reset (rst_i),
+      .O_rnd (rnd_data)
+   );
+
    assign csr_exists_o = 1;
    assign csr_ro_o = 0;
    assign csr_busy_o = busy;
@@ -62,7 +73,8 @@ module csr
                     M_TVAL      = 10,
                     M_IP        = 11,
                     M_TAGS      = 12,
-                    M_LAST      = 13;
+                    M_RND       = 13,
+                    M_LAST      = 14;
 
 
    reg [3:0] csr_index;
@@ -81,6 +93,7 @@ module csr
          `MSR_MTVAL:      csr_index = M_TVAL;
          `MSR_MIP:        csr_index = M_IP;
          `MSR_MTAGS:      csr_index = M_TAGS;
+         `MSR_MRND:       csr_index = M_RND;
          default :        csr_index = M_VENDOR_ID;
       endcase
    end
@@ -91,7 +104,7 @@ module csr
    reg [CSR_DATA_WIDTH - 1:0] stored_data;
 
    wire [CSR_DATA_WIDTH - 1:0] csr_data_out;
-   assign csr_data_o = csr_data_out;
+   assign csr_data_o = (csr_index == M_RND) ? rnd_data : csr_data_out;
 
    generic_ram
    #(

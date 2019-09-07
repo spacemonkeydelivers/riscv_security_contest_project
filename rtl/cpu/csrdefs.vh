@@ -20,5 +20,6 @@
     `define MSR_MTVAL      12'h343
     `define MSR_MIP        12'h344
     `define MSR_MTAGS      12'h345
+    `define MSR_MRND       12'h346
 
 `endif
