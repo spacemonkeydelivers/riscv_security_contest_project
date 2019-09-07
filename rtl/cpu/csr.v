@@ -44,7 +44,7 @@ module csr
       end else begin
          irq_en <= (csr_addr_i == `MSR_MSTATUS) ? csr_data_i[3] : irq_en;
          tags_en <= (csr_addr_i == `MSR_MTAGS) ? csr_data_i[0] : tags_en;
-         tags_if_en <= (csr_addr_i == `MSR_MTAGS) ? csr_data_i[2] : tags_en;
+         tags_if_en <= (csr_addr_i == `MSR_MTAGS) ? csr_data_i[2] : tags_if_en;
          tags_irq_clear <= (csr_addr_i == `MSR_MTAGS) ? csr_data_i[1] : 0;
       end
    end
