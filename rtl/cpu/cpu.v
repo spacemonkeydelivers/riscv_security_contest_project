@@ -347,7 +347,7 @@ module cpu
    
    always @ (posedge clk) begin
       if (reset) begin
-         mret_state <= TRAP_STATE_RESET;
+         mret_state <= MRET_STATE_RESET;
       end else begin
          mret_state <= (csr_busy) ? mret_state : next_mret_state;
       end
