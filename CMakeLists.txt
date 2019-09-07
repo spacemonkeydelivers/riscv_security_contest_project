@@ -17,11 +17,6 @@ set(MODELS_FILES_ROOT "${CMAKE_BINARY_DIR}/distrib/models")
 set(EXECUTABLE_OUTPUT_PATH ${PLATFORM_FILES_ROOT}/bin)
 set(LIBRARY_OUTPUT_PATH ${PLATFORM_FILES_ROOT}/lib)
 
-#if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-#  set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install CACHE PATH "..." FORCE)
-#endif()
-# SET(CMAKE_INSTALL_RPATH "${LIBRARY_OUTPUT_PATH}")
-
 find_package(Python2 COMPONENTS Interpreter Development)
 message("-- Checking that all required python libraries are installed...")
 execute_process(COMMAND "${Python2_EXECUTABLE}" -uB "${CMAKE_SOURCE_DIR}/cmake/checks/python.py"
