@@ -41,7 +41,7 @@ module cpu
     // MSRS
     reg nextpc_from_alu, writeback_from_alu, writeback_from_bus;
 
-    localparam CAUSE_INSTRUCTION_MISALIGNED = 32'h00000123;
+    localparam CAUSE_INSTRUCTION_MISALIGNED = 32'h00000000;
     localparam CAUSE_INVALID_INSTRUCTION    = 32'h00000002;
     localparam CAUSE_BREAK                  = 32'h00000003;
     localparam CAUSE_ECALL                  = 32'h0000000b;
@@ -379,10 +379,10 @@ module cpu
 //=================================================================================================
    localparam TRAP_STATE_RESET        = 3'd0;
    localparam TRAP_STATE_IDLE         = 3'd1;
-   localparam TRAP_STATE_SAVE_CAUSE   = 3'd2;
-   localparam TRAP_STATE_LOAD_STATUS  = 3'd3;
-   localparam TRAP_STATE_STORE_STATUS = 3'd4;
-   localparam TRAP_STORE_EPC          = 3'd5;
+   localparam TRAP_STATE_LOAD_STATUS  = 3'd2;
+   localparam TRAP_STATE_STORE_STATUS = 3'd3;
+   localparam TRAP_STATE_STORE_EPC    = 3'd4;
+   localparam TRAP_STATE_STORE_TVAL   = 3'd5;
    localparam TRAP_STATE_LOAD_TVEC    = 3'd6;
    localparam TRAP_STATE_DEAD         = 3'd7;
 
@@ -412,26 +412,30 @@ module cpu
          TRAP_STATE_IDLE: begin
             next_trap_state = (trap_occured) ? TRAP_STATE_LOAD_STATUS : TRAP_STATE_IDLE;
          end
-         TRAP_STATE_SAVE_CAUSE: begin
-            next_trap_state = TRAP_STATE_LOAD_STATUS;
-         end
          TRAP_STATE_LOAD_STATUS: begin
             next_trap_state = TRAP_STATE_STORE_STATUS;
             trap_csr_en = 1;
             trap_csr_addr = MSR_MSTATUS;
          end
          TRAP_STATE_STORE_STATUS: begin
-            next_trap_state = TRAP_STORE_EPC;
+            next_trap_state = TRAP_STATE_STORE_EPC;
             trap_csr_en = 1;
             trap_csr_we = 1;
             trap_csr_addr = MSR_MSTATUS;
             trap_csr_data_in = {csr_data_out[31:8], csr_data_out[3], csr_data_out[6:4], 1'b0, csr_data_out[2:0]};
          end
-         TRAP_STORE_EPC: begin
-            next_trap_state = TRAP_STATE_LOAD_TVEC;
+         TRAP_STATE_STORE_EPC: begin
+            next_trap_state = TRAP_STATE_STORE_TVAL;
             trap_csr_en = 1;
             trap_csr_we = 1;
             trap_csr_addr = MSR_MEPC;
+            trap_csr_data_in = pc;
+         end
+         TRAP_STATE_STORE_TVAL: begin
+            next_trap_state = TRAP_STATE_LOAD_TVEC;
+            trap_csr_en = 1;
+            trap_csr_we = 1;
+            trap_csr_addr = MSR_MTVAL;
             trap_csr_data_in = pc;
          end
          TRAP_STATE_LOAD_TVEC: begin
@@ -532,7 +536,7 @@ module cpu
             next_state = STATE_PRE_FETCH;
          end
          STATE_UPDATE_PC: begin
-            update_pc = addr_misaligned ? 0 : 1;
+            update_pc = 1;
             next_state = addr_misaligned ? STATE_TRAP : STATE_PRE_FETCH;
             next_pc = (next_pc_from_csr || next_addr_from_csr)      ? csr_data_out & ~32'h1:
                       (exec_next_pc_from_alu || branch_pc_from_alu) ? alu_dataout & ~32'h1 :
