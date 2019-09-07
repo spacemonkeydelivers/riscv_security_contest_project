@@ -59,7 +59,7 @@ def generate_test(technique, code_ptr, func, location, attack):
     config_content.append(func[1])
     config_content.append('--location')
     config_content.append(location[1])
-    config_content.append('--attack')
+    config_content.append('--inject_param')
     config_content.append(attack[1])
     # Writing generated config to a respective folder
     with open(os.path.join(args.cfg_dir, test_name + '.cfg'), 'w') as config_file:
