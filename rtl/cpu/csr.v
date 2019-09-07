@@ -16,11 +16,38 @@ module csr
    output wire [CSR_DATA_WIDTH - 1:0] csr_data_o,
    output wire                        csr_busy_o,
    output wire                        csr_exists_o,
-   output wire                        csr_ro_o
+   output wire                        csr_ro_o,
+   output wire                        csr_irq_en_o,
+   output wire                        csr_tags_en_o,
+   output wire                        csr_tags_if_en_o,
+   output wire                        csr_tags_irq_clear_o
 );
    assign csr_exists_o = 1;
    assign csr_ro_o = 0;
    assign csr_busy_o = busy;
+
+   reg irq_en;
+   assign csr_irq_en_o = irq_en;
+   reg tags_en;
+   assign csr_tags_en_o = tags_en;
+   reg tags_if_en;
+   assign csr_tags_if_en_o = tags_if_en;
+   reg tags_irq_clear;
+   assign csr_tags_irq_clear_o = tags_irq_clear;
+
+   always @ (posedge clk_i) begin
+      if (rst_i) begin
+         irq_en <= 0;
+         tags_en <= 0;
+         tags_if_en <= 0;
+         tags_irq_clear <= 0;
+      end else begin
+         irq_en <= (csr_addr_i == `MSR_MSTATUS) ? csr_data_i[3] : irq_en;
+         tags_en <= (csr_addr_i == `MSR_MTAGS) ? csr_data_i[0] : tags_en;
+         tags_if_en <= (csr_addr_i == `MSR_MTAGS) ? csr_data_i[2] : tags_en;
+         tags_irq_clear <= (csr_addr_i == `MSR_MTAGS) ? csr_data_i[1] : 0;
+      end
+   end
    
    localparam [3:0] M_VENDOR_ID = 0,
                     M_HART_ID   = 1,

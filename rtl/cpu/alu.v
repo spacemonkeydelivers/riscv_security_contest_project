@@ -39,7 +39,7 @@ module alu(
     reg[32:0] rem;
     reg[31:0] remu;
    
-//`define SINGLE_CYCLE_SHIFTER
+`define SINGLE_CYCLE_SHIFTER
 `ifdef SINGLE_CYCLE_SHIFTER
 	wire[31:0] sll, srl, sra;
 	wire signed[31:0] I_dataS1_signed;
@@ -108,7 +108,7 @@ module alu(
 	always @(posedge I_clk) begin
 		if(I_reset) begin
 			busy <= 0;
-		end else if(I_en) begin
+		end else if(I_en || busy) begin
 			case(I_aluop)
 				default: result <= sum; // ALUOP_ADD
 				`ALUOP_SUB: result <= sub[31:0];		

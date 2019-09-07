@@ -30,7 +30,7 @@ module cpu
    
     /*verilator public_module*/
     /*verilator no_inline_module*/
-   
+  
    reg [31:0] bus_dataout_stored;
 
     wire interrupt_occured = TIMER_INTERRUPT_I || TAGS_INTERRUPT_I;
@@ -90,8 +90,7 @@ module cpu
     wire bus_busy;
 
     reg reg_we = 0, reg_re = 0;
-    reg clear_tag_mismatch = 0;
-    assign clear_tag_mismatch_o = clear_tag_mismatch;
+    assign clear_tag_mismatch_o = tags_irq_clear;
     wire[31:0] reg_val1, reg_val2;
     reg[31:0] reg_datain;
 
@@ -272,6 +271,13 @@ module cpu
    wire [31:0] csr_data_in_f = (handling_trap) ? trap_csr_data_in :
                                (handling_mret) ? mret_csr_data_in : 
                                                  csr_data_in;
+
+   wire irq_en;
+   wire tags_en;
+   wire tags_if_en;
+   wire tags_irq_clear;
+   assign check_tags_o = check_tags;
+
    csr
    csr0
    (
@@ -284,7 +290,11 @@ module cpu
       .csr_data_o (csr_data_out),
       .csr_busy_o (csr_busy),
       .csr_exists_o (csr_exists),
-      .csr_ro_o (csr_ro)
+      .csr_ro_o (csr_ro),
+      .csr_irq_en_o (irq_en),
+      .csr_tags_en_o (tags_en),
+      .csr_tags_if_en_o (tags_if_en),
+      .csr_tags_irq_clear_o (tags_irq_clear)
    );
 
     reg [1:0] mux_reg_input_sel = `MUX_REGINPUT_ALU;
@@ -474,6 +484,9 @@ module cpu
    reg next_branch_pc_from_alu;
    reg next_addr_from_csr;
 
+   reg check_tags;
+   reg next_check_tags;
+
    always @ (posedge clk) begin
       if (reset) begin
          state <= STATE_RESET;
@@ -483,6 +496,7 @@ module cpu
          bus_dataout_stored <= 0;
          branch_pc_from_alu <= 0;
          next_addr_from_csr <= 0;
+         check_tags <= 0;
       end
       else begin
          state <= busy ? state : next_state;
@@ -493,14 +507,16 @@ module cpu
          bus_dataout_stored <= (state == STATE_FETCH) ? bus_dataout : bus_dataout_stored;
          branch_pc_from_alu <= next_branch_pc_from_alu;
          next_addr_from_csr <= (busy) ? next_addr_from_csr : next_pc_from_csr;
+         check_tags <= ((state == STATE_PRE_FETCH) || (state == STATE_LOAD1) || (state == STATE_STORE1)) ? next_check_tags : check_tags;
       end
    end
 
    reg next_pc_from_csr;
    wire addr_misaligned = |next_pc[1:0];
 
+   reg check;
    always @ (*) begin
-
+      next_check_tags = 0;
       trap_occured = 0;
       mret_occured = 0;
 
@@ -538,7 +554,7 @@ module cpu
          STATE_UPDATE_PC: begin
             update_pc = 1;
             next_state = addr_misaligned ? STATE_TRAP : STATE_PRE_FETCH;
-            next_pc = (next_pc_from_csr || next_addr_from_csr)      ? csr_data_out & ~32'h1:
+            next_pc = (next_pc_from_csr || next_addr_from_csr)      ? csr_data_out & ~32'h1 :
                       (exec_next_pc_from_alu || branch_pc_from_alu) ? alu_dataout & ~32'h1 :
                                                                       pcnext & ~32'h1;
             mux_reg_input_sel = (writeback_from_alu || exec_writeback_from_alu) ? `MUX_REGINPUT_ALU :
@@ -559,6 +575,7 @@ module cpu
             next_state = STATE_FETCH;
             bus_en = 1;
             bus_op = `BUSOP_READW;
+            next_check_tags = tags_if_en;
          end
          STATE_FETCH: begin
             // ALU is unused... let's compute PC+4!
@@ -572,17 +589,19 @@ module cpu
             reg_re = 1;
             next_state = STATE_EXEC;
             next_pcnext = alu_dataout;
-/*
-            if (interrupt_occured && csr[M_STATUS][3]) begin
-               if (TAGS_INTERRUPT_I && csr[M_TAGS][0]) begin
-                  csr[M_CAUSE] <= CAUSE_TAG_MISMATCH;
+            if (interrupt_occured && irq_en) begin
+               trap_occured = 1;
+               next_state = STATE_TRAP;
+               csr_en = 1;
+               csr_addr = MSR_MCAUSE;
+               csr_we = 1;
+               if (TAGS_INTERRUPT_I && tags_en) begin
+                  csr_data_in = CAUSE_TAG_MISMATCH;
                end
                if (TIMER_INTERRUPT_I) begin
-                  csr[M_CAUSE] <= CAUSE_EXTERNAL_INTERRUPT;
+                  csr_data_in = CAUSE_EXTERNAL_INTERRUPT;
                end
-               nextstate <= STATE_TRAP1;
             end
-*/
          end
          STATE_EXEC: begin
             case (exec_next_stage)
@@ -610,20 +629,25 @@ module cpu
             case(dec_funct3)
                `FUNC_LB: begin
                   bus_op = `BUSOP_READB;
+                  next_check_tags = tags_en;
                end
                `FUNC_LH: begin
                   bus_op = `BUSOP_READH;
+                  next_check_tags = tags_en;
                end
                `FUNC_LW: begin
                   bus_op = `BUSOP_READW;
+                  next_check_tags = tags_en;
                end
                `FUNC_LBU: begin
                   bus_op = `BUSOP_READBU;
+                  next_check_tags = tags_en;
                end
                `FUNC_LT: begin
                   bus_op = `BUSOP_READT;
                end
                default: begin
+                  next_check_tags = tags_en;
                   bus_op = `BUSOP_READHU; // FUNC_LHU
                end
             endcase
@@ -638,15 +662,18 @@ module cpu
             mux_bus_addr_sel = `MUX_BUSADDR_ALU;
             case(dec_funct3)
                `FUNC_SB: begin
+                  next_check_tags = tags_en;
                   bus_op = `BUSOP_WRITEB;
                end
                `FUNC_SH: begin
+                  next_check_tags = tags_en;
                   bus_op = `BUSOP_WRITEH;
                end
                `FUNC_ST: begin
                   bus_op = `BUSOP_WRITET;
                end
                default: begin
+                  next_check_tags = tags_en;
                   bus_op = `BUSOP_WRITEW; // FUNC_SW
                end
             endcase
