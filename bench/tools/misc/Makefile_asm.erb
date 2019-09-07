@@ -4,6 +4,9 @@ CC         = $(RISCV_CC)
 OBJCOPY    = $(RISCV_OBJCOPY)
 # YES, we support M instructions in assembly tests
 CFLAGS     = $(RISCV_CFLAGS_COMMON) -I$(RISCV_ASM_INCLUDES) -march=rv32im  -mabi=ilp32
+<% if asm_c_ext %>
+CFLAGS += -march=rv32imc
+<% end %>
 LDFLAGS    = $(RISCV_LDFLAGS_COMMON)
 LDSCRIPT   = $(RISCV_ASM_LD_SCRIPT)
 

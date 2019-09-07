@@ -35,8 +35,18 @@ def extract_uart_checker(filename):
 
 class MakeFileBuilder:
   def __init__(self, erb_data, erb_template, custom_driver_path):
-    cmd = '(echo \'{}\' && cat \'{}\') | erb > Makefile.test'.format(
-        erb_data, '/'.join([os.environ['TOOLS_DIR'], '/misc/',erb_template]))
+    aux_directives = []
+
+    if '--enable-compressed' in sys.argv:
+      aux_directives.append('asm_c_ext = true')
+    else:
+      aux_directives.append('asm_c_ext = false')
+    aux_cmd = '<% {} %>'.format(';'.join(aux_directives))
+
+    cmd = '(echo \'{}\' \'{}\' && cat \'{}\') | erb > Makefile.test'.format(
+        erb_data,
+        aux_cmd,
+        '/'.join([os.environ['TOOLS_DIR'], '/misc/', erb_template]))
 
     print('running <{}>'.format(cmd))
     ret = os.system(cmd)
