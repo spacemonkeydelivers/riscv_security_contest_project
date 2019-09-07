@@ -52,7 +52,17 @@ module csr
                     M_TAGS      = 12,
                     M_LAST      = 13;
 
-   assign csr_ro_o = ((csr_operation_type_i == CSR_OPER_WRITE) && (csr_addr_i[11:10] == 2'b11));
+   reg [1:0] csr_op_type;
+
+   always @ (posedge clk_i) begin
+      if (rst_i) begin
+         csr_op_type <= 0;
+      end else begin
+         csr_op_type <= (csr_en_i) ? csr_operation_type_i : csr_op_type;
+      end
+   end
+
+   assign csr_ro_o = 0;
   
    reg [3:0] csr_index;
    always @(csr_addr_i) begin
@@ -78,9 +88,9 @@ module csr
 
    reg [CSR_DATA_WIDTH - 1:0] read_data;
    reg [CSR_DATA_WIDTH - 1:0] stored_data;
-   wire [CSR_DATA_WIDTH - 1:0] write_data = (csr_operation_type_i == CSR_OPER_WRITE) ? stored_data :
-                                            (csr_operation_type_i == CSR_OPER_READ)  ? read_data | stored_data :
-                                            (csr_operation_type_i == CSR_OPER_CLEAR) ? read_data & ~stored_data :
+   wire [CSR_DATA_WIDTH - 1:0] write_data = (csr_op_type == CSR_OPER_WRITE) ? stored_data :
+                                            (csr_op_type == CSR_OPER_READ)  ? read_data | stored_data :
+                                            (csr_op_type == CSR_OPER_CLEAR) ? read_data & ~stored_data :
                                                                                        0;
 
    wire [CSR_DATA_WIDTH - 1:0] csr_data_out;
@@ -107,7 +117,7 @@ module csr
          read_data <= 0;
       end
       else begin
-         read_data <= ((state == STATE_CSR_IDLE_READ)) ? csr_data_out : read_data;
+         read_data <= ((state == STATE_CSR_IDLE_READ) && csr_en_i) ? csr_data_out : read_data;
       end
    end
 
@@ -130,7 +140,6 @@ module csr
          case (state)
             STATE_CSR_IDLE_READ: begin
                state <= (csr_en_i) ? STATE_CSR_WRITE_REG : STATE_CSR_IDLE_READ;
-//               we <= (csr_en_i) ? we_i : 1'b0;
                we <= 1'b0;
                busy <= (csr_en_i) ? 1 : 0;
             end
