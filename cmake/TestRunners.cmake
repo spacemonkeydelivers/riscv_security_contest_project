@@ -11,7 +11,12 @@ set(DEBUGGER_TEST_RUNNER ${CMAKE_SOURCE_DIR}/tests/debugger/run.sh)
 
 function(test_add name)
 
-    set(options NIGHTLY DISABLE_SECURITY INVERT_RESULT WARN_DISABLE)
+    set(options
+        NIGHTLY
+        DISABLE_SECURITY
+        INVERT_RESULT
+        WARN_DISABLE
+        ENABLE_C_EXT)
     cmake_parse_arguments(PARSE_ARGV 1 TEST_DESCR "${options}" "" "")
 
     set(TEST_DIR "${CMAKE_BINARY_DIR}/tests/${name}")
@@ -28,6 +33,10 @@ function(test_add name)
 
     if (${TEST_DESCR_WARN_DISABLE})
         set(NOWARN "--disable-c-warnings")
+    endif()
+
+    if (${TEST_DESCR_ENABLE_C_EXT})
+        set(NOWARN "--enable-compressed")
     endif()
 
     add_test(NAME "${name}"
