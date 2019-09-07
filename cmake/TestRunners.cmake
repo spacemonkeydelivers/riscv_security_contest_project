@@ -36,11 +36,12 @@ function(test_add name)
     endif()
 
     if (${TEST_DESCR_ENABLE_C_EXT})
-        set(NOWARN "--enable-compressed")
+        set(ENABLE_C "--enable-compressed")
     endif()
 
     add_test(NAME "${name}"
-        COMMAND "${TEST_RUNNER}" ${TEST_DESCR_UNPARSED_ARGUMENTS} ${RINVERT} ${NSC} ${NOWARN}
+        COMMAND "${TEST_RUNNER}" ${TEST_DESCR_UNPARSED_ARGUMENTS}
+                ${RINVERT} ${NSC} ${NOWARN} ${ENABLE_C}
         WORKING_DIRECTORY "${TEST_DIR}")
 
     if (${TEST_DESCR_NIGHTLY})
