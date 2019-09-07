@@ -10,7 +10,7 @@ module csr
    input  wire                        clk_i,
    input  wire                        rst_i,
    input  wire                        csr_en_i,
-   input  wire [1:0]                  csr_operation_type_i, //write, set bits, clear bits
+   input  wire                        csr_we_i,
    input  wire [CSR_ADDR_WIDTH - 1:0] csr_addr_i,
    input  wire [CSR_DATA_WIDTH - 1:0] csr_data_i,
    output wire [CSR_DATA_WIDTH - 1:0] csr_data_o,
@@ -18,25 +18,10 @@ module csr
    output wire                        csr_exists_o,
    output wire                        csr_ro_o
 );
-   
-   localparam [1:0] STATE_CSR_IDLE_READ = 2'd0,
-                    STATE_CSR_WRITE_REG = 2'd1,
-                    STATE_CSR_STOP      = 2'd2,
-                    STATE_CSR_WRONG     = 2'd3;
-   reg [1:0] state;
-   reg we;
-
-   reg busy;
-   assign csr_busy_o = busy;
-
    assign csr_exists_o = 1;
-
-
-   localparam [1:0] CSR_OPER_READ  = 2'd0,
-                    CSR_OPER_WRITE = 2'd1,
-                    CSR_OPER_CLEAR = 2'd2,
-                    CSR_OPER_WRONG = 2'd3;
-
+   assign csr_ro_o = 0;
+   assign csr_busy_o = busy;
+   
    localparam [3:0] M_VENDOR_ID = 0,
                     M_HART_ID   = 1,
                     M_STATUS    = 2,
@@ -52,24 +37,11 @@ module csr
                     M_TAGS      = 12,
                     M_LAST      = 13;
 
-   reg [1:0] csr_op_type;
 
-   always @ (posedge clk_i) begin
-      if (rst_i) begin
-         csr_op_type <= 0;
-      end else begin
-         csr_op_type <= (csr_en_i) ? csr_operation_type_i : csr_op_type;
-      end
-   end
-
-   assign csr_ro_o = 0;
-  
    reg [3:0] csr_index;
-   always @(csr_addr_i) begin
-      case (csr_addr_i)
-         `MSR_MVENDORID: begin
-            csr_index = M_VENDOR_ID;
-         end
+   always @(*) begin
+      case (stored_addr)
+         `MSR_MVENDORID:  csr_index = M_VENDOR_ID;
          `MSR_MHARTID:    csr_index = M_HART_ID;
          `MSR_MSTATUS:    csr_index = M_STATUS;
          `MSR_MISA:       csr_index = M_ISA;
@@ -85,17 +57,14 @@ module csr
          default :        csr_index = M_VENDOR_ID;
       endcase
    end
-
-   reg [CSR_DATA_WIDTH - 1:0] read_data;
+   
+   reg we;
+   reg busy;
+   reg [CSR_ADDR_WIDTH - 1:0] stored_addr;
    reg [CSR_DATA_WIDTH - 1:0] stored_data;
-   wire [CSR_DATA_WIDTH - 1:0] write_data = (csr_op_type == CSR_OPER_WRITE) ? stored_data :
-                                            (csr_op_type == CSR_OPER_READ)  ? read_data | stored_data :
-                                            (csr_op_type == CSR_OPER_CLEAR) ? read_data & ~stored_data :
-                                                                                       0;
 
    wire [CSR_DATA_WIDTH - 1:0] csr_data_out;
-   assign csr_data_o = read_data;
-    
+   assign csr_data_o = csr_data_out;
 
    generic_ram
    #(
@@ -106,61 +75,32 @@ module csr
    (
       .clk_i    (clk_i),
       .we_i     (we),
-      .data_i   (write_data),
+      .data_i   (stored_data),
       .w_addr_i (csr_index),
       .r_addr_i (csr_index),
       .data_o   (csr_data_out)
    );
   
+   
    always @ (posedge clk_i) begin
       if (rst_i) begin
-         read_data <= 0;
-      end
-      else begin
-         read_data <= ((state == STATE_CSR_IDLE_READ) && csr_en_i) ? csr_data_out : read_data;
-      end
-   end
-
-   always @ (posedge clk_i) begin
-      if (rst_i) begin
-         stored_data <= 0;
-      end
-      else begin
-         stored_data <= ((state == STATE_CSR_IDLE_READ) && csr_en_i) ? csr_data_i : stored_data;
-      end
-   end
-  
-   always @ (posedge clk_i) begin
-      if (rst_i) begin
-         state <= STATE_CSR_IDLE_READ;
          we <= 0;
          busy <= 0;
       end
       else begin
-         case (state)
-            STATE_CSR_IDLE_READ: begin
-               state <= (csr_en_i) ? STATE_CSR_WRITE_REG : STATE_CSR_IDLE_READ;
-               we <= 1'b0;
-               busy <= (csr_en_i) ? 1 : 0;
-            end
-            STATE_CSR_WRITE_REG: begin
-               state <= STATE_CSR_STOP;
-               we <= 1;
-               busy <= 1;
-            end
-            STATE_CSR_STOP: begin
-               state <= STATE_CSR_IDLE_READ;
-               we <= 0;
-               busy <= 0;
-            end
-            default: begin
-               state <= STATE_CSR_WRONG;
-               we <= 0;
-               busy <= 0;
-            end
-         endcase
+         if (csr_en_i) begin
+            busy <= 1;
+            stored_addr <= csr_addr_i;
+            stored_data <= csr_data_i;
+            we <= csr_we_i;
+         end
+         if (busy) begin
+            busy <= 0;
+            we <= 0;
+         end
       end
    end
+
 
 endmodule
 
