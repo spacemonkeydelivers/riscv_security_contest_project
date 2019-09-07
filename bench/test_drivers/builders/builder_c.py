@@ -34,7 +34,29 @@ def make_command_line():
 
     print('reading command line from file <{}> [{}]'.format(the_file, cmd_file))
     with open(the_file) as f:
-      content.extend(f.read().splitlines())
+      input_lines = f.read().splitlines()
+      # detect comments, if any
+      comments = []
+      scan_for_comments = input_lines[0][0] == '#'
+      for line in input_lines:
+        if scan_for_comments:
+          if line == '':
+            scan_for_comments = False
+          else:
+            if line[0] == '#':
+              comments.append(line)
+            else:
+              raise Exception('comments in config file must start with `#`')
+        else:
+          content.append(line)
+
+      print('- Extracted comments:')
+      if len(comments) > 0:
+        print('\n'.join(comments))
+      else:
+        print('-')
+      print('- Extracted line:')
+      print("'" + '\' \''.join(content) + "'")
   else:
     print('extern command line is not detected, generating the default one')
 
