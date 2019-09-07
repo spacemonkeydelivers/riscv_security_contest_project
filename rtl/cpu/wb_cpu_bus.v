@@ -22,6 +22,13 @@ module wb_cpu_bus(
 		output reg WE_O
 	);
    /*verilator public_module*/ 
+		
+   reg [3:0] op;
+
+   always @ (posedge CLK_I) begin
+      op <= (I_en) ? I_op : op;
+   end
+
 
 	reg[31:0] buffer;
 	assign O_data = buffer;
@@ -46,7 +53,7 @@ module wb_cpu_bus(
 		endcase
 
 		// determine if sign extension is requested
-		case(I_op)
+		case(op)
 			`BUSOP_READBU, `BUSOP_READHU: signextend = 0;
 			default: signextend = 1;
 		endcase
@@ -63,7 +70,7 @@ module wb_cpu_bus(
    reg [31:0] data_from_bus;
 
    always @ (*) begin
-      case (mem_sel)
+      case (SEL_O)
          4'b1111: begin
             data_from_bus = DAT_I;
          end

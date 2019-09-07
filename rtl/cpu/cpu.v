@@ -41,7 +41,7 @@ module cpu
     // MSRS
     reg nextpc_from_alu, writeback_from_alu, writeback_from_bus;
 
-    localparam CAUSE_INSTRUCTION_MISALIGNED = 32'h00000000;
+    localparam CAUSE_INSTRUCTION_MISALIGNED = 32'h00000123;
     localparam CAUSE_INVALID_INSTRUCTION    = 32'h00000002;
     localparam CAUSE_BREAK                  = 32'h00000003;
     localparam CAUSE_ECALL                  = 32'h0000000b;
@@ -61,7 +61,7 @@ module cpu
     reg alu_en = 0;
     wire [4:0] alu_op_final;
     reg[4:0] alu_op = 0;
-    assign alu_op_final = (state == STATE_EXEC) ? dec_alu_oper : alu_op;
+    assign alu_op_final = ((state == STATE_EXEC) || (state == STATE_POST_EXEC)) ? dec_alu_oper : alu_op;
 
     wire[31:0] alu_dataout;
     reg[31:0] alu_dataS1, alu_dataS2;
@@ -169,7 +169,7 @@ module cpu
 
     wire mux_alu_s1_sel_f;
     reg mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
-    assign mux_alu_s1_sel_f = (state == STATE_EXEC) ? exec_mux_alu_s1_sel : mux_alu_s1_sel;
+    assign mux_alu_s1_sel_f = ((state == STATE_EXEC) || (state == STATE_POST_EXEC)) ? exec_mux_alu_s1_sel : mux_alu_s1_sel;
     always @(*) begin
         case(mux_alu_s1_sel_f)
             `MUX_ALUDAT1_REGVAL1: alu_dataS1 = reg_val1;
@@ -179,7 +179,7 @@ module cpu
 
     wire [1:0] mux_alu_s2_sel_f;
     reg[1:0] mux_alu_s2_sel = `MUX_ALUDAT2_REGVAL2;
-    assign mux_alu_s2_sel_f = (state == STATE_EXEC) ? exec_mux_alu_s2_sel : mux_alu_s2_sel;
+    assign mux_alu_s2_sel_f = ((state == STATE_EXEC) || (state == STATE_POST_EXEC)) ? exec_mux_alu_s2_sel : mux_alu_s2_sel;
     always @(*) begin
         case(mux_alu_s2_sel_f)
             `MUX_ALUDAT2_REGVAL2: alu_dataS2 = reg_val2;
@@ -242,23 +242,45 @@ module cpu
                      M_LAST      = 17;
     
    reg csr_en;
-   reg [1:0] csr_op_type;
+   reg csr_we;
    reg [11:0] csr_addr;
    reg [31:0] csr_data_in;
    wire [31:0] csr_data_out;
    wire csr_busy;
    wire csr_exists;
    wire csr_ro;
+   
+   reg mret_csr_en;
+   reg mret_csr_we;
+   reg [11:0] mret_csr_addr;
+   reg [31:0] mret_csr_data_in;
 
+   reg trap_csr_en;
+   reg trap_csr_we;
+   reg [11:0] trap_csr_addr;
+   reg [31:0] trap_csr_data_in;
+
+   wire csr_en_f = (handling_trap) ? trap_csr_en :
+                   (handling_mret) ? mret_csr_en : 
+                                     csr_en;
+   wire csr_we_f = (handling_trap) ? trap_csr_we :
+                   (handling_mret) ? mret_csr_we : 
+                                     csr_we;
+   wire [11:0] csr_addr_f = (handling_trap) ? trap_csr_addr :
+                            (handling_mret) ? mret_csr_addr :
+                                              csr_addr;
+   wire [31:0] csr_data_in_f = (handling_trap) ? trap_csr_data_in :
+                               (handling_mret) ? mret_csr_data_in : 
+                                                 csr_data_in;
    csr
    csr0
    (
       .clk_i (clk),
       .rst_i (reset),
-      .csr_en_i (csr_en),
-      .csr_operation_type_i (csr_op_type),
-      .csr_addr_i (csr_addr),
-      .csr_data_i (csr_data_in),
+      .csr_en_i (csr_en_f),
+      .csr_we_i (csr_we_f),
+      .csr_addr_i (csr_addr_f),
+      .csr_data_i (csr_data_in_f),
       .csr_data_o (csr_data_out),
       .csr_busy_o (csr_busy),
       .csr_exists_o (csr_exists),
@@ -291,16 +313,140 @@ module cpu
     localparam STATE_PRE_FETCH      = 5'd13;
     localparam STATE_STORE1         = 5'd14;
     localparam STATE_LOAD1          = 5'd15;
-    localparam STATE_CSR_TO_TRAP    = 5'd16;
-    localparam STATE_TRAP_STORE_STATUS   = 5'd17;
-    localparam STATE_TRAP_STORE_EPC      = 5'd18;
-    localparam STATE_TRAP_STORE_TVAL     = 5'd19;
-    localparam STATE_TRAP_READ_TVEC      = 5'd20;
-    localparam STATE_MRET_UPDATE_MSTATUS = 5'd21;
-    localparam STATE_MRET_READ_EPC       = 5'd22;
+    localparam STATE_MRET_UPDATE_MSTATUS = 5'd16;
+    localparam STATE_MRET_READ_EPC       = 5'd17;
+    localparam STATE_POST_EXEC       = 5'd18;
+    localparam STATE_MISALIGNED_ADDR = 5'd19;
+    localparam STATE_CSR2    = 5'd20;
+    localparam STATE_MRET    = 5'd21;
 
+
+   reg [1:0] csr_op_type;
+
+//=================================================================================================
+   localparam MRET_STATE_RESET        = 2'd0;
+   localparam MRET_STATE_IDLE         = 2'd1;
+   localparam MRET_STATE_STORE_STATUS = 2'd2;
+   localparam MRET_STATE_LOAD_EPC     = 2'd3;
+
+   reg mret_occured;
+   reg [1:0] mret_state;
+   reg [1:0] next_mret_state;
+   reg mret_busy;
+   wire handling_mret = !((mret_state == MRET_STATE_RESET) || (mret_state == MRET_STATE_IDLE));
+   
+   always @ (posedge clk) begin
+      if (reset) begin
+         mret_state <= TRAP_STATE_RESET;
+      end else begin
+         mret_state <= (csr_busy) ? mret_state : next_mret_state;
+      end
+   end
+
+   always @ (*) begin
+      mret_csr_en = 0;
+      mret_csr_we = 0;
+      mret_csr_addr = 0;
+      mret_csr_data_in = 0;
+
+      case (mret_state)
+         MRET_STATE_RESET: begin
+            next_mret_state = MRET_STATE_IDLE;
+         end
+         MRET_STATE_IDLE: begin
+            next_mret_state = (mret_occured) ? MRET_STATE_STORE_STATUS : MRET_STATE_IDLE;
+         end
+         MRET_STATE_STORE_STATUS: begin
+            next_mret_state = MRET_STATE_LOAD_EPC;
+            mret_csr_en = 1;
+            mret_csr_we = 1;
+            mret_csr_addr = MSR_MSTATUS;
+            mret_csr_data_in = {csr_data_out[31:4], csr_data_out[7], csr_data_out[2:0]};
+         end
+         MRET_STATE_LOAD_EPC: begin
+            next_mret_state = MRET_STATE_IDLE;
+            mret_csr_en = 1;
+            mret_csr_addr = MSR_MEPC;
+         end
+         default: begin
+            next_mret_state = MRET_STATE_IDLE;
+         end
+      endcase
+   end
+//=================================================================================================
+
+
+//=================================================================================================
+   localparam TRAP_STATE_RESET        = 3'd0;
+   localparam TRAP_STATE_IDLE         = 3'd1;
+   localparam TRAP_STATE_SAVE_CAUSE   = 3'd2;
+   localparam TRAP_STATE_LOAD_STATUS  = 3'd3;
+   localparam TRAP_STATE_STORE_STATUS = 3'd4;
+   localparam TRAP_STORE_EPC          = 3'd5;
+   localparam TRAP_STATE_LOAD_TVEC    = 3'd6;
+   localparam TRAP_STATE_DEAD         = 3'd7;
+
+   reg trap_occured;
+   reg [2:0] trap_state;
+   reg [2:0] next_trap_state;
+   wire handling_trap = !((trap_state == TRAP_STATE_RESET) || (trap_state == TRAP_STATE_IDLE));
+
+   always @ (posedge clk) begin
+      if (reset) begin
+         trap_state <= TRAP_STATE_RESET;
+      end else begin
+         trap_state <= (csr_busy) ? trap_state : next_trap_state;
+      end
+   end
+
+   always @ (*) begin
+      trap_csr_en = 0;
+      trap_csr_we = 0;
+      trap_csr_addr = 0;
+      trap_csr_data_in = 0;
+
+      case (trap_state)
+         TRAP_STATE_RESET: begin
+            next_trap_state = TRAP_STATE_IDLE;
+         end
+         TRAP_STATE_IDLE: begin
+            next_trap_state = (trap_occured) ? TRAP_STATE_LOAD_STATUS : TRAP_STATE_IDLE;
+         end
+         TRAP_STATE_SAVE_CAUSE: begin
+            next_trap_state = TRAP_STATE_LOAD_STATUS;
+         end
+         TRAP_STATE_LOAD_STATUS: begin
+            next_trap_state = TRAP_STATE_STORE_STATUS;
+            trap_csr_en = 1;
+            trap_csr_addr = MSR_MSTATUS;
+         end
+         TRAP_STATE_STORE_STATUS: begin
+            next_trap_state = TRAP_STORE_EPC;
+            trap_csr_en = 1;
+            trap_csr_we = 1;
+            trap_csr_addr = MSR_MSTATUS;
+            trap_csr_data_in = {csr_data_out[31:8], csr_data_out[3], csr_data_out[6:4], 1'b0, csr_data_out[2:0]};
+         end
+         TRAP_STORE_EPC: begin
+            next_trap_state = TRAP_STATE_LOAD_TVEC;
+            trap_csr_en = 1;
+            trap_csr_we = 1;
+            trap_csr_addr = MSR_MEPC;
+            trap_csr_data_in = pc;
+         end
+         TRAP_STATE_LOAD_TVEC: begin
+            next_trap_state = TRAP_STATE_IDLE;
+            trap_csr_en = 1;
+            trap_csr_addr = MSR_MTVEC;
+         end
+         default: begin
+            next_trap_state = TRAP_STATE_DEAD;
+         end
+      endcase
+   end
+//=================================================================================================
     wire busy;
-    assign busy = alu_busy | bus_busy | csr_busy;
+    assign busy = alu_busy | bus_busy | csr_busy | handling_trap | handling_mret;
 
     // evaluate branch conditions
     wire branch;
@@ -322,6 +468,7 @@ module cpu
 
    reg branch_pc_from_alu;
    reg next_branch_pc_from_alu;
+   reg next_addr_from_csr;
 
    always @ (posedge clk) begin
       if (reset) begin
@@ -331,6 +478,7 @@ module cpu
          writeback_from_bus <= 0;
          bus_dataout_stored <= 0;
          branch_pc_from_alu <= 0;
+         next_addr_from_csr <= 0;
       end
       else begin
          state <= busy ? state : next_state;
@@ -340,17 +488,24 @@ module cpu
          writeback_from_bus <= (busy) ? writeback_from_bus : next_writeback_from_bus;
          bus_dataout_stored <= (state == STATE_FETCH) ? bus_dataout : bus_dataout_stored;
          branch_pc_from_alu <= next_branch_pc_from_alu;
+         next_addr_from_csr <= (busy) ? next_addr_from_csr : next_pc_from_csr;
       end
    end
 
    reg next_pc_from_csr;
+   wire addr_misaligned = |next_pc[1:0];
 
    always @ (*) begin
+
+      trap_occured = 0;
+      mret_occured = 0;
+
       next_pc_from_csr = 0;
       update_pc = 0;
       
       bus_en = 0;
       dec_en = 0;
+      alu_en = 0;
 
       next_pcnext = 0;
 
@@ -368,7 +523,7 @@ module cpu
       next_branch_pc_from_alu = 0;
 
       csr_en = 0;
-      csr_op_type = 0;
+      csr_we = 0;
       csr_addr = 0;
       csr_data_in = 0;
 
@@ -377,38 +532,57 @@ module cpu
             next_state = STATE_PRE_FETCH;
          end
          STATE_UPDATE_PC: begin
-            update_pc = 1;
-            next_state = STATE_PRE_FETCH;
-            next_pc = (exec_next_pc_from_alu || branch_pc_from_alu) ? alu_dataout  :
-                      (next_pc_from_csr)                            ? csr_data_out :
-                                                                      pcnext;
+            update_pc = addr_misaligned ? 0 : 1;
+            next_state = addr_misaligned ? STATE_TRAP : STATE_PRE_FETCH;
+            next_pc = (next_pc_from_csr || next_addr_from_csr)      ? csr_data_out & ~32'h1:
+                      (exec_next_pc_from_alu || branch_pc_from_alu) ? alu_dataout & ~32'h1 :
+                                                                      pcnext & ~32'h1;
             mux_reg_input_sel = (writeback_from_alu || exec_writeback_from_alu) ? `MUX_REGINPUT_ALU :
                                 (exec_writeback_from_imm                      ) ?  exec_mux_reg_input_sel :
                                                                                   `MUX_REGINPUT_BUS;
             reg_we = writeback_from_alu || writeback_from_bus || exec_writeback_from_imm || exec_writeback_from_alu;
+            if (addr_misaligned) begin
+               trap_occured = 1;
+               csr_en = 1;
+               csr_we = 1;
+               csr_addr = MSR_MCAUSE;
+               csr_data_in = CAUSE_INSTRUCTION_MISALIGNED;
+            end
          end
          STATE_PRE_FETCH: begin
+            next_state = STATE_FETCH;
             mux_bus_addr_sel = `MUX_BUSADDR_PC;
             next_state = STATE_FETCH;
             bus_en = 1;
             bus_op = `BUSOP_READW;
-            
          end
          STATE_FETCH: begin
-            next_state = STATE_DECODE;
             // ALU is unused... let's compute PC+4!
             alu_en = 1;
             mux_alu_s1_sel = `MUX_ALUDAT1_PC;
             mux_alu_s2_sel = `MUX_ALUDAT2_INSTLEN;
+            next_state = STATE_DECODE;
          end
          STATE_DECODE: begin
             dec_en = 1;
             reg_re = 1;
             next_state = STATE_EXEC;
             next_pcnext = alu_dataout;
+/*
+            if (interrupt_occured && csr[M_STATUS][3]) begin
+               if (TAGS_INTERRUPT_I && csr[M_TAGS][0]) begin
+                  csr[M_CAUSE] <= CAUSE_TAG_MISMATCH;
+               end
+               if (TIMER_INTERRUPT_I) begin
+                  csr[M_CAUSE] <= CAUSE_EXTERNAL_INTERRUPT;
+               end
+               nextstate <= STATE_TRAP1;
+            end
+*/
          end
          STATE_EXEC: begin
             case (exec_next_stage)
+//               `EXEC_TO_FETCH:  next_state = STATE_POST_EXEC;
                `EXEC_TO_FETCH:  next_state = STATE_UPDATE_PC;
                `EXEC_TO_LOAD:   next_state = STATE_LOAD1;
                `EXEC_TO_STORE:  next_state = STATE_STORE1;
@@ -417,8 +591,13 @@ module cpu
                `EXEC_TO_TRAP:   next_state = STATE_TRAP;
                default:         next_state = STATE_DEAD;
             endcase
-            reg_we = write_reg;
             alu_en = 1;
+            reg_we = write_reg;
+         end
+         STATE_POST_EXEC: begin
+            next_state = STATE_UPDATE_PC;
+//            alu_en = 1;
+//            reg_we = write_reg;
          end
          STATE_LOAD1: begin
             next_state = STATE_LOAD2;
@@ -487,18 +666,20 @@ module cpu
                   // handle ecall, ebreak and mret here
                   case(dec_imm[11:0])
                      `SYSTEM_ECALL: begin
-                        next_state = STATE_CSR_TO_TRAP;
+                        trap_occured = 1;
+                        next_state = STATE_TRAP;
                         csr_en = 1;
-                        csr_op_type = 2'd1; // CSR_OP_WRITE
-                        csr_data_in = CAUSE_ECALL;
                         csr_addr = MSR_MCAUSE;
+                        csr_we = 1;
+                        csr_data_in = CAUSE_ECALL;
                      end
                      `SYSTEM_EBREAK: begin
-                        next_state = STATE_CSR_TO_TRAP;
+                        trap_occured = 1;
+                        next_state = STATE_TRAP;
                         csr_en = 1;
-                        csr_op_type = 2'd1; // CSR_OP_WRITE
-                        csr_data_in = CAUSE_BREAK;
                         csr_addr = MSR_MCAUSE;
+                        csr_we = 1;
+                        csr_data_in = CAUSE_BREAK;
                      end
                      `SYSTEM_WFI: begin
                         next_state = STATE_UPDATE_PC;
@@ -506,113 +687,82 @@ module cpu
                      `SYSTEM_MRET: begin
                         csr_en = 1;
                         csr_addr = MSR_MSTATUS;
-                        csr_op_type = 0;
-                        next_state = STATE_MRET_UPDATE_MSTATUS;
+                        next_state = STATE_MRET;
+                        mret_occured = 1;
                      end
                      default: begin
-                        next_state = STATE_CSR_TO_TRAP;
+                        trap_occured = 1;
+                        next_state = STATE_TRAP;
                         csr_en = 1;
-                        csr_op_type = 2'd1; // CSR_OP_WRITE
-                        csr_data_in = CAUSE_INVALID_INSTRUCTION;
                         csr_addr = MSR_MCAUSE;
+                        csr_we = 1;
+                        csr_data_in = CAUSE_INVALID_INSTRUCTION;
                      end
                   endcase
                end
-               `FUNC_CSRRW: begin
+
+               `FUNC_CSRRW, `FUNC_CSRRWI, `FUNC_CSRRSI, `FUNC_CSRRS, `FUNC_CSRRCI, `FUNC_CSRRC: begin
                   next_state = STATE_CSR1;
                   csr_en = 1;
-                  csr_op_type = 2'd1; // CSR_OP_WRITE
-                  csr_data_in = reg_val1;
-                  csr_addr = dec_imm[11:0];
-               end
-               `FUNC_CSRRWI: begin
-                  next_state = STATE_CSR1;
-                  csr_en = 1;
-                  csr_op_type = 2'd1; // CSR_OP_WRITE
-                  csr_data_in = ({27'b0, dec_rs1});
-                  csr_addr = dec_imm[11:0];
-               end
-               `FUNC_CSRRSI: begin
-                  next_state = STATE_CSR1;
-                  csr_en = 1;
-                  csr_op_type = 2'd0; // CSR_OP_READ
-                  csr_data_in = ({27'b0, dec_rs1});
-                  csr_addr = dec_imm[11:0];
-               end
-               `FUNC_CSRRS: begin
-                  next_state = STATE_CSR1;
-                  csr_en = 1;
-                  csr_op_type = 2'd0; // CSR_OP_READ
-                  csr_data_in = reg_val1;
-                  csr_addr = dec_imm[11:0];
-               end
-               `FUNC_CSRRCI: begin
-                  next_state = STATE_CSR1;
-                  csr_en = 1;
-                  csr_op_type = 2'd2; // CSR_OP_CLEAR
-                  csr_data_in = ({27'b0, dec_rs1});
-                  csr_addr = dec_imm[11:0];
-               end
-               `FUNC_CSRRC: begin
-                  next_state = STATE_CSR1;
-                  csr_en = 1;
-                  csr_op_type = 2'd2; // CSR_OP_CLEAR
-                  csr_data_in = reg_val1;
                   csr_addr = dec_imm[11:0];
                end
 
                // unsupported SYSTEM instruction
                default: begin
-                  next_state = STATE_CSR_TO_TRAP;
+                  trap_occured = 1;
+                  next_state = STATE_TRAP;
                   csr_en = 1;
-                  csr_op_type = 2'd1; // CSR_OP_WRITE
-                  csr_data_in = CAUSE_INVALID_INSTRUCTION;
                   csr_addr = MSR_MCAUSE;
+                  csr_we = 1;
+                  csr_data_in = CAUSE_INVALID_INSTRUCTION;
                end
             endcase
          end
          STATE_CSR1: begin
             mux_reg_input_sel = `MUX_REGINPUT_MSR;
             reg_we = 1;
+            next_state = STATE_CSR2;
+         end
+         STATE_CSR2: begin
             next_state = STATE_UPDATE_PC;
+            csr_en = 1;
+            csr_addr = dec_imm[11:0];
+            csr_we = 1;
+            case (dec_funct3)
+               `FUNC_CSRRW: begin
+                  csr_data_in = reg_val1;
+               end
+               `FUNC_CSRRWI: begin
+                  csr_data_in = {27'b0, dec_rs1};
+               end
+               `FUNC_CSRRSI: begin
+                  csr_data_in = ({27'b0, dec_rs1}) | csr_data_out;
+               end
+               `FUNC_CSRRS: begin
+                  csr_data_in = reg_val1 | csr_data_out;
+               end
+               `FUNC_CSRRCI: begin
+                  csr_data_in = ~({27'b0, dec_rs1}) & (csr_data_out);
+               end
+               `FUNC_CSRRC: begin
+                  csr_data_in = ~reg_val1 & (csr_data_out);
+               end
+               default: begin
+                  csr_data_in = 32'hB0010BAD;
+               end
+            endcase
          end
-         STATE_CSR_TO_TRAP: begin
-            next_state = STATE_TRAP;
-         end
+
          STATE_TRAP: begin
-            next_state = STATE_TRAP_STORE_STATUS;
-            csr_en = 1;
-            csr_op_type = 0;
-            csr_addr = MSR_MSTATUS;
-         end
-         STATE_TRAP_STORE_STATUS: begin
-            next_state = STATE_TRAP_STORE_EPC;
-            csr_en = 1;
-            csr_op_type = 1;
-            csr_addr = MSR_MSTATUS;
-            csr_data_in = {csr_data_out[31:8], csr_data_out[3], csr_data_out[6:1], 1'b0};
-         end
-         STATE_TRAP_STORE_EPC: begin
-            next_state = STATE_TRAP_STORE_TVAL;
-            csr_en = 1;
-            csr_op_type = 1;
-            csr_addr = MSR_MEPC;
-            csr_data_in = pc;
-         end
-         STATE_TRAP_STORE_TVAL: begin
-            next_state = STATE_TRAP_READ_TVEC;
-            csr_en = 1;
-            csr_op_type = 1;
-            csr_addr = MSR_MEPC;
-            csr_data_in = pc;
-         end
-         STATE_TRAP_READ_TVEC: begin
             next_state = STATE_UPDATE_PC;
-            csr_en = 1;
-            csr_op_type = 0;
-            csr_addr = MSR_MTVEC;
             next_pc_from_csr = 1;
          end
+
+         STATE_MRET: begin
+            next_state = STATE_UPDATE_PC;
+            next_pc_from_csr = 1;
+         end
+
          STATE_MRET_UPDATE_MSTATUS: begin
             next_state = STATE_MRET_READ_EPC;
             csr_en = 1;
