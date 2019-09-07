@@ -126,3 +126,7 @@ foreach(file ${COMPLIANCE_TESTS})
         test_add(compliance_rv32im_${NAME}  compliance/rv32im/src/${NAME})
     endif()
 endforeach()
+
+if (ENABLE_EXTENDED_RIPE_TESTS)
+    include(${CMAKE_SOURCE_DIR}/cmake/ExtendedRipeTests.cmake)
+endif()
