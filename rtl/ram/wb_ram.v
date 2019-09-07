@@ -208,7 +208,8 @@ module wb_ram
             next_ack = 1'b0;
          end
          STATE_STOP: begin
-            next_tag_mismatch = (check_tags_i && (access_byte || access_half || access_word)) ? (current_tag != tag_data) : 1'b0;
+//            next_tag_mismatch = (check_tags_i && (access_byte || access_half || access_word)) ? (current_tag != tag_data) : 1'b0;
+            next_tag_mismatch = (check_tags_i) ? (current_tag != tag_data) : 1'b0;
             next_ram_we_r = 0;
             next_tag_we_r = 0;
             next_state = STATE_IDLE;

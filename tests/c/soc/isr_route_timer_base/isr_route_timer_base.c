@@ -7,7 +7,7 @@
 volatile int global = 0;
 volatile int unused = 0;
 
-#define D_TIMEOUT 30
+#define D_TIMEOUT 100
 void timer_handler(int n, void* context)
 {
     (void)context;
