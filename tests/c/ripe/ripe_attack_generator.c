@@ -111,12 +111,12 @@ void simple_secure_monitor(int n, void* context)
 int 
 check_attack_struct()
 {
-	if (attack.technique == NULL) return -1;
-	if (attack.inject_param == NULL) return -1;
-	if (attack.code_ptr == NULL) return -1;
-	if (attack.location == NULL) return -1;
-	if (attack.function == NULL) return -1;
-	return 1;
+    if (attack.technique == NULL) return -1;
+    if (attack.inject_param == NULL) return -1;
+    if (attack.code_ptr == NULL) return -1;
+    if (attack.location == NULL) return -1;
+    if (attack.function == NULL) return -1;
+    return 1;
 }
 
 int
@@ -127,7 +127,7 @@ argument_parse(int argc, char* argv[])
             ++i;
             if (i > argc) {
                 printf("[-] Invalid number of parameters: %s\n", argv[i]);
-				return -1;
+                return -1;
             }
             if (strcmp(argv[i], "DIRECT") == 0) {
                 attack.technique = DIRECT;  
@@ -135,7 +135,7 @@ argument_parse(int argc, char* argv[])
                 attack.technique = INDIRECT;  
             } else {
                 printf("[-] Invalid parameter: %s\n", argv[i]);
-				return -1;
+                return -1;
             }
             printf("[+] attack.technique: %s\n", argv[i]);
             continue;
@@ -145,7 +145,7 @@ argument_parse(int argc, char* argv[])
             ++i;
             if (i > argc) {
                 printf("[-] Invalid number of parameters: %s\n", argv[i]);
-				return -1;
+                return -1;
             }
             if (strcmp(argv[i], "INJECTED_CODE_NO_NOP") == 0) {
                 attack.inject_param = INJECTED_CODE_NO_NOP;  
@@ -157,7 +157,7 @@ argument_parse(int argc, char* argv[])
                 attack.inject_param = DATA_ONLY;  
             } else {
                 printf("[-] Invalid parameter: %s\n", argv[i]);
-				return -1;
+                return -1;
             }
             printf("[+] attack.inject_param: %s\n", argv[i]);
             continue;
@@ -166,7 +166,7 @@ argument_parse(int argc, char* argv[])
             ++i;
             if (i > argc) {
                 printf("[-] Invalid number of parameters: %s\n", argv[i]);
-				return -1;
+                return -1;
             }
             if (strcmp(argv[i], "RET_ADDR") == 0) {
                 attack.code_ptr = RET_ADDR;  
@@ -206,7 +206,7 @@ argument_parse(int argc, char* argv[])
                 attack.code_ptr = VAR_LEAK;  
             } else {
                 printf("[-] Invalid parameter: %s\n", argv[i]);
-				return -1;
+                return -1;
             }
             printf("[+] attack.code_ptr: %s\n", argv[i]);
             continue;
@@ -216,7 +216,7 @@ argument_parse(int argc, char* argv[])
             ++i;
             if (i > argc) {
                 printf("[-] Invalid number of parameters: %s\n", argv[i]);
-				return -1;
+                return -1;
             }
             if (strcmp(argv[i], "STACK") == 0) {
                 attack.location = STACK;  
@@ -228,7 +228,7 @@ argument_parse(int argc, char* argv[])
                 attack.location = DATA;  
             } else {
                 printf("[-] Invalid parameter: %s\n", argv[i]);
-				return -1;
+                return -1;
             }
             printf("[+] attack.location: %s\n", argv[i]);
             continue;
@@ -238,7 +238,7 @@ argument_parse(int argc, char* argv[])
             ++i;
             if (i > argc) {
                 printf("[-] Invalid number of parameters: %s\n", argv[i]);
-				return -1;
+                return -1;
             }
             if (strcmp(argv[i], "MEMCPY") == 0) {
                 attack.function = MEMCPY;  
@@ -264,7 +264,7 @@ argument_parse(int argc, char* argv[])
                 attack.function = HOMEBREW;  
             } else {
                 printf("[-] Invalid parameter: %s\n", argv[i]);
-				return -1;
+                return -1;
             }
             printf("[+] attack.function: %s\n", argv[i]);
             continue;
@@ -275,7 +275,7 @@ argument_parse(int argc, char* argv[])
             continue;
         }
     }
-	return 0;
+    return 0;
 }
 //
 // Initial main taking argument on the commande line has been replaced by a simple function call
@@ -292,14 +292,14 @@ main(int argc, char* argv[])
     hardened_mode = false;
     bool scan_number = false;
     int attack_number = 0;
-	if (argument_parse(argc, argv) == -1) {
-		printf("[-] Parsing went wrong. Exiting\n");
-		exit(EXIT_FAILURE);
-	}	
-	if (check_attack_struct() == -1) {
-		printf("[-] Some parameters are messed up. Check cfg file \n");
-		exit(EXIT_FAILURE);
-	}
+    if (argument_parse(argc, argv) == -1) {
+        exit(EXIT_FAILURE);
+        printf("[-] Parsing went wrong. Exiting\n");
+    }
+    if (check_attack_struct() == -1) {
+        exit(EXIT_FAILURE);
+        printf("[-] Some parameters are messed up. Check cfg file \n");
+    }
     printk("RIPE is alive! %s\n", CONFIG_BOARD);
     if (is_unit_test == 1) return EXIT_SUCCESS;
     try_attack();
