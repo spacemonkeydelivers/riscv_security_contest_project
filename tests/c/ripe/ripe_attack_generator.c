@@ -293,12 +293,12 @@ main(int argc, char* argv[])
     bool scan_number = false;
     int attack_number = 0;
     if (argument_parse(argc, argv) == -1) {
-        exit(EXIT_FAILURE);
         printf("[-] Parsing went wrong. Exiting\n");
+        exit(EXIT_FAILURE);
     }
     if (check_attack_struct() == -1) {
-        exit(EXIT_FAILURE);
         printf("[-] Some parameters are messed up. Check cfg file \n");
+        exit(EXIT_FAILURE);
     }
     printk("RIPE is alive! %s\n", CONFIG_BOARD);
     if (is_unit_test == 1) return EXIT_SUCCESS;
