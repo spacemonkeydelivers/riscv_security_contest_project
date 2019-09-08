@@ -6,9 +6,10 @@
     `define MUX_ALUDAT1_PC      1'd1
 
     // Muxer for second operand of ALU
-    `define MUX_ALUDAT2_REGVAL2  2'd0
-    `define MUX_ALUDAT2_IMM      2'd1
-    `define MUX_ALUDAT2_INSTLEN  2'd2
+    `define MUX_ALUDAT2_REGVAL2    2'd0
+    `define MUX_ALUDAT2_IMM        2'd1
+    `define MUX_ALUDAT2_INSTLEN32  2'd2
+    `define MUX_ALUDAT2_INSTLEN16  2'd3
 
     // Muxer for bus address
     `define MUX_BUSADDR_ALU  1'd0

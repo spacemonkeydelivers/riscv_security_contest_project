@@ -30,8 +30,6 @@ module cpu
     /*verilator public_module*/
     /*verilator no_inline_module*/
   
-   reg [31:0] bus_dataout_stored;
-
     wire interrupt_occured = TIMER_INTERRUPT_I || TAGS_INTERRUPT_I;
     wire clk, reset;
     assign clk = CLK_I;
@@ -123,10 +121,15 @@ module cpu
     wire [2:0] dec_funct3;
     wire write_reg;
 
+    reg [15:0] parcel_low;
+    reg [15:0] parcel_high;
+    wire [31:0] parcels = {parcel_high, parcel_low};
+   
+
     decoder dec_inst(
         .I_clk(clk),
         .I_en(dec_en),
-        .I_instr(bus_dataout_stored),
+        .I_instr(parcels),
         .O_rs1(dec_rs1),
         .O_rs2(dec_rs2),
         .O_rd(dec_rd),
@@ -174,7 +177,8 @@ module cpu
         case(mux_alu_s2_sel_f)
             `MUX_ALUDAT2_REGVAL2: alu_dataS2 = reg_val2;
             `MUX_ALUDAT2_IMM:     alu_dataS2 = dec_imm;
-            default:             alu_dataS2 = 4; // MUX_ALUDAT2_INSTLEN
+            `MUX_ALUDAT2_INSTLEN16: alu_dataS2 = 2;
+            default:              alu_dataS2 = 4; // MUX_ALUDAT2_INSTLEN32
         endcase
     end
 
@@ -275,6 +279,9 @@ module cpu
     localparam STATE_MISALIGNED_ADDR = 5'd19;
     localparam STATE_CSR2    = 5'd20;
     localparam STATE_MRET    = 5'd21;
+    localparam STATE_FETCH_MORE     = 5'd22;
+    localparam STATE_PREPAIR_UNALIGNED_FETCH = 5'd23;
+    localparam STATE_DECODE16 = 5'd24; // NOT used for now... Maybe we don't need it
 
 
    reg [1:0] csr_op_type;
@@ -441,28 +448,50 @@ module cpu
          pc <= (VECTOR_RESET);
          pcnext <= 0;
          writeback_from_bus <= 0;
-         bus_dataout_stored <= 0;
          branch_pc_from_alu <= 0;
          next_addr_from_csr <= 0;
          check_tags <= 0;
          prev_pc <= 0;
       end
       else begin
+
+         case (state) 
+             STATE_FETCH: begin
+                if (pc[1] == 1) begin
+                    parcel_low <= bus_dataout[31:16];
+                    parcel_high <= 0;
+                end
+                else begin
+                    parcel_low <= bus_dataout[15:0];
+                    parcel_high <= bus_dataout[31:16];
+                end
+             end
+             STATE_FETCH_MORE: begin
+                 parcel_high <= bus_dataout[15:0];
+             end
+             default: begin
+                parcel_low <= parcel_low;
+                parcel_high <= parcel_high;
+             end
+         endcase
+
          state <= busy ? state : next_state;
-//         pc <= (update_pc && !busy) ? next_pc : pc;
          pc <= (update_pc && !busy) ? next_pc : pc;
          prev_pc <= (update_pc && !busy) ? pc : prev_pc;
          pcnext <= ((state == STATE_DECODE) && !busy) ? next_pcnext : pcnext;
          writeback_from_bus <= (busy) ? writeback_from_bus : next_writeback_from_bus;
-         bus_dataout_stored <= (state == STATE_FETCH) ? bus_dataout : bus_dataout_stored;
          branch_pc_from_alu <= next_branch_pc_from_alu;
          next_addr_from_csr <= (busy) ? next_addr_from_csr : next_pc_from_csr;
-         check_tags <= ((state == STATE_PRE_FETCH) || (state == STATE_LOAD1) || (state == STATE_STORE1)) ? next_check_tags : check_tags;
+         check_tags <= (    (state == STATE_PRE_FETCH)
+                         || (state == STATE_LOAD1)
+                         || (state == STATE_STORE1))
+                     ? next_check_tags : check_tags;
       end
    end
 
    reg next_pc_from_csr;
-   wire addr_misaligned = |next_pc[1:0];
+   // TODO: we should add an assert here, this should not really happen
+   wire addr_misaligned = |next_pc[0];
 
    reg check;
    always @ (*) begin
@@ -521,38 +550,72 @@ module cpu
                csr_data_in = CAUSE_INSTRUCTION_MISALIGNED;
             end
          end
-         STATE_PRE_FETCH: begin
-            next_state = STATE_FETCH;
-            mux_bus_addr_sel = `MUX_BUSADDR_PC;
-            next_state = STATE_FETCH;
+         STATE_PREPAIR_UNALIGNED_FETCH: begin
+            next_state = STATE_FETCH_MORE;
+            mux_bus_addr_sel = `MUX_BUSADDR_ALU;
             bus_en = 1;
             bus_op = `BUSOP_READW;
             next_check_tags = tags_if_en;
          end
+         STATE_PRE_FETCH: begin
+            next_state = STATE_FETCH;
+            mux_bus_addr_sel = `MUX_BUSADDR_PC;
+            bus_en = 1;
+            bus_op = `BUSOP_READW;
+            next_check_tags = tags_if_en;
+         end
+         STATE_FETCH_MORE: begin
+             alu_en = 1;
+             mux_alu_s1_sel = `MUX_ALUDAT1_PC;
+             mux_alu_s2_sel = `MUX_ALUDAT2_INSTLEN32 ;
+             next_state = STATE_DECODE;
+         end
          STATE_FETCH: begin
-            // ALU is unused... let's compute PC+4!
-            alu_en = 1;
-            mux_alu_s1_sel = `MUX_ALUDAT1_PC;
-            mux_alu_s2_sel = `MUX_ALUDAT2_INSTLEN;
-            next_state = STATE_DECODE;
+             if (pc[1] == 1) begin
+                 alu_en = 1;
+                 mux_alu_s1_sel = `MUX_ALUDAT1_PC;
+                 mux_alu_s2_sel = `MUX_ALUDAT2_INSTLEN16;
+
+                 if (bus_dataout[17:16] == 3) begin
+                    next_state = STATE_PREPAIR_UNALIGNED_FETCH ;
+                 end
+                 else begin
+                    next_state = STATE_DECODE;
+                 end
+             end
+             else begin
+                alu_en = 1;
+                mux_alu_s1_sel = `MUX_ALUDAT1_PC;
+                mux_alu_s2_sel = (bus_dataout[1:0] == 3)
+                              ? `MUX_ALUDAT2_INSTLEN32 : `MUX_ALUDAT2_INSTLEN16;
+                next_state = STATE_DECODE;
+             end
          end
          STATE_DECODE: begin
-            dec_en = 1;
-            reg_re = 1;
-            next_state = STATE_EXEC;
-            next_pcnext = alu_dataout;
-            if (interrupt_occured && irq_en) begin
-               trap_occured = 1;
-               next_state = STATE_TRAP;
-               csr_en = 1;
-               csr_addr = `MSR_MCAUSE;
-               csr_we = 1;
-               if (TAGS_INTERRUPT_I && tags_en) begin
-                  csr_data_in = CAUSE_TAG_MISMATCH;
-               end
-               if (TIMER_INTERRUPT_I) begin
-                  csr_data_in = CAUSE_EXTERNAL_INTERRUPT;
-               end
+            if (parcels[1:0] == 3) begin
+                dec_en = 1;
+                reg_re = 1;
+                next_state = STATE_EXEC;
+                next_pcnext = alu_dataout;
+                if (interrupt_occured && irq_en) begin
+                   trap_occured = 1;
+                   next_state = STATE_TRAP;
+                   csr_en = 1;
+                   csr_addr = `MSR_MCAUSE;
+                   csr_we = 1;
+                   if (TAGS_INTERRUPT_I && tags_en) begin
+                      csr_data_in = CAUSE_TAG_MISMATCH;
+                   end
+                   if (TIMER_INTERRUPT_I) begin
+                      csr_data_in = CAUSE_EXTERNAL_INTERRUPT;
+                   end
+                end
+            end
+            else begin
+              // TODO: figure out how to implement 16-bit decoder
+              // for now we just skip such instructions
+              next_state = STATE_POST_EXEC;
+              next_pcnext = alu_dataout;
             end
          end
          STATE_EXEC: begin
@@ -763,6 +826,9 @@ module cpu
             csr_addr = `MSR_MEPC;
             csr_op_type = 0;
             next_pc_from_csr = 1;
+         end
+         STATE_DECODE16: begin
+            next_state = STATE_DEAD;
          end
          default: begin
             next_state = STATE_DEAD;
