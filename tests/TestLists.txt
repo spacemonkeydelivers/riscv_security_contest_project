@@ -86,6 +86,12 @@ test_add(c_example_abs     c/examples/cmd_line
 
 test_add(c_fibonacci c/fibo)
 
+test_add(c_ripe_ha1  c/ripe --cmd="./cfg/h_attack_1.cfg" WARN_DISABLE INVERT_RESULT)
+test_add(c_ripe_ha2  c/ripe --cmd="./cfg/h_attack_2.cfg" WARN_DISABLE INVERT_RESULT)
+test_add(c_ripe_ha3  c/ripe --cmd="./cfg/h_attack_3.cfg" NIGHTLY WARN_DISABLE INVERT_RESULT)
+test_add(c_ripe_ha4  c/ripe --cmd="./cfg/h_attack_4.cfg" NIGHTLY WARN_DISABLE INVERT_RESULT)
+test_add(c_ripe_ha5  c/ripe --cmd="./cfg/h_attack_5.cfg" WARN_DISABLE INVERT_RESULT)
+
 test_add(c_ripe_a1   c/ripe --cmd="./cfg/attack_1.cfg" WARN_DISABLE INVERT_RESULT)
 test_add(c_ripe_a2   c/ripe --cmd="./cfg/attack_2.cfg" WARN_DISABLE INVERT_RESULT)
 test_add(c_ripe_a3   c/ripe --cmd="./cfg/attack_3.cfg" NIGHTLY WARN_DISABLE INVERT_RESULT)
