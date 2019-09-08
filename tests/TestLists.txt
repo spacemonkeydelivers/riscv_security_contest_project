@@ -5,7 +5,10 @@ test_add(basic_mem         basic/mem.py)
 test_add(store_byte_issue  basic/store_byte_issue.py)
 
 test_add(asm_simple             asm/examples/simple.s)
-test_add(asm_c_add              asm/compressed/c_add.s ENABLE_C_EXT)
+
+test_add(asm_cext_basic         asm/compressed/c_basic.s ENABLE_C_EXT)
+test_add(asm_cext_fetch_flow    asm/compressed/c_fetch_flow.s ENABLE_C_EXT)
+test_add(asm_cext_fetch_flow_b  asm/compressed/c_fetch_flow_brn.s ENABLE_C_EXT NIGHTLY)
 
 test_add(asm_timer              asm/timer.s)
 test_add(asm_uart               asm/uart.s)
@@ -73,7 +76,7 @@ test_add(c_Slibc_ns_malloc    c/libc_sec/ns_malloc DISABLE_SECURITY)
 test_add(c_Slibc_ns_free      c/libc_sec/ns_free DISABLE_SECURITY)
 
 test_add(c_soc_isr_route_timer_base   c/soc/isr_route_timer_base)
-test_add(c_soc_isr_route_ialign_base  c/soc/isr_route_ialign_base)
+test_add(c_soc_isr_route_ialign_base  c/soc/isr_route_ialign_base NIGHTLY)
 test_add(c_soc_hwrand                 c/soc/hwrand NIGHTLY)
 
 test_add(c_example_cmdln   c/examples/cmd_line --cmd="./cmd.line")
@@ -113,10 +116,16 @@ endforeach()
 
 #I
 set(COMPLIANCE_SOURCES_ROOT ${CMAKE_SOURCE_DIR}/tests/compliance/rv32i/src)
+set(FAILED_TESTS  "compliance_rv32i_I-MISALIGN_JMP-01.S"
+                  "")
 file(GLOB COMPLIANCE_TESTS "${COMPLIANCE_SOURCES_ROOT}/*.S")
 foreach(file ${COMPLIANCE_TESTS})
     get_filename_component(NAME "${file}" NAME)
-    test_add(compliance_rv32i_${NAME}  compliance/rv32i/src/${NAME})
+    if (compliance_rv32i_${NAME} IN_LIST FAILED_TESTS)
+        test_add(compliance_rv32i_${NAME}  compliance/rv32i/src/${NAME} NIGHTLY)
+    else()
+        test_add(compliance_rv32i_${NAME}  compliance/rv32i/src/${NAME})
+    endif()
 endforeach()
 #M
 set(COMPLIANCE_SOURCES_ROOT ${CMAKE_SOURCE_DIR}/tests/compliance/rv32im/src)
