@@ -48,8 +48,11 @@ module wb_ram
    reg [WB_ADDR_WIDTH - 1:0] stored_addr;
    reg [WB_DATA_WIDTH - 1:0] stored_data;
 
-   wire [GRANULE_TAG_WIDTH - 1:0]   current_tag          = wb_addr_i[WB_ADDR_WIDTH - WB_ADDR_SKIP_BITS - 1:WB_ADDR_WIDTH - WB_ADDR_SKIP_BITS - GRANULE_TAG_WIDTH];
-   wire [GRANULES_ADDR_WIDTH - 1:0] current_granule_addr = wb_addr_i[GRAMULES_ADDR_SKIP + GRANULES_ADDR_WIDTH - 1:GRAMULES_ADDR_SKIP];
+   wire [GRANULE_TAG_WIDTH - 1:0]   current_tag          =
+       wb_addr_i[WB_ADDR_WIDTH - WB_ADDR_SKIP_BITS - 1:
+                 WB_ADDR_WIDTH - WB_ADDR_SKIP_BITS - GRANULE_TAG_WIDTH];
+   wire [GRANULES_ADDR_WIDTH - 1:0] current_granule_addr =
+        wb_addr_i[GRAMULES_ADDR_SKIP + GRANULES_ADDR_WIDTH - 1:GRAMULES_ADDR_SKIP];
 
    reg [WB_DATA_WIDTH - 1:0] wb_data_out;
    assign wb_data_o = wb_data_out;
