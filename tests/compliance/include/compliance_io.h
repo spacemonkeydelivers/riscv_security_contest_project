@@ -70,6 +70,8 @@
     lw      x8,   (8*RSIZE)(_SP);                                       \
     lw      x10,  (10*RSIZE)(_SP);
 
+#ifndef DISABLE_COMPLIANCE_IO
+
 #define LOCAL_IO_WRITE_GPR(_R)                                          \
     mv          a0, _R;                                                 \
     jal         FN_WriteA0;
@@ -87,6 +89,8 @@
 #define LOCAL_IO_PUTC(_R)                                               \
     li          x30, RVTEST_BTB_UART_BASE;                              \
     sb          _R, 3(x30);                                             \
+
+#endif // `ifndef DISABLE_COMPLIANCE_IO
 
 #ifdef DISABLE_COMPLIANCE_IO
 #define LOCAL_IO_WRITE_GPR(_R)
@@ -165,6 +169,7 @@
 20005:
 
 // _SP = (volatile register)
+#ifndef DISABLE_COMPLIANCE_IO
 #define LOCAL_IO_WRITE_STR(_STR) RVTEST_IO_WRITE_STR(x31, _STR)
 #define RVTEST_IO_WRITE_STR(_SP, _STR)                                  \
     LOCAL_IO_PUSH(_SP)                                                  \
@@ -175,9 +180,11 @@
     la a0, 20001b;                                                      \
     jal FN_WriteStr;                                                    \
     LOCAL_IO_POP(_SP)
+#endif // `ifndef DISABLE_COMPLIANCE_IO
 
 #ifdef DISABLE_COMPLIANCE_IO
 #define RVTEST_IO_WRITE_STR(_SP, _STR)
+#define LOCAL_IO_WRITE_STR(_STR) RVTEST_IO_WRITE_STR(x31, _STR)
 #endif  // DISABLE_COMPLIANCE_IO
 
 // generate assertion listing
