@@ -433,6 +433,8 @@ module cpu
    reg check_tags;
    reg next_check_tags;
 
+   reg [31:0] prev_pc;
+
    always @ (posedge clk) begin
       if (reset) begin
          state <= STATE_RESET;
@@ -443,11 +445,13 @@ module cpu
          branch_pc_from_alu <= 0;
          next_addr_from_csr <= 0;
          check_tags <= 0;
+         prev_pc <= 0;
       end
       else begin
          state <= busy ? state : next_state;
 //         pc <= (update_pc && !busy) ? next_pc : pc;
          pc <= (update_pc && !busy) ? next_pc : pc;
+         prev_pc <= (update_pc && !busy) ? pc : prev_pc;
          pcnext <= ((state == STATE_DECODE) && !busy) ? next_pcnext : pcnext;
          writeback_from_bus <= (busy) ? writeback_from_bus : next_writeback_from_bus;
          bus_dataout_stored <= (state == STATE_FETCH) ? bus_dataout : bus_dataout_stored;
@@ -551,8 +555,8 @@ module cpu
          end
          STATE_EXEC: begin
             case (exec_next_stage)
-//               `EXEC_TO_FETCH:  next_state = STATE_POST_EXEC;
-               `EXEC_TO_FETCH:  next_state = STATE_UPDATE_PC;
+               `EXEC_TO_FETCH:  next_state = STATE_POST_EXEC;
+//               `EXEC_TO_FETCH:  next_state = STATE_UPDATE_PC;
                `EXEC_TO_LOAD:   next_state = STATE_LOAD1;
                `EXEC_TO_STORE:  next_state = STATE_STORE1;
                `EXEC_TO_BRANCH: next_state = STATE_BRANCH2;
@@ -561,12 +565,16 @@ module cpu
                default:         next_state = STATE_DEAD;
             endcase
             alu_en = 1;
-            reg_we = write_reg;
+            if (exec_next_pc_from_alu) begin
+               reg_we = write_reg;
+            end
          end
          STATE_POST_EXEC: begin
             next_state = STATE_UPDATE_PC;
 //            alu_en = 1;
-//            reg_we = write_reg;
+            if (!exec_next_pc_from_alu) begin
+               reg_we = write_reg;
+            end
          end
          STATE_LOAD1: begin
             next_state = STATE_LOAD2;

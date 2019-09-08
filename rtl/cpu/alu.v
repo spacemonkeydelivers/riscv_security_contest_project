@@ -39,7 +39,7 @@ module alu(
     reg[32:0] rem;
     reg[31:0] remu;
    
-`define SINGLE_CYCLE_SHIFTER
+//`define SINGLE_CYCLE_SHIFTER
 `ifdef SINGLE_CYCLE_SHIFTER
 	wire[31:0] sll, srl, sra;
 	wire signed[31:0] I_dataS1_signed;
