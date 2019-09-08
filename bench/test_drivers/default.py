@@ -13,6 +13,7 @@ from builders.builder_c import BuilderC
 from builders.builder_compliance import BuilderCompliance
 from builders.builder_zephyr import BuilderZephyr
 
+import subprocess, os, sys
 
 def build_test_image(soc):
 
@@ -57,6 +58,14 @@ def run(libbench):
     ticks = soc.get_ticks_to_run()
     if sys.stdout.isatty() or enforce_repl:
       print('TTY session detected! starting debugger')
+
+      # Unbuffer output (this ensures the output is in the correct order)
+      sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+
+      tee = subprocess.Popen(["tee", "log.txt"], stdin=subprocess.PIPE)
+      os.dup2(tee.stdin.fileno(), sys.stdout.fileno())
+      os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
+
       dbg.set_tracing_enabled(True)
       dbg.repl()
     else:
