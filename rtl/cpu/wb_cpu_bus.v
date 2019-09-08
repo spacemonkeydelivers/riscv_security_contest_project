@@ -84,8 +84,7 @@ module wb_cpu_bus(
             data_from_bus = {28'b0, DAT_I[3:0]};
          end
          default: begin
-//            data_from_bus = 32'hDEADF001;
-            data_from_bus = 0;
+            data_from_bus = 32'hDEADF001;
          end
       endcase
    end
