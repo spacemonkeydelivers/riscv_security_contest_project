@@ -478,7 +478,7 @@ module cpu
       alu_en = 0;
 
       next_pcnext = 0;
-
+      alu_op = 0;
       reg_we = 0;
       reg_re = 0;
 
@@ -491,6 +491,8 @@ module cpu
 
       mux_reg_input_sel = 0;
       next_branch_pc_from_alu = 0;
+      mux_alu_s2_sel = 0;
+      mux_alu_s1_sel = 0;
 
       csr_en = 0;
       csr_we = 0;
