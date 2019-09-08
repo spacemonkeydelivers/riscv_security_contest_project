@@ -48,7 +48,7 @@ static int data_flag = 0700;
 static uint32_t * data_mem_ptr_aux[64] = { &dummy_function };
 static uint32_t * data_mem_ptr[64] = { &dummy_function };
 static int (* data_func_ptr)(const char *) = &dummy_function;
-static jmp_buf data_jmp_buffer = { 1 };
+static jmp_buf data_jmp_buffer = { { 1 } };
 
 // JM: control data destinations
 void
@@ -290,8 +290,6 @@ main(int argc, char* argv[])
     register_int_handler(RISCV_INT_SM_PANIC, &simple_secure_monitor);
 
     hardened_mode = false;
-    bool scan_number = false;
-    int attack_number = 0;
     if (argument_parse(argc, argv) == -1) {
         printf("[-] Parsing went wrong. Exiting\n");
         exit(EXIT_FAILURE);
@@ -918,7 +916,7 @@ perform_attack(
             break;
     }
 
-    printf("");
+    printf(" ");
     printf("\nExecuting attack... ");
 
     switch (attack.code_ptr) {
