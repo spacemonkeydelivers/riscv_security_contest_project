@@ -21,6 +21,8 @@ def make_command_line():
       m = re.search('--cmd="(.*?)"', arg)
       if m:
         cmd_file = m.group(1)
+      elif arg.startswith('--cmd='):
+        cmd_file = arg[6:]
 
   content = ["test.elf"]
 
