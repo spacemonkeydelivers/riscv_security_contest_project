@@ -17,7 +17,21 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+
+bool hardened_mode = false;
+
+unsigned int ptr_diff(const void* p1, const void* p2) {
+    unsigned long pl1 = (unsigned long)p1;
+    unsigned long pl2 = (unsigned long)p2;
+    if (hardened_mode) {
+        return (pl1 & ((1 << 26) - 1)) - (pl2 & ((1 << 26) - 1));
+    } else {
+        return pl1 - pl2;
+    }
+}
+
 int is_unit_test = {0};
+
 static boolean output_debug_info = TRUE;
 
 // JM: shellcode is generated in perform_attack()
@@ -123,6 +137,12 @@ int
 argument_parse(int argc, char* argv[])
 {
     for(int i = 0; i < argc; ++i) {
+        if (strcmp(argv[i], "--hardened") == 0) {
+            hardened_mode = true;
+            printf("[+] Hardening mode\n");
+            continue;
+        }
+
         if (strcmp(argv[i], "--technique") == 0) {
             ++i;
             if (i > argc) {
@@ -281,8 +301,6 @@ argument_parse(int argc, char* argv[])
 // Initial main taking argument on the commande line has been replaced by a simple function call
 // You have to update the ATTACK_NR to mimic the command line arguments
 //
-
-bool hardened_mode = false;
 
 int
 main(int argc, char* argv[])
@@ -795,11 +813,10 @@ perform_attack(
     // ------------------------------------------------------
     /* Calculate payload size for overflow of chosen target address */
     if ((unsigned long) target_addr > (unsigned long) buffer) {
-        payload.size =
-          (unsigned int) ((unsigned long) target_addr + sizeof(long)
-          - (unsigned long) buffer
-          + 1); /* For null termination so that buffer can be     */
-                /* used with string functions in standard library */
+
+        payload.size = ptr_diff(target_addr, buffer) + sizeof(long) + 1;
+           /* + 1: For null termination so that buffer can be */
+           /* used with string functions in standard library  */
 
         if (output_debug_info)
             fprintf(stderr, "payload size == %d\n", payload.size);
