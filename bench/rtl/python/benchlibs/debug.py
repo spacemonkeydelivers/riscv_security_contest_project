@@ -16,6 +16,7 @@ from debugger.cmd_step import CmdStep
 from debugger.cmd_tick import CmdTick
 from debugger.cmd_assign import CmdAssign
 from debugger.cmd_reset import CmdReset
+from debugger.cmd_watchpoint import CmdWatchpoint
 
 class Debugger:
     def register_cmd(cmd):
@@ -36,7 +37,8 @@ class Debugger:
             CmdHelp,
             CmdPrint,
             CmdStep,
-            CmdTick
+            CmdTick,
+            CmdWatchpoint,
         ]
         [self.add_command(cmd) for cmd in commands]
 
@@ -85,6 +87,7 @@ class Debugger:
             s.append('{}({})'.format(k, v))
         print('     - step: #{}, utick: {}'.format(step_ctr, tick_ctr))
         print('     - {} || tick#{}'.format(','.join(s), self._trace['tick_cnt']))
+        self.process_input('watchpoint callback')
 
     def tracing_callback(self):
 
