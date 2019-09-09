@@ -22,21 +22,17 @@ find_package(Boost COMPONENTS python)
 
 
 # This one is important
-SET(CMAKE_SYSTEM_NAME Linux)
-
+#SET(CMAKE_SYSTEM_NAME Linux)
 # Specify the cross compiler
-SET(CMAKE_C_COMPILER   /tank/work/dev/toolchains/arm-at91-linux-gnueabi/bin/arm-at91-linux-gnueabi-gcc)
-SET(CMAKE_CXX_COMPILER /tank/work/dev/toolchains/arm-at91-linux-gnueabi/bin/arm-at91-linux-gnueabi-g++)
-
+#SET(CMAKE_C_COMPILER   /tank/work/dev/toolchains/arm-at91-linux-gnueabi/bin/arm-at91-linux-gnueabi-gcc)
+#SET(CMAKE_CXX_COMPILER /tank/work/dev/toolchains/arm-at91-linux-gnueabi/bin/arm-at91-linux-gnueabi-g++)
 # Where is the target environment
-SET(CMAKE_FIND_ROOT_PATH  /tank/work/dev/toolchains/arm-at91-linux-gnueabi/arm-at91-linux-gnueabi/ /tank/work/dev/toolchains/arm-at91-linux-gnueabi/)
-
+#SET(CMAKE_FIND_ROOT_PATH  /tank/work/dev/toolchains/arm-at91-linux-gnueabi/arm-at91-linux-gnueabi/ /tank/work/dev/toolchains/arm-at91-linux-gnueabi/)
 # Search for programs in the build host directories
-SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-
-# For libraries and headers in the target directories
-SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+#SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+## For libraries and headers in the target directories
+#SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+#SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 
 # Building static library #
