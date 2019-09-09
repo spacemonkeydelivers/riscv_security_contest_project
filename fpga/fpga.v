@@ -86,7 +86,7 @@ module fpga(
    wire [15:0] data_from_soc_high;
    wire [15:0] to_cpu = (addr == REG_LOW_DATA_OUT)  ? data_from_soc_low :
                         (addr == REG_HIGH_DATA_OUT) ? data_from_soc_high :
-                        (addr == REG_CONTROL)       ? {regs_internal[addr][15:CONTROL_TRAN_SIZE_LOW], tran_ready, regs_internal[addr][CONTROL_TRAN_CLEAN:0]} :
+                        (addr == REG_CONTROL)       ? {regs_internal[addr][15:7], tran_ready, regs_internal[addr][5:0]} :
                                                       regs_internal[addr];
    
    wire [31:0] addr_to_soc = {regs_internal[REG_HIGH_ADDR], regs_internal[REG_LOW_ADDR]};
@@ -129,11 +129,14 @@ module fpga(
    begin
       if (!reset_i) begin
          data_to_cpu <= 0;
-         regs_internal[REG_SANITY] <= 16'h5AFE;
+         regs_internal[REG_SANITY] <= 16'h50FE;
+         regs_internal[REG_LOW_DATA_IN]  <= 0;
+         regs_internal[REG_HIGH_DATA_IN] <= 0;
          regs_internal[REG_LOW_DATA_OUT]  <= 0;
          regs_internal[REG_HIGH_DATA_OUT] <= 0;
-         regs_internal[REG_LOW_DATA_OUT] <= 0;
-         regs_internal[REG_HIGH_DATA_OUT] <= 0;
+         regs_internal[REG_LOW_ADDR] <= 0;
+         regs_internal[REG_HIGH_ADDR] <= 0;
+         regs_internal[REG_CONTROL] <= 0;
       end
       else begin
          if (iface_accessed) begin
@@ -141,7 +144,7 @@ module fpga(
                data_to_cpu <= to_cpu;
             end
             if (!write_i) begin
-               regs_internal[addr] <= data_from_cpu & ((addr == REG_CONTROL) ? 16'hFFBF : 16'hFFFF);
+               regs_internal[addr] <= data_from_cpu;
                if (regs_internal[REG_CONTROL][CONTROL_TRAN_CLEAN]) begin
                   regs_internal[REG_CONTROL][CONTROL_TRAN_CLEAN] <= 0;
                end
@@ -149,6 +152,9 @@ module fpga(
                   regs_internal[REG_CONTROL][CONTROL_TRAN_START] <= 0;
                end
             end
+         end
+         if (regs_internal[REG_CONTROL][CONTROL_TRAN_START]) begin
+            regs_internal[REG_CONTROL][CONTROL_TRAN_START] <= 1'b0;
          end
       end
    end
