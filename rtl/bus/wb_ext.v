@@ -58,7 +58,7 @@ module wb_ext
          tran_started <= 0;
          tran_finished <= 0;
          data_sel <= 0;
-         data <= 0;
+         data <= 32'hC0017A1E;
          wb_we <= 0;
       end
       else begin
@@ -75,7 +75,7 @@ module wb_ext
          if (tran_started && wb_ack_i) begin
             tran_started <= 0;
             tran_finished <= 1;
-            data <= wb_data_i;
+            data <= (wb_we) ? data : wb_data_i;
             wb_we <= 0;
          end
          if (transaction_clear_ready_i) begin
