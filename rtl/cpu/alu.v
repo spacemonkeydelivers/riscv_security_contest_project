@@ -1,6 +1,8 @@
 `include "cpu/aludefs.vh"
 
 `define HW_DIVISION 1
+//`define SINGLE_CYCLE_DIVISION 1
+
 
 module alu(
 	input I_clk,
@@ -38,6 +40,9 @@ module alu(
     reg[31:0] divu;
     reg[32:0] rem;
     reg[31:0] remu;
+    reg[31:0] div_src1;
+    reg[31:0] div_src2;
+    reg[63:0] dividend_copy, divider_copy, diff;
    
 //`define SINGLE_CYCLE_SHIFTER
 `ifdef SINGLE_CYCLE_SHIFTER
@@ -72,11 +77,14 @@ module alu(
         mulsu = tmp_src1 * tmp_src2u;
     end
 
-    reg tmp_div;
-    reg tmp_rem;
+    assign div_src1 = I_dataS1[31] ? (1 + (~I_dataS1)) : I_dataS1;
+    assign div_src2 = I_dataS2[31] ? (1 + (~I_dataS2)) : I_dataS2;
+
+    reg[5:0] bit_num;
+    initial bit_num = 0;
+    assign diff = dividend_copy - divider_copy;
+`ifdef SINGLE_CYCLE_DIVISION
     always @(*) begin
-       tmp_div = 0;
-       tmp_rem = 0;
         if(I_dataS2 == { 32{1'b0} } ) begin
             div = {1'b0, {32{1'b1}}};
             divu = {32{1'b1}};
@@ -94,6 +102,7 @@ module alu(
             end*/
         end
     end
+`endif
 `endif
 
 	always @(*) begin
@@ -156,11 +165,56 @@ module alu(
                 `ALUOP_MULH: result <= mulss[63:32];
                 `ALUOP_MULHSU: result <= mulsu[63:32];
                 `ALUOP_MULHU: result <= muluu[63:32];
+                // multi-cycle division
+                `ifndef SINGLE_CYCLE_DIVISION
+                `ALUOP_DIV, `ALUOP_REM, `ALUOP_DIVU, `ALUOP_REMU: begin
+                    if (!busy) begin
+                        if(I_dataS2 == 32'd0) begin
+                            case(I_aluop)
+                                `ALUOP_DIV, `ALUOP_DIVU: result <= {32'hffffffff};
+                                default: result <= I_dataS1;
+                            endcase
+                        end else if (((I_dataS1 == 32'hffffffff && (I_dataS2 == 32'h80000000 || I_dataS2 == 32'h7fffffff)) ||
+                                      (I_dataS1 == 32'h80000000 && I_dataS2 == 32'h7fffffff)) &&
+                                     I_aluop == `ALUOP_REM) begin
+                            result <= 32'hffffffff;
+                        end else begin
+                            busy <= 1;
+                            result <= 0;
+                            bit_num <= 32;
+                            if(I_aluop == `ALUOP_DIVU || I_aluop == `ALUOP_REMU) begin
+                                dividend_copy <= {32'd0,I_dataS1};
+                                divider_copy <= {1'b0,I_dataS2,31'd0};
+                            end else begin
+                                dividend_copy <= {32'd0,div_src1};
+                                divider_copy <= {1'b0,div_src2,31'd0};
+                            end
+                        end
+                    end else if(|bit_num) begin
+                        if (!diff[63]) begin
+                            dividend_copy <= diff;
+                            result <= {result[30:0], 1'b1};
+                        end else begin
+                            result <= {result[30:0], 1'b0};
+                        end
+                        divider_copy <= divider_copy >> 1;
+                        bit_num <= bit_num - 1;
+                    end else begin
+						case(I_aluop)
+                           `ALUOP_DIV: result <= (I_dataS1[31] ^ I_dataS2[31]) ? ((~result) + 1) : result;
+                           `ALUOP_DIVU: result <= result;
+                           default: result <= dividend_copy[31:0];
+                        endcase
+                        busy <= 0;
+                    end
+                end
+                `else
                 // single-cycle division ;)
                 `ALUOP_DIV: result <= div[31:0];
                 `ALUOP_DIVU: result <= divu;
                 `ALUOP_REM: result <= rem[31:0];
                 `ALUOP_REMU: result <= remu;
+                `endif
 `endif
 			endcase
 
