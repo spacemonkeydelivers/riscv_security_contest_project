@@ -14,7 +14,7 @@
 #include <soc_common.h>
 
 /* UART Configuration */
-#define RISCV_BEEHIVE_UART_BASE      0x80000003
+#define RISCV_BEEHIVE_UART_BASE      0x80000004
 
 /* Timer configuration */
 #define RISCV_MTIME_BASE             0x40000004
