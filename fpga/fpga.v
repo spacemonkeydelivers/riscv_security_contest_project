@@ -137,6 +137,8 @@ module fpga(
          regs_internal[REG_LOW_ADDR] <= 0;
          regs_internal[REG_HIGH_ADDR] <= 0;
          regs_internal[REG_CONTROL] <= 0;
+         regs_internal[REG_CONTROL][CONTROL_CPU_RESET] <= 1;
+         regs_internal[REG_CONTROL][CONTROL_SOC_RESET] <= 1;
       end
       else begin
          if (iface_accessed) begin
