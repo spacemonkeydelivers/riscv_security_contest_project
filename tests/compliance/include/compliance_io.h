@@ -88,7 +88,7 @@
 
 #define LOCAL_IO_PUTC(_R)                                               \
     li          x30, RVTEST_BTB_UART_BASE;                              \
-    sb          _R, 3(x30);                                             \
+    sb          _R, 4(x30);                                             \
 
 #endif // `ifndef DISABLE_COMPLIANCE_IO
 
