@@ -29,7 +29,28 @@ class FPGA_SOC:
         self._control_reg = 0
     
     def upload_firmware(self, firmware_path):
-        self._soc.uploadBitstream(firmware_path)
+        pass
+#        self._soc.uploadBitstream(firmware_path)
+
+    def print_ram(self, start_address, num_words):
+        print("{:10} : {:10}".format("address", "data"))
+        for w in range(num_words):
+            addr = start_address + w * 4
+            data = self.read_word(addr)
+            print("0x{:08X} : 0x{:08X}".format(addr, data))
+
+    def upload_image(self, path_to_image):
+        data = map(lambda x: x.strip(), open(path_to_image, "r").readlines())
+        address = 0
+        for line in data:
+            if line[0] == '@':
+                address = int(line[1:], 16)
+            else:
+                b = line.split()
+                for k in range(0, len(b), 4):
+                    word = int("".join(b[k:k+4][::-1]), 16)
+                    self.write_word(address, word)
+                    address += 4
     
     def fpga_init(self):
         self._soc.setReset(0)
@@ -227,30 +248,24 @@ print(hex(soc.read_word(0x0)))
 print(hex(soc.read_word(0x100)))
 print(hex(soc.read_word(0x104)))
 
-soc.write_word(0x0,  0x10000113)
-soc.write_word(0x4,  0x12300513)
-soc.write_word(0x8,  0x20000593)
-soc.write_word(0xc,  0x00a12023)
-soc.write_word(0x10, 0x00b50633)
-soc.write_word(0x14, 0x00c12223)
-soc.write_word(0x18, 0x0a11c0b7)
-soc.write_word(0x1c, 0x00108093)
-soc.write_word(0x20, 0x0000006f)
+soc.upload_image("/mnt/smd/test.v")
 
-print(hex(soc.read_word(0x0)))
-print(hex(soc.read_word(0x4)))
-print(hex(soc.read_word(0x8)))
-print(hex(soc.read_word(0xc)))
-print(hex(soc.read_word(0x10)))
-print(hex(soc.read_word(0x14)))
-print(hex(soc.read_word(0x18)))
-print(hex(soc.read_word(0x1c)))
-print(hex(soc.read_word(0x20)))
+#soc.write_word(0x0,  0x10000113)
+#soc.write_word(0x4,  0x12300513)
+#soc.write_word(0x8,  0x20000593)
+#soc.write_word(0xc,  0x00a12023)
+#soc.write_word(0x10, 0x00b50633)
+#soc.write_word(0x14, 0x00c12223)
+#soc.write_word(0x18, 0x0a11c0b7)
+#soc.write_word(0x1c, 0x00108093)
+#soc.write_word(0x20, 0x0000006f)
+
+soc.print_ram(0, 40)
 
 soc.run_soc()
 
 time.sleep(3)
 
 soc.halt_soc()
-print(hex(soc.read_word(0x100)))
-print(hex(soc.read_word(0x104)))
+
+soc.print_ram(0x100, 2)
