@@ -13,7 +13,7 @@ class FPGA_SOC:
     REGISTER_CONTROL        = 0xa
     REGISTER_DATA_OUT_LOW   = 0xc
     REGISTER_DATA_OUT_HIGH  = 0xe
-    SANE_CONSTANT           = 0x5AFE
+    SANE_CONSTANT           = 0x50FE
     BIT_CPU_RESET             = 0
     BIT_SOC_RESET             = 1
     BIT_BUS_MASTER            = 2
@@ -53,7 +53,7 @@ class FPGA_SOC:
                     address += 4
     
     def fpga_init(self):
-        self._soc.setReset(0)
+        self._soc.setReset(False)
         self._soc.setReset(1)
     
     def check_sanity(self):
@@ -244,9 +244,12 @@ soc.check_sanity()
 soc.halt_soc()
 soc.write_word(0x0, 0x12345678)
 soc.write_word(0x100, 0xABCDEF)
+#soc.write_word(0x104, 0xABCDEF)
 print(hex(soc.read_word(0x0)))
 print(hex(soc.read_word(0x100)))
 print(hex(soc.read_word(0x104)))
+
+print("#######################")
 
 soc.upload_image("/mnt/smd/test.v")
 
@@ -268,4 +271,5 @@ time.sleep(3)
 
 soc.halt_soc()
 
+print("#######################")
 soc.print_ram(0x100, 2)
