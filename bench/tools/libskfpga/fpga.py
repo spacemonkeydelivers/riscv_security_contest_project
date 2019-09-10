@@ -23,6 +23,9 @@ class FPGA_SOC:
     BIT_TRANSACTION_READY     = 6
     BIT_TRANSACTION_SIZE_LOW  = 7
     BIT_TRANSACTION_SIZE_HIGH = 8
+    UART_BAUDE_DIVIDER_ADDR   = 0x80000000
+    UART_TRANSMIT_BYTE_ADDR   = 0x80000004
+    UART_9600_DIVIDER         = 13889
     def  __init__(self, fpga_dev):
         self._soc = libbench.skFpga(fpga_dev)
         self._firmware_uploaded = False
@@ -83,6 +86,14 @@ class FPGA_SOC:
         # set soc to run
         self.__clear_soc_reset()
         self.__update_control_register()
+
+    def uart_set_baud_9600(self):
+        self.write_word(self.UART_BAUDE_DIVIDER_ADDR, self.UART_9600_DIVIDER)
+
+    def uart_print(self, data):
+        string = str(data)
+        for ch in string:
+            self.write_word(self.UART_TRANSMIT_BYTE_ADDR, ord(ch))
 
     def read_word(self, address):
         # set address
@@ -242,9 +253,16 @@ soc = FPGA_SOC("/dev/fpga")
 soc.fpga_init()
 soc.check_sanity()
 soc.halt_soc()
+
+soc.uart_set_baud_9600()
+soc.uart_print("Test")
+
+#for i in range(32, 127):
+#    soc.write_word(0x80000004, i)
+
 soc.write_word(0x0, 0x12345678)
 soc.write_word(0x100, 0xABCDEF)
-#soc.write_word(0x104, 0xABCDEF)
+soc.write_word(0x104, 0xABCDEF)
 print(hex(soc.read_word(0x0)))
 print(hex(soc.read_word(0x100)))
 print(hex(soc.read_word(0x104)))
@@ -270,6 +288,6 @@ soc.run_soc()
 time.sleep(3)
 
 soc.halt_soc()
-
+#
 print("#######################")
 soc.print_ram(0x100, 2)
