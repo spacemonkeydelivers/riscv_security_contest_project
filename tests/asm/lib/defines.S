@@ -64,7 +64,7 @@
    __test_exit \status, TARGET
 .endm
 
-#define UART_BASE_ADDR 0x80000003
+#define UART_BASE_ADDR 0x80000004
 
 #define GRANULE_TAG_WIDTH 4
 #define TAG_OFFSET (32 - 2 - GRANULE_TAG_WIDTH)
