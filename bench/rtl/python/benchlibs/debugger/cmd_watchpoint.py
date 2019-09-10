@@ -109,7 +109,7 @@ class CmdWatchpoint:
 
                     current_value = self.soc.read_word_ram(word_index)
                     if ( int(saved_value[2:], 16) != current_value ):
-                        print '\t[*] Watchpoint {} hit. Value at address {} changed its value from {:08X} to {08X}'.format(
+                        print '\t[*] Watchpoint {} hit. Value at address {} changed its value from {} to {}'.format(
                             key,
                             trigger,
                             saved_value,
