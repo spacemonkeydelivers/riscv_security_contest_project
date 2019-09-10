@@ -7,6 +7,8 @@ CFLAGS     = $(RISCV_CFLAGS_COMMON) -I$(RISCV_ASM_INCLUDES) -march=rv32im  -mabi
 <% if asm_c_ext %>
 CFLAGS += -march=rv32imc
 <% end %>
+CFLAGS += -DENABLE_FPGA_EXIT
+
 LDFLAGS    = $(RISCV_LDFLAGS_COMMON)
 LDSCRIPT   = $(RISCV_ASM_LD_SCRIPT)
 
@@ -14,15 +16,21 @@ SRC  = <%= input_asm %>
 
 .PHONY : all
 
-all: test.elf test.v tcl_copy
+all: test.elf test.v tcl_copy fpga.info
 
 clean:
 	rm asm_pre.s
 	rm test.elf
 	rm test.v
+	rm fpga.info
+
 
 tcl_copy: $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl
 	cp $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl filter_init.tcl
+
+fpga.info: test.elf
+	NM_TOOL=$(RISCV_NM) $(PYTHON_INTERPRETER) \
+	-uB $(TESTBENCH_TOOLS_SRC)/misc/fpga_info.py test.elf fpga.info >/dev/null
 
 test.elf: asm_pre.s
 	$(CC) -Xlinker -T$(RISCV_ASM_LD_SCRIPT) \

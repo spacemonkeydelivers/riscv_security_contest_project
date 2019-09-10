@@ -29,8 +29,17 @@
 .endif
 
 .macro __test_exit status:req, target
-  // TODO: implement a proper test exit sequence
+  // ra contains "return code"
   li ra, \status
+#ifdef ENABLE_FPGA_EXIT
+  // this is FPGA-friendly exit sequence
+  la t1, __marker_test_status
+  sw ra, 0(t1)
+
+  la t1, __marker_test_end
+  li t2, 0xbaddad
+  sw t2, 0(t1)
+#endif //ENABLE_FPGA_EXIT
 1:
   j 1b
   wfi
