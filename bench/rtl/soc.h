@@ -62,7 +62,7 @@ private:
     uint64_t       m_ramSize     {0};
     uint64_t       m_regFileSize {0};
 
-    uint64_t       UART_TX_ADDR  {0x3};
+    uint64_t       UART_TX_ADDR  {0x80000004};
     uint64_t       UART_RX_ADDR  {0x2};
     const char*    m_tracePath   {nullptr};
 
