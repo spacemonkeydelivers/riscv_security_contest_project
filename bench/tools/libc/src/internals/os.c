@@ -106,7 +106,7 @@ void _putchar(char character) {
     (void)character;
     if (character == '\0')
         return;
-    volatile char* dst = (volatile char*)0x80000003;
+    volatile char* dst = (volatile char*)0x80000004;
     *dst = character;
 }
 __attribute__((section(".__system.os")))
