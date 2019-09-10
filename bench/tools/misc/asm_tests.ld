@@ -8,4 +8,15 @@ SECTIONS
         *(.reset);
         *(.text);
     }
+    . = ALIGN(16) ;
+    .results : {
+        __marker_test_end = . ;
+        LONG(0xdeadbabe) ;
+        __marker_test_status = . ;
+        LONG(0xdeadbabe) ; 
+        __marker_test_pad0 = . ;
+        LONG(0xdeadbabe) ; 
+        __marker_test_pad1 = . ;
+        LONG(0xdeadbabe) ; 
+    }
 }
