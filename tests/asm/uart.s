@@ -11,7 +11,7 @@ A
 __start:
 lui sp, 0x80000
 addi a0, zero, 0x41
-sb a0, 3(sp)
+sb a0, 4(sp)
 addi zero, zero, 0
 addi zero, zero, 0
 addi zero, zero, 0
