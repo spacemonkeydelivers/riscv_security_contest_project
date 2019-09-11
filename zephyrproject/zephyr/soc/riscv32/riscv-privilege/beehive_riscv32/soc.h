@@ -5,7 +5,7 @@
  */
 
 /**
- * @file SoC configuration macros for the SiFive Freedom processor
+ * @file SoC configuration macros for the Beehive processor
  */
 
 #ifndef __RISCV32_BEEHIVE_RISCV32_SOC_H_
@@ -17,8 +17,9 @@
 #define RISCV_BEEHIVE_UART_BASE      0x80000004
 
 /* Timer configuration */
-#define RISCV_MTIME_BASE             0x40000004
-#define RISCV_MTIMECMP_BASE          0x40000000
+#define RISCV_MTIME_BASE             0x40000000
+#define RISCV_MTIMECMP_BASE          0x40000008
+#define BEEHIVE_MTIMECTRL_BASE       0x40000010
 
 /* lib-c hooks required RAM defined variables */
 #define RISCV_RAM_BASE               CONFIG_RISCV_RAM_BASE_ADDR
