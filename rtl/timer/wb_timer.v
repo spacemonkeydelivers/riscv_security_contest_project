@@ -34,10 +34,7 @@ module wb_timer
 `define HI(reg_name) reg_name[63:32]
 
    // IRQ pin, raised to HIGH if current time exceeds the threshold
-   // It can be raised to HIGH only if treshold is not zero
    reg                                irq;
-   wire                               irq_enabled;
-   assign irq_enabled = |mtimecmp;
    assign timer_irq_o = irq & irq_enabled;
 
    // ack signal for wishbone delayed by one clock with a reg
@@ -71,7 +68,7 @@ module wb_timer
          clk_cnt <= 1;
       end
       else begin
-         irq <= irq_enabled ? mtime >= mtimecmp : 0;
+         irq <= mtime >= mtimecmp;
 
          if (wb_cyc_i & wb_we_i) begin
             // No increment for MTIME on write to it
@@ -104,8 +101,6 @@ module wb_timer
                   end
                end
             end // else: !if((addr == MTIME_LO ) || (addr == MTIME_HI))
-
-            ack <= wb_cyc_i;
          end // if (wb_cyc_i & wb_we_i)
          else begin
             if (timer_enabled) begin
@@ -118,9 +113,9 @@ module wb_timer
                   clk_cnt <= clk_cnt + 1;
                end
             end
-
-            ack <= 0; // to avoid latch generation
          end // else: !if(wb_cyc_i & wb_we_i)
+
+         ack <= (wb_cyc_i & !ack);
       end // else: !if(rst_i)
 
    end // always @ (posedge clk_i)
