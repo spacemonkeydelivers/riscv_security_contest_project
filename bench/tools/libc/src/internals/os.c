@@ -90,12 +90,15 @@ bool alarm_soc_timer(int interval)
     if (interval < 0) {
         return false;
     }
-    int timer_address = 0x40000000;
-    __asm__ volatile ("lw zero, 0(%[timer_addr])\n\t"
-                      "sw %[threshold], 0(%[timer_addr])"
+    int freq = 1;
+    int timer_base = 0x40000000;
+    __asm__ volatile ("sw %[threshold], 8(%[timer_base])\n\t"
+                      "sw zero, 0(%[timer_base])\n\t"
+                      "sw %[freq], 16(%[timer_base])\n\t"
                       :
-                      : [timer_addr]"r" (timer_address),
-                        [threshold]"r"(interval)
+                      : [timer_base]"r" (timer_base),
+                        [threshold]"r"(interval),
+                        [freq]"r"(freq)
                       : "memory");
     return true;
 
