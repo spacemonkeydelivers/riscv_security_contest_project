@@ -8,7 +8,11 @@ config SOC_SERIES
 
 config SYS_CLOCK_HW_CYCLES_PER_SEC
 	int
-	default 32768
+	default 100
+
+config BEEHIVE_TIMER_INIT_PRIORITY
+        int
+        default 45
 
 config RISCV_SOC_INTERRUPT_INIT
 	bool
@@ -46,4 +50,4 @@ config RISCV_RAM_SIZE
 	hex
 	default 0x4000
 
-endif # SOC_SERIES_RISCV32_SIFIVE_FREEDOM
+endif # SOC_SERIES_BEEHIVE_RISCV32
