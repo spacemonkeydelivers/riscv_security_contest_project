@@ -5,8 +5,12 @@
 main:
 mv sp, zero
 lui sp, 0x40000
+// count clocks
+addi a0, zero, 1
+sw a0, 16(sp)
+// up to 10 clocks
 addi a0, zero, 10
-sb a0, 0(sp)
+sb a0, 8(sp)
 mv zero, zero
 mv zero, zero
 mv zero, zero
