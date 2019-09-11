@@ -64,14 +64,16 @@ class CmdWatchpoint:
         if ( len(args) < 3 ):
             print '[-] Insufficient number of arguments passed. Add address to watch.'
             return None
-
-        address = int(args[2][2:],16) #Cutting 0x off
+        if (args[2][:2] == '0x'):
+            address = int(args[2][2:],16) #Cutting 0x off
+        else:
+            address = int(args[2]) 
         word_index = address / self._word_size
-        memory_value = self.soc.read_register(word_index)
+        memory_value = self.soc.read_word_ram(word_index)
 
         self.watchpoints[self.watchpoint_table_size] = [
             hex(address), 
-            hex(self.soc.read_word_ram(word_index)),
+            hex(memory_value),
             'memory',
             ]
         self.watchpoint_table_size += 1
@@ -107,10 +109,8 @@ class CmdWatchpoint:
                     #print 'Testing register memory'
                     address = int(trigger[2:],16) #Cutting 0x off
                     word_index = address / self._word_size
-                    memory_value = self.soc.read_register(word_index)
-
                     current_value = self.soc.read_word_ram(word_index)
-                    if ( int(saved_value[2:], 16) != current_value ):
+                    if ( int(saved_value[2:], 16) != current_value):
                         print '\t[*] Watchpoint {} hit. Value at address {} changed its value from {} to {}'.format(
                             key,
                             trigger,
