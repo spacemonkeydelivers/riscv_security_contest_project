@@ -16,6 +16,15 @@
     `define C1_F3_NOP
     `define C1_F3_NOP_JAL
 
+    `define C2_F3_SLLI   3'b000
+    `define C2_F3_LWSP   3'b010
+    `define C2_F3_JR     3'b100
+    `define C2_F3_MV     3'b100
+    `define C2_F3_EBREAK 3'b100
+    `define C2_F3_JALR   3'b100
+    `define C2_F3_CADD   3'b100
+    `define C2_F3_SWSP   3'b110
+
     `define OP_JALR     5'b11001    // I-type
     `define OP_LOAD     5'b00000    // I-type
     `define OP_OPIMM    5'b00100    // I-type

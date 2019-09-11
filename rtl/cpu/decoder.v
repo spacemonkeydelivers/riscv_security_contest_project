@@ -63,9 +63,18 @@ module decoder
    assign O_imm = imm;
 
    // combinatorial decode of source register information to allow for register read during decode
+   reg[4:0] o_rs1;
+   reg[4:0] o_rs2;
+   reg[4:0] o_rd;
+
+   assign O_rs1 = o_rs1;
+   assign O_rs2 = o_rs2;
+   assign O_rd = o_rd;
+   /*
    assign O_rs1 = I_instr[19:15];
    assign O_rs2 = I_instr[24:20];
    assign O_rd = I_instr[11:7];
+   */
 
    assign funct3_o = funct3;
 
@@ -120,6 +129,11 @@ module decoder
    assign write_reg_o = write_reg;
 
    always @ (*) begin
+
+      o_rs1 = I_instr[19:15];
+      o_rs2 = I_instr[24:20];
+      o_rd = I_instr[11:7];
+
       exec_writeback_from_imm = 0;
       exec_writeback_from_alu = 0;
       exec_next_pc_from_alu = 0;
@@ -265,9 +279,11 @@ module decoder
       endcase
     end
     else begin
-      //o_rs1 = I_instr[11:7];
-      //o_rs2 = I_instr[6:2];
-      //o_rd = I_instr[11:7];
+
+      o_rs1 = I_instr[11:7];
+      o_rs2 = I_instr[6:2];
+      o_rd = I_instr[11:7];
+
       case(c_op)
         `C_OPC_C0: begin
 /*
@@ -319,25 +335,78 @@ module decoder
         `C_OPC_C2: begin
 /*
     | 15 14 13 | 12        | 11 10 9 8 7 | 6 5 4 3 2    | 1 0  |
-    |   000    | nzuimm[5] | rs1/rd6=0   | nzuimm[4:0]  |  10  | C.SLLI (HINT, rd=0; RV32 NSE, nzuimm[5]=1)
-    |   000    | 0         | rs1/rd6=0   | 0            |  10  | C.SLLI64 (RV128; RV32/64 HINT; HINT, rd=0)
-    |   001    | uimm[5]   | rd          | uimm[4:3;8:6]|  10  | C.FLDSP (RV32/64)
-    |   001    | uimm[5]   | rd6=0       | uimm[4;9:6]  |  10  | C.LQSP (RV128; RES, rd=0)
-    |   010    | uimm[5]   | rd6=0       | uimm[4:2;7:6]|  10  | C.LWSP (RES, rd=0)
-    |   011    | uimm[5]   | rd          | uimm[4:2;7:6]|  10  | C.FLWSP (RV32)
-    |   011    | uimm[5]   | rd6=0       | uimm[4:3;8:6]|  10  | C.LDSP (RV64/128; RES, rd=0)
-    |   100    | 0         | rs1!=0      | 0            |  10  | C.JR (RES, rs1=0)
-    |   100    | 0         | rd!=0       | rs2!=0       |  10  | C.MV (HINT, rd=0)
-    |   100    | 1         | 0           |  0           |  10  | C.EBREAK
-    |   100    | 1         | rs1!=0      |  0           |  10  | C.JALR
-    |   100    | 1         | rs1/rd!=0   | rs2!=0       |  10  | C.ADD (HINT, rd=0)
-    |   101    | uimm[5:3;8:6]           | rs2          |  10  | C.FSDSP (RV32/64)
-    |   101    | uimm[5:4;9:6]           | rs2          |  10  | C.SQSP (RV128)
-    |   110    | uimm[5:2;7:6]           | rs2          |  10  | C.SWSP
-    |   111    | uimm[5:2;7:6]           | rs2          |  10  | C.FSWSP (RV32)
-    |   111    | uimm[5:3;8:6]           | rs2          |  10  | C.SDSP (RV64/128)
+c|  |   000    | nzuimm[5] | rs1/rd!=0   | nzuimm[4:0]  |  10  | C.SLLI (HINT, rd=0; RV32 NSE, nzuimm[5]=1)
+ h  |   000    | 0         | rs1/rd!=0   | 0            |  10  | C.SLLI64 (RV128; RV32/64 HINT; HINT, rd=0)
+ F  |   001    | uimm[5]   | rd          | uimm[4:3;8:6]|  10  | C.FLDSP (RV32/64)
+ -  |   001    | uimm[5]   | rd!=0       | uimm[4;9:6]  |  10  | C.LQSP (RV128; RES, rd=0)
+c|  |   010    | uimm[5]   | rd!=0       | uimm[4:2;7:6]|  10  | C.LWSP (RES, rd=0)
+ F  |   011    | uimm[5]   | rd          | uimm[4:2;7:6]|  10  | C.FLWSP (RV32)
+ -  |   011    | uimm[5]   | rd!=0       | uimm[4:3;8:6]|  10  | C.LDSP (RV64/128; RES, rd=0)
+c+  |   100    | 0         | rs1!=0      | 0            |  10  | C.JR (RES, rs1=0)
+c+  |   100    | 0         | rd!=0       | rs2!=0       |  10  | C.MV (HINT, rd=0)
+c|  |   100    | 1         | 0           |  0           |  10  | C.EBREAK
+c|  |   100    | 1         | rs1!=0      |  0           |  10  | C.JALR
+c+  |   100    | 1         | rs1/rd!=0   | rs2!=0       |  10  | C.ADD (HINT, rd=0)
+ F  |   101    | uimm[5:3;8:6]           | rs2          |  10  | C.FSDSP (RV32/64)
+ D  |   101    | uimm[5:4;9:6]           | rs2          |  10  | C.SQSP (RV128)
+c|  |   110    | uimm[5:2;7:6]           | rs2          |  10  | C.SWSP
+ F  |   111    | uimm[5:2;7:6]           | rs2          |  10  | C.FSWSP (RV32)
+ D  |   111    | uimm[5:3;8:6]           | rs2          |  10  | C.SDSP (RV64/128)
 */
-            exec_next_stage = `EXEC_TO_DEAD;
+            case (c_funct3)
+                `C2_F3_SLLI: begin
+                end
+                `C2_F3_LWSP: begin
+                end
+                `C2_F3_JR/*, `C2_F3_MV, `C2_F3_EBREAK,  `C2_F3_JALR, `C2_F3_CADD*/: begin
+                    exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
+                    exec_mux_alu_s2_sel = `MUX_ALUDAT2_REGVAL2;
+                    if (I_instr[12]) begin
+                        if ((o_rs2 != 0) && (o_rd != 0)) begin // c.add
+                            alu_oper = `ALUOP_ADD;
+                            exec_next_stage = `EXEC_TO_FETCH;
+                            exec_writeback_from_alu = 1;
+                        end
+                        if ((o_rs1 != 0) && (o_rd == 0)) begin // c.jalr
+                            exec_next_stage = `EXEC_TO_DEAD;
+                        end
+                        if ((o_rs1 == 0) && (o_rd == 0)) begin // c.ebreak
+                            exec_next_stage = `EXEC_TO_DEAD;
+                        end
+                    end
+                    else begin
+                        if (o_rs2 == 0) begin //C.JR
+                            if (o_rs1 == 0) begin //RES, when rs1 == 0
+                                exec_next_stage = `EXEC_TO_DEAD;
+                            end
+                            else begin
+                                // return address computed during decode, write to register
+                                write_reg = 1;
+                                exec_mux_reg_input_sel = `MUX_REGINPUT_ALU;
+
+                                // compute jal/jalr address
+                                alu_oper = `ALUOP_ADD;
+                                exec_next_pc_from_alu = 1;
+                                exec_next_stage = `EXEC_TO_FETCH;
+                            end
+                        end
+                        else begin //C.MV
+                            exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
+                            exec_mux_alu_s2_sel = `MUX_ALUDAT2_REGVAL2;
+                            o_rs1 = 0;
+                            alu_oper = `ALUOP_ADD;
+                            exec_writeback_from_alu = 1;
+                            exec_next_stage = `EXEC_TO_FETCH;
+                        end
+                    end
+                end
+                `C2_F3_SWSP: begin
+                    exec_next_stage = `EXEC_TO_DEAD;
+                end
+                default: begin
+                    exec_next_stage = `EXEC_TO_DEAD;
+                end
+            endcase
         end
         default: begin
             exec_next_stage = `EXEC_TO_DEAD;
