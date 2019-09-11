@@ -22,14 +22,15 @@ module wb_timer
                                       tgt_clk, // clocks to wait
                                       clk_cnt; // i_clk counter
 
-   localparam [7:0] MTIME_LO = 8'h00;
-   localparam [7:0] MTIME_HI = 8'h04;
-   localparam [7:0] MTIMECMP_LO = 8'h08;
-   localparam [7:0] MTIMECMP_HI = 8'h0C;
-   localparam [7:0] TGT_CLK_LO = 8'h10;
-   localparam [7:0] TGT_CLK_HI = 8'h14;
+   localparam [2:0] MTIME_LO = 0;
+   localparam [2:0] MTIME_HI = 1;
+   localparam [2:0] MTIMECMP_LO = 2;
+   localparam [2:0] MTIMECMP_HI = 3;
+   localparam [2:0] TGT_CLK_LO = 4;
+   localparam [2:0] TGT_CLK_HI = 5;
 
-   ////////////////////////
+`define LO(reg_name) reg_name[31:0]
+`define HI(reg_name) reg_name[63:32]
 
    // IRQ pin, raised to HIGH if current time exceeds the threshold
    // It can be raised to HIGH only if treshold is not zero
@@ -45,24 +46,26 @@ module wb_timer
    wire                               timer_enabled;
    assign timer_enabled = |tgt_clk;
 
-   wire [7:0]                         addr = wb_addr_i[7:0];
+   wire [2:0]                         addr = wb_addr_i[4:2];
 
-   assign wb_data_o = addr == MTIME_LO ? mtime[31:0] :
-                      addr == MTIME_HI ? mtime[63:32] :
-                      addr == MTIMECMP_LO ? mtimecmp[31:0] :
-                      addr == MTIMECMP_HI ? mtimecmp[63:32] :
-                      addr == TGT_CLK_LO ? tgt_clk[31:0] :
-                      addr == TGT_CLK_HI ? tgt_clk[63:32] :
+   assign wb_data_o = addr == MTIME_LO    ? `LO(mtime) :
+                      addr == MTIME_HI    ? `HI(mtime) :
+                      addr == MTIMECMP_LO ? `LO(mtimecmp) :
+                      addr == MTIMECMP_HI ? `HI(mtimecmp) :
+                      addr == TGT_CLK_LO  ? `LO(tgt_clk) :
+                      addr == TGT_CLK_HI  ? `HI(tgt_clk) :
                       32'd0;
 
    always @ (posedge clk_i) begin
       if (rst_i) begin
-         mtime <=0;
+         mtime <= 0;
          mtimecmp <= 0;
          tgt_clk <= 0;
-         clk_cnt <= 1;
-         ack <=0;
+         ack <= 0;
          irq <= 0;
+
+         // ONE
+         clk_cnt <= 1;
       end
       else begin
          irq <= irq_enabled ? mtime >= mtimecmp : 0;
@@ -71,9 +74,9 @@ module wb_timer
             // No increment for MTIME on write to it
             if ((addr == MTIME_LO ) || (addr == MTIME_HI)) begin
                if (addr == MTIME_LO)
-                 mtime[31:0] <= wb_data_i;
+                 `LO(mtime) <= wb_data_i;
                if (addr == MTIME_HI)
-                 mtime[63:32] <= wb_data_i;
+                 `HI(mtime) <= wb_data_i;
 
                // Only update, no check
                if (timer_enabled)
@@ -81,10 +84,10 @@ module wb_timer
             end
             else begin
                case (addr)
-                 MTIMECMP_LO: mtimecmp[31:0] <= wb_data_i;
-                 MTIMECMP_HI: mtimecmp[63:32] <= wb_data_i;
-                 TGT_CLK_LO: tgt_clk[31:0] <= wb_data_i;
-                 TGT_CLK_HI: tgt_clk[63:32] <= wb_data_i;
+                 MTIMECMP_LO: `LO(mtimecmp) <= wb_data_i;
+                 MTIMECMP_HI: `HI(mtimecmp) <= wb_data_i;
+                 TGT_CLK_LO:  `LO(tgt_clk)  <= wb_data_i;
+                 TGT_CLK_HI:  `HI(tgt_clk)  <= wb_data_i;
                  default:;
                endcase // case (addr)
 
@@ -112,8 +115,11 @@ module wb_timer
                   clk_cnt <= clk_cnt + 1;
                end
             end
-            ack <= 0;
+
+            ack <= 0; // to avoid latch generation
          end // else: !if(wb_cyc_i & wb_we_i)
       end // else: !if(rst_i)
+
    end // always @ (posedge clk_i)
+
 endmodule // wb_timer
