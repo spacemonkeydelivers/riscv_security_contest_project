@@ -2,6 +2,38 @@
 `include "cpu/aludefs.vh"
 `include "cpu/cpudefs.vh"
 
+/*
+CR type: .insn cr opcode2, func4, rd, rs2
+     +---------+--------+-----+---------+
+     |   func4 | rd/rs1 | rs2 | opcode2 |
+     +---------+--------+-----+---------+
+     15        12       7     2        0
+CI type: .insn ci opcode2, func3, rd, simm6
+     +---------+-----+--------+-----+---------+
+     |   func3 | imm | rd/rs1 | imm | opcode2 |
+     +---------+-----+--------+-----+---------+
+     15        13    12       7     2         0
+CIW type: .insn ciw opcode2, func3, rd, uimm8
+     +---------+--------------+-----+---------+
+     |   func3 |          imm | rd' | opcode2 |
+     +---------+--------------+-----+---------+
+     15        13             7     2         0
+CA type: .insn ca opcode2, func6, func2, rd, rs2
+     +---------+----------+-------+------+--------+
+     |   func6 | rd'/rs1' | func2 | rs2' | opcode |
+     +---------+----------+-------+------+--------+
+     15        10         7       5      2        0
+CB type: .insn cb opcode2, func3, rs1, symbol
+     +---------+--------+------+--------+---------+
+     |   func3 | offset | rs1' | offset | opcode2 |
+     +---------+--------+------+--------+---------+
+     15        13       10     7        2         0
+CJ type: .insn cj opcode2, symbol
+     +---------+--------------------+---------+
+     |   func3 |        jump target | opcode2 |
+     +---------+--------------------+---------+
+     15        13             7     2         0
+*/
 module decoder
 (
    input  wire        I_clk,
@@ -41,6 +73,10 @@ module decoder
 
    wire [6:0] funct7 = I_instr[31:25];
    wire [2:0] funct3 = I_instr[14:12];
+
+   wire [2:0] c_funct3 = I_instr[15:13];
+   wire [3:0] c_funct4 = I_instr[15:12];
+   wire [1:0] c_op     = I_instr[1:0];
 
    always @(*) begin
       case(opcode)
@@ -92,6 +128,7 @@ module decoder
       exec_mux_alu_s1_sel = 0;
       alu_oper = `ALUOP_ADD;
       write_reg = 0;
+    if (c_op == 2'b11) begin
       case(opcode)
          `OP_OP: begin
             exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
@@ -226,6 +263,87 @@ module decoder
          `OP_SYSTEM:     exec_next_stage = `EXEC_TO_SYSTEM;
          default:        exec_next_stage = `EXEC_TO_TRAP;
       endcase
+    end
+    else begin
+      //o_rs1 = I_instr[11:7];
+      //o_rs2 = I_instr[6:2];
+      //o_rd = I_instr[11:7];
+      case(c_op)
+        `C_OPC_C0: begin
+/*
+    | 15 14 13 | 12        | 11 10 9 8 7 | 6 5 4 3 2 | 1 0 |
+    |    000   | 0 0 00 Illegal instruction
+    |    000   | nzuimm[5:4j9:6j2j3] rd0 00 C.ADDI4SPN (RES, nzuimm=0)
+    |    001   | uimm[5:3] rs10 uimm[7:6] rd0 00 C.FLD (RV32/64)
+    |    001   | uimm[5:4j8] rs10 uimm[7:6] rd0 00 C.LQ (RV128)
+    |    010   | uimm[5:3] rs10 uimm[2j6] rd0 00 C.LW
+    |    011   | uimm[5:3] rs10 uimm[2j6] rd0 00 C.FLW (RV32)
+    |    011   | uimm[5:3] rs10 uimm[7:6] rd0 00 C.LD (RV64/128)
+    |    100   | | 00 Reserved
+    |    101   | uimm[5:3] rs10 uimm[7:6] rs20 00 C.FSD (RV32/64)
+    |    101   | uimm[5:4j8] rs10 uimm[7:6] rs20 00 C.SQ (RV128)
+    |    110   | uimm[5:3] rs10 uimm[2j6] rs20 00 C.SW
+    |    111   | uimm[5:3] rs10 uimm[2j6] rs20 00 C.FSW (RV32)
+    |    111   | uimm[5:3] rs10 uimm[7:6] rs20 00 C.SD (RV64/128)
+*/
+         end
+        `C_OPC_C1: begin
+/*
+    | 15 14 13 | 12        | 11 10 9 8 7 | 6 5 4 3 2 | 1 0 |
+    |   000    | 0         |      0      |    0      | 01  | C.NOP 
+    |   000    | nzimm[5]  | rs1/rd6=0   | nzimm[4:0]| 01  | C.ADDI (HINT, nzimm=0)
+    |   001    | imm[11;4;9:8;10;6;7;3:1j;]          | 01  | C.JAL (RV32)
+    |   001    | imm[5]    | rs1/rd6=0   | imm[4:0]  | 01  | C.ADDIW (RV64/128; RES, rd=0)
+    |   010    | imm[5]    |   rd6=0     |  imm[4:0] | 01  | C.LI (HINT, rd=0)
+    |   011    | nzimm[9]  | 2 | nzimm[4j6j8:7j5]    | 01  | C.ADDI16SP (RES, nzimm=0)
+    |   011    | nzimm[17] | rd6=f0; 2g nzimm[16:12] 01 C.LUI (RES, nzimm=0; HINT, rd=0)
+    |   100    | nzuimm[5] | 00 rs10/rd0 nzuimm[4:0] 01 C.SRLI (RV32 NSE, nzuimm[5]=1)
+    |   100    | 0         | 00 rs10/rd0 0 01 C.SRLI64 (RV128; RV32/64 HINT)
+    |   100    | nzuimm[5] | 01 rs10/rd0 nzuimm[4:0] 01 C.SRAI (RV32 NSE, nzuimm[5]=1)
+    |   100    | 0         | 01 rs10/rd0 0 01 C.SRAI64 (RV128; RV32/64 HINT)
+    |   100    | imm[5]    | 10 rs10/rd0 imm[4:0] 01 C.ANDI
+    |   100    | 0         |11 rs10/rd0 00 rs20 01 C.SUB
+    |   100    | 0         |11 rs10/rd0 01 rs20 01 C.XOR
+    |   100    | 0         |11 rs10/rd0 10 rs20 01 C.OR
+    |   100    | 0         |11 rs10/rd0 11 rs20 01 C.AND
+    |   100    | 1         |11 rs10/rd0 00 rs20 01 C.SUBW (RV64/128; RV32 RES)
+    |   100    | 1         |11 rs10/rd0 01 rs20 01 C.ADDW (RV64/128; RV32 RES)
+    |   100    | 1         |11 | 10 | 01 Reserved
+    |   100    | 1         |11 | 11 | 01 Reserved
+    |   101    | imm[11j4j9:8j10j6j7j3:1j5] 01 C.J
+    |   110    | imm[8;4:3]| rs10 imm[7:6j2:1j5] 01 C.BEQZ
+    |   111    | imm[8;4:3]| rs10 imm[7:6j2:1j5] 01 C.BNEZ
+*/
+            exec_next_stage = `EXEC_TO_FETCH;
+         end
+        `C_OPC_C2: begin
+/*
+    | 15 14 13 | 12        | 11 10 9 8 7 | 6 5 4 3 2    | 1 0  |
+    |   000    | nzuimm[5] | rs1/rd6=0   | nzuimm[4:0]  |  10  | C.SLLI (HINT, rd=0; RV32 NSE, nzuimm[5]=1)
+    |   000    | 0         | rs1/rd6=0   | 0            |  10  | C.SLLI64 (RV128; RV32/64 HINT; HINT, rd=0)
+    |   001    | uimm[5]   | rd          | uimm[4:3;8:6]|  10  | C.FLDSP (RV32/64)
+    |   001    | uimm[5]   | rd6=0       | uimm[4;9:6]  |  10  | C.LQSP (RV128; RES, rd=0)
+    |   010    | uimm[5]   | rd6=0       | uimm[4:2;7:6]|  10  | C.LWSP (RES, rd=0)
+    |   011    | uimm[5]   | rd          | uimm[4:2;7:6]|  10  | C.FLWSP (RV32)
+    |   011    | uimm[5]   | rd6=0       | uimm[4:3;8:6]|  10  | C.LDSP (RV64/128; RES, rd=0)
+    |   100    | 0         | rs1!=0      | 0            |  10  | C.JR (RES, rs1=0)
+    |   100    | 0         | rd!=0       | rs2!=0       |  10  | C.MV (HINT, rd=0)
+    |   100    | 1         | 0           |  0           |  10  | C.EBREAK
+    |   100    | 1         | rs1!=0      |  0           |  10  | C.JALR
+    |   100    | 1         | rs1/rd!=0   | rs2!=0       |  10  | C.ADD (HINT, rd=0)
+    |   101    | uimm[5:3;8:6]           | rs2          |  10  | C.FSDSP (RV32/64)
+    |   101    | uimm[5:4;9:6]           | rs2          |  10  | C.SQSP (RV128)
+    |   110    | uimm[5:2;7:6]           | rs2          |  10  | C.SWSP
+    |   111    | uimm[5:2;7:6]           | rs2          |  10  | C.FSWSP (RV32)
+    |   111    | uimm[5:3;8:6]           | rs2          |  10  | C.SDSP (RV64/128)
+*/
+            exec_next_stage = `EXEC_TO_DEAD;
+        end
+        default: begin
+            exec_next_stage = `EXEC_TO_DEAD;
+        end
+      endcase
+    end
    end
 
 endmodule

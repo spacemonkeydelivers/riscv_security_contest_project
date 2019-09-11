@@ -28,5 +28,6 @@
     `define EXEC_TO_BRANCH 3'd3
     `define EXEC_TO_SYSTEM 3'd4
     `define EXEC_TO_TRAP   3'd5
+    `define EXEC_TO_DEAD   3'd6
 
 `endif
