@@ -592,30 +592,22 @@ module cpu
              end
          end
          STATE_DECODE: begin
-            if (parcels[1:0] == 3) begin
-                dec_en = 1;
-                reg_re = 1;
-                next_state = STATE_EXEC;
-                next_pcnext = alu_dataout;
-                if (interrupt_occured && irq_en) begin
-                   trap_occured = 1;
-                   next_state = STATE_TRAP;
-                   csr_en = 1;
-                   csr_addr = `MSR_MCAUSE;
-                   csr_we = 1;
-                   if (TAGS_INTERRUPT_I && tags_en) begin
-                      csr_data_in = CAUSE_TAG_MISMATCH;
-                   end
-                   if (TIMER_INTERRUPT_I) begin
-                      csr_data_in = CAUSE_EXTERNAL_INTERRUPT;
-                   end
+            dec_en = 1;
+            reg_re = 1;
+            next_state = STATE_EXEC;
+            next_pcnext = alu_dataout;
+            if (interrupt_occured && irq_en) begin
+                trap_occured = 1;
+                next_state = STATE_TRAP;
+                csr_en = 1;
+                csr_addr = `MSR_MCAUSE;
+                csr_we = 1;
+                if (TAGS_INTERRUPT_I && tags_en) begin
+                    csr_data_in = CAUSE_TAG_MISMATCH;
                 end
-            end
-            else begin
-              // TODO: figure out how to implement 16-bit decoder
-              // for now we just skip such instructions
-              next_state = STATE_POST_EXEC;
-              next_pcnext = alu_dataout;
+                if (TIMER_INTERRUPT_I) begin
+                    csr_data_in = CAUSE_EXTERNAL_INTERRUPT;
+                end
             end
          end
          STATE_EXEC: begin

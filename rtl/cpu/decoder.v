@@ -80,21 +80,41 @@ module decoder
 
    reg isbranch = 0;
 
+   wire [1:0] c_op   = I_instr[1:0];
    wire [6:0] funct7 = I_instr[31:25];
-   wire [2:0] funct3 = I_instr[14:12];
+   wire [2:0] funct3 = (I_instr[1:0] == 2'b11) ?  I_instr[14:12] : `FUNC_LW;
 
    wire [2:0] c_funct3 = I_instr[15:13];
    wire [3:0] c_funct4 = I_instr[15:12];
-   wire [1:0] c_op     = I_instr[1:0];
 
    always @(*) begin
-      case(opcode)
-         `OP_STORE: imm = {{20{I_instr[31]}}, I_instr[31:25], I_instr[11:8], I_instr[7]}; // S-type
-         `OP_BRANCH: imm = {{19{I_instr[31]}}, I_instr[31], I_instr[7], I_instr[30:25], I_instr[11:8], 1'b0}; // SB-type
-         `OP_LUI, `OP_AUIPC: imm = {I_instr[31:12], {12{1'b0}}};
-         `OP_JAL: imm = {{11{I_instr[31]}}, I_instr[31], I_instr[19:12], I_instr[20], I_instr[30:25], I_instr[24:21], 1'b0}; // UJ-type
-         default: imm = {{20{I_instr[31]}}, I_instr[31:20]}; // I-type and R-type. Immediate has no meaning for R-type I_instructions
-      endcase
+       case (c_op)
+           2'b11: begin
+               case(opcode)
+                   `OP_STORE: imm = {{20{I_instr[31]}}, I_instr[31:25], I_instr[11:8], I_instr[7]}; // S-type
+                   `OP_BRANCH: imm = {{19{I_instr[31]}}, I_instr[31], I_instr[7], I_instr[30:25], I_instr[11:8], 1'b0}; // SB-type
+                   `OP_LUI, `OP_AUIPC: imm = {I_instr[31:12], {12{1'b0}}};
+                   `OP_JAL: imm = {{11{I_instr[31]}}, I_instr[31], I_instr[19:12], I_instr[20], I_instr[30:25], I_instr[24:21], 1'b0}; // UJ-type
+                   default: imm = {{20{I_instr[31]}}, I_instr[31:20]}; // I-type and R-type. Immediate has no meaning for R-type I_instructions
+               endcase
+           end
+           2'b10: begin
+/*
+| 15 14 13 | 12        | 11 10 9 8 7 | 6 5 4 3 2    | 1 0  |
+|      010 | uimm[5]   | rd!=0       | uimm[4:2;7:6]|  10 | C.LWSP (RES, rd=0)
+*/
+               imm = 0;
+               if (c_funct3  == `C2_F3_LWSP) begin
+                   imm = { 24'b0, I_instr[3:2], I_instr[12], I_instr[6:4], 2'b00 } ;
+               end
+           end
+           2'b01: begin
+               imm = 0;
+           end
+           2'b00: begin
+               imm = 0;
+           end
+       endcase
 
       isbranch = (opcode == `OP_BRANCH);
       O_branchmask = 0;
@@ -338,8 +358,8 @@ module decoder
 c|  |   000    | nzuimm[5] | rs1/rd!=0   | nzuimm[4:0]  |  10  | C.SLLI (HINT, rd=0; RV32 NSE, nzuimm[5]=1)
  h  |   000    | 0         | rs1/rd!=0   | 0            |  10  | C.SLLI64 (RV128; RV32/64 HINT; HINT, rd=0)
  F  |   001    | uimm[5]   | rd          | uimm[4:3;8:6]|  10  | C.FLDSP (RV32/64)
- -  |   001    | uimm[5]   | rd!=0       | uimm[4;9:6]  |  10  | C.LQSP (RV128; RES, rd=0)
-c|  |   010    | uimm[5]   | rd!=0       | uimm[4:2;7:6]|  10  | C.LWSP (RES, rd=0)
+ D  |   001    | uimm[5]   | rd!=0       | uimm[4;9:6]  |  10  | C.LQSP (RV128; RES, rd=0)
+c+  |   010    | uimm[5]   | rd!=0       | uimm[4:2;7:6]|  10  | C.LWSP (RES, rd=0)
  F  |   011    | uimm[5]   | rd          | uimm[4:2;7:6]|  10  | C.FLWSP (RV32)
  -  |   011    | uimm[5]   | rd!=0       | uimm[4:3;8:6]|  10  | C.LDSP (RV64/128; RES, rd=0)
 c+  |   100    | 0         | rs1!=0      | 0            |  10  | C.JR (RES, rs1=0)
@@ -353,10 +373,24 @@ c|  |   110    | uimm[5:2;7:6]           | rs2          |  10  | C.SWSP
  F  |   111    | uimm[5:2;7:6]           | rs2          |  10  | C.FSWSP (RV32)
  D  |   111    | uimm[5:3;8:6]           | rs2          |  10  | C.SDSP (RV64/128)
 */
+        /*
+         `OP_STORE:  begin // compute store address on ALU
+            alu_oper = `ALUOP_ADD;
+            exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
+            exec_mux_alu_s2_sel = `MUX_ALUDAT2_IMM;
+            exec_next_stage = `EXEC_TO_STORE;
+         end
+        */
             case (c_funct3)
                 `C2_F3_SLLI: begin
                 end
                 `C2_F3_LWSP: begin
+                    alu_oper = `ALUOP_ADD;
+                    o_rs1 = 2 ;
+                    exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
+                    exec_mux_alu_s2_sel = `MUX_ALUDAT2_IMM;
+                    exec_next_stage = `EXEC_TO_LOAD;
+                    if (o_rd == 0) begin exec_next_stage = `EXEC_TO_DEAD; end
                 end
                 `C2_F3_JR/*, `C2_F3_MV, `C2_F3_EBREAK,  `C2_F3_JALR, `C2_F3_CADD*/: begin
                     exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
@@ -401,6 +435,7 @@ c|  |   110    | uimm[5:2;7:6]           | rs2          |  10  | C.SWSP
                     end
                 end
                 `C2_F3_SWSP: begin
+                    o_rs1 = 2 ;
                     exec_next_stage = `EXEC_TO_DEAD;
                 end
                 default: begin
