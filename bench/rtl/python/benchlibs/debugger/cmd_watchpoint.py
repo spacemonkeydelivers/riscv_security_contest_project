@@ -31,8 +31,10 @@ class CmdWatchpoint:
           'Synopsys: command prints value of changed register or memory by means of 4 bytes.',
           'Command requires either [reg]ister or [mem]ory modifier.',
           'Example usage:',
-          'watchpoint reg x1',
-          'watchpoint mem 0x04',
+          'watchpoint add reg x1',
+          'watchpoint add mem 0x04',
+          'w show',
+          'w rem [index] ==> w rem 0',
           ]))
 
     def add_register_watchpoint(self, args):
@@ -116,6 +118,13 @@ class CmdWatchpoint:
                             hex(current_value),
                             )
                         self.watchpoints[key] = [trigger, hex(current_value), location]
+    def show(self):
+        print 'Watchpoint table:'
+        for key, watchpoint in self.watchpoints.iteritems():
+            trigger = watchpoint[0]
+            saved_value = watchpoint[1]
+            location = watchpoint[2]
+            print '\t[#{}, {}: {}. Value: {}]'.format(key, location, trigger, saved_value)
 
     def run(self, args):
         if ( len(args) == 0 ):
@@ -152,8 +161,7 @@ class CmdWatchpoint:
             return None 
 
         if ( args[0] == 'show'):
-            print 'Watchpoints: {}'.format(self.watchpoints)
-            print REG_INDEXES
+            self.show()
             return None
        
         print('Error: incorrect <watchpoint> command')
