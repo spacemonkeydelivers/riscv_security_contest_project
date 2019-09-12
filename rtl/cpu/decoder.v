@@ -87,19 +87,6 @@ module decoder
    wire [2:0] c_funct3 = I_instr[15:13];
    wire [3:0] c_funct4 = I_instr[15:12];
 
-   wire [31:0] c_j_imm = {{20{I_instr[12]}},
-                            I_instr[12], //11
-                            I_instr[8],  //10
-                            I_instr[10:9],  //9-8
-                            I_instr[6],  //7
-                            I_instr[7],  //6
-                            I_instr[2],  //5
-                            I_instr[11], //4
-                            I_instr[5:3], //3:1
-                            1'b0 //0
-                        };
-
-
    always @(*) begin
        case (c_op)
            2'b11: begin
@@ -142,7 +129,18 @@ module decoder
                     case (c_funct3)
                         `C1_F3_NOP_ADDI: imm = {
                             {26{I_instr[12]}}, I_instr[12], I_instr[6:2] };
-                        3'b101, `C1_F3_JAL: imm = c_j_imm;
+                        `C1_F3_J, `C1_F3_JAL: imm = {
+                            {20{I_instr[12]}},
+                            I_instr[12], //11
+                            I_instr[8],  //10
+                            I_instr[10:9],  //9-8
+                            I_instr[6],  //7
+                            I_instr[7],  //6
+                            I_instr[2],  //5
+                            I_instr[11], //4
+                            I_instr[5:3], //3:1
+                            1'b0 //0
+                         };
                         `C1_F3_LI: begin
                             imm = { {26{I_instr[12]}}, I_instr[12], I_instr[6:2] };
                         end
@@ -151,6 +149,11 @@ module decoder
                                 ? {22'b0, I_instr[12], //TODO: tripple-check
                                     I_instr[4:3], I_instr[5], I_instr[2], I_instr[6], 4'b0}
                                 : {14'b0, I_instr[12], I_instr[6:2], 12'b0 };
+                        end
+                        `C1_F3_BEQ, `C1_F3_BNE: begin
+                            imm = { 22'b0,
+                                I_instr[12],
+                                I_instr[6:5], I_instr[2], I_instr[11:10], I_instr[4:3], 2'b0 };
                         end
                         default: begin
                             imm = 0;
@@ -161,7 +164,6 @@ module decoder
                 end
            end
            2'b00: begin
-               imm = 0;
 /*
     | 15 14 13 | 12        | 11 10|9 8 7| 6 5      | 4 3 2 | 1 0 |
     |    000   | nzuimm[5:4;9:6;2;3]               | rd   | 00  | C.ADDI4SPN (RES, nzuimm=0)
@@ -174,17 +176,24 @@ module decoder
            end
        endcase
 
+
       isbranch = (opcode == `OP_BRANCH);
       O_branchmask = 0;
-      case(funct3)
-         `FUNC_BEQ:  O_branchmask[0] = isbranch;
-         `FUNC_BNE:  O_branchmask[1] = isbranch;
-         `FUNC_BLT:  O_branchmask[2] = isbranch;
-         `FUNC_BGE:  O_branchmask[3] = isbranch;
-         `FUNC_BLTU: O_branchmask[4] = isbranch;
-         `FUNC_BGEU: O_branchmask[5] = isbranch;
-         default:    O_branchmask    = 6'b0;
-      endcase
+      if (c_op == 2'b11) begin
+          case(funct3)
+             `FUNC_BEQ:  O_branchmask[0] = isbranch;
+             `FUNC_BNE:  O_branchmask[1] = isbranch;
+             `FUNC_BLT:  O_branchmask[2] = isbranch;
+             `FUNC_BGE:  O_branchmask[3] = isbranch;
+             `FUNC_BLTU: O_branchmask[4] = isbranch;
+             `FUNC_BGEU: O_branchmask[5] = isbranch;
+             default:    O_branchmask    = 6'b0;
+          endcase
+      end
+      else begin
+          O_branchmask[0] = (c_funct3 == `C1_F3_BEQ) ;
+          O_branchmask[1] = (c_funct3 == `C1_F3_BNE) ;
+      end
    end
 
    reg [4:0] alu_oper;
@@ -471,11 +480,11 @@ c+  |   101    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.J
                             if ({I_instr[12], I_instr[6:2]} == 0) exec_next_stage = `EXEC_TO_DEAD;
                         end
                     end
-                    `C1_F3_BEQ: begin //c.beqz
-                        exec_next_stage = `EXEC_TO_DEAD;
-                    end
-                    `C1_F3_BNE: begin //c.bnez
-                        exec_next_stage = `EXEC_TO_DEAD;
+                    `C1_F3_BEQ, `C1_F3_BNE: begin // c.beqz, c.bnez
+                        alu_oper = `ALUOP_ADD; // doesn't really matter
+                        exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
+                        exec_mux_alu_s2_sel = `MUX_ALUDAT2_REGVAL2;
+                        exec_next_stage = `EXEC_TO_BRANCH;
                     end
                     default: begin
                         exec_next_stage = `EXEC_TO_DEAD;
