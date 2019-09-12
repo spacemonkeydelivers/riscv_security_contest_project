@@ -87,6 +87,19 @@ module decoder
    wire [2:0] c_funct3 = I_instr[15:13];
    wire [3:0] c_funct4 = I_instr[15:12];
 
+   wire [31:0] c_j_imm = {{20{I_instr[12]}},
+                            I_instr[12], //11
+                            I_instr[8],  //10
+                            I_instr[10:9],  //9-8
+                            I_instr[6],  //7
+                            I_instr[7],  //6
+                            I_instr[2],  //5
+                            I_instr[11], //4
+                            I_instr[5:3], //3:1
+                            1'b0 //0
+                        };
+
+
    always @(*) begin
        case (c_op)
            2'b11: begin
@@ -129,18 +142,7 @@ module decoder
                     case (c_funct3)
                         `C1_F3_NOP_ADDI: imm = {
                             {26{I_instr[12]}}, I_instr[12], I_instr[6:2] };
-                        `C1_F3_JAL: imm = { //TODO: tripple-check this one
-                            {20{I_instr[12]}},
-                            I_instr[12], //11
-                            I_instr[8],  //10
-                            I_instr[10:9],  //9-8
-                            I_instr[6],  //7
-                            I_instr[7],  //6
-                            I_instr[2],  //5
-                            I_instr[11], //4
-                            I_instr[5:3], //3:1
-                            1'b0 //0
-                        };
+                        3'b101, `C1_F3_JAL: imm = c_j_imm;
                         `C1_F3_LI: begin
                             imm = { {26{I_instr[12]}}, I_instr[12], I_instr[6:2] };
                         end
@@ -425,9 +427,9 @@ c+  |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES,
  D  |   100    | 1         | 11     | rs1/rd | 01   | rs2     | 01 | C.ADDW (RV64/128; RV32 RES)
  D  |   100    | 1         | 11     |        | 10   |         | 01 | Reserved
  D  |   100    | 1         | 11     |        | 11   |         | 01 | Reserved
- -  |   101    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.J
- -  |   110    | imm[8;4:3]         | rs10   | imm[7:6;2:1;5] | 01 | C.BEQZ
- -  |   111    | imm[8;4:3]         | rs10   | imm[7:6;2:1;5] | 01 | C.BNEZ
+c+  |   101    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.J
+ -  |   110    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BEQZ
+ -  |   111    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BNEZ
 */
             exec_next_stage = `EXEC_TO_FETCH;
 
@@ -442,9 +444,9 @@ c+  |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES,
                         alu_oper = `ALUOP_ADD;
                         exec_writeback_from_alu = 1;
                     end
-                    `C1_F3_JAL: begin
+                    `C1_F3_JAL, `C1_F3_J: begin
                         o_rd = 1;
-                        write_reg = 1;
+                        write_reg = (c_funct3 == `C1_F3_J) ? 0 : 1;
                         exec_mux_reg_input_sel = `MUX_REGINPUT_ALU;
                         // compute jal/jalr address
                         alu_oper = `ALUOP_ADD;
@@ -469,6 +471,12 @@ c+  |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES,
                             if ({I_instr[12], I_instr[6:2]} == 0) exec_next_stage = `EXEC_TO_DEAD;
                         end
                     end
+                    `C1_F3_BEQ: begin //c.beqz
+                        exec_next_stage = `EXEC_TO_DEAD;
+                    end
+                    `C1_F3_BNE: begin //c.bnez
+                        exec_next_stage = `EXEC_TO_DEAD;
+                    end
                     default: begin
                         exec_next_stage = `EXEC_TO_DEAD;
                     end
@@ -478,7 +486,6 @@ c+  |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES,
                 o_rs1 = { 2'b01, I_instr[9:7] };
                 o_rs2 = { 2'b01, I_instr[4:2] };
                 o_rd  = { 2'b01, I_instr[9:7] };
-                // exec_next_stage = `EXEC_TO_DEAD;
             end
          end
         `C_OPC_C2: begin

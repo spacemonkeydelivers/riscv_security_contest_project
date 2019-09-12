@@ -15,6 +15,9 @@
 
     `define C1_F3_NOP_ADDI      3'b000
     `define C1_F3_JAL           3'b001
+    `define C1_F3_J             3'b101
+    `define C1_F3_BEQ           3'b110
+    `define C1_F3_BNE           3'b111
     `define C1_F3_LI            3'b010
     `define C1_F3_LUI_ADDI16SP  3'b011
 
