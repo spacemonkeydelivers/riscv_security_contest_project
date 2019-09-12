@@ -116,22 +116,55 @@ module decoder
                imm = 0;
 /*
     | 15 14 13 | 12        | 11 10  | 9 8 7  | 6 5  |  4 3 2  | 1 0|
- -  |   000    | 0         |      0          |    0           | 01 | C.NOP
- -  |   000    | nzimm[5]  | rs1/rd=0        | nzimm[4:0]     | 01 | C.ADDI (HINT, nzimm=0)
- -  |   001    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.JAL (RV32)
- D  |   001    | imm[5]    | rs1/rd=0        | imm[4:0]       | 01 | C.ADDIW (RV64/128; RES, rd=0)
- -  |   010    | imm[5]    |   rd6=0         | imm[4:0]       | 01 | C.LI (HINT, rd=0)
- -  |   011    | nzimm[9]  | 2               |nzimm[4;6;8:7;5]| 01 | C.ADDI16SP (RES, nzimm=0)
- -  |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES, nzimm=0; HINT, rd=0)
+    |   000    | 0         |      0          |    0           | 01 | C.NOP
+    |   000    | nzimm[5]  | rs1/rd=0        | nzimm[4:0]     | 01 | C.ADDI (HINT, nzimm=0)
+    |   001    |imm[11;      4;   9:8; 10;6;   7;   3:1;   5]    | 01 | C.JAL (RV32)
+    |   001    | imm[5]    | rs1/rd=0        | imm[4:0]       | 01 | C.ADDIW (RV64/128; RES, rd=0)
+    |   010    | imm[5]    |   rd6=0         | imm[4:0]       | 01 | C.LI (HINT, rd=0)
+    |   011    | nzimm[9]  | 2               |nzimm[4;6;8:7;5]| 01 | C.ADDI16SP (RES, nzimm=0)
+    |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES, nzimm=0; HINT, rd=0)
 */
+                if (c_funct3 != 3'b100) begin
+                    // exec_next_stage = `EXEC_TO_DEAD;
+                    case (c_funct3)
+                        `C1_F3_NOP_ADDI: imm = {
+                            {26{I_instr[12]}}, I_instr[12], I_instr[6:2] };
+                        `C1_F3_JAL: imm = { //TODO: tripple-check this one
+                            {20{I_instr[12]}},
+                            I_instr[12], //11
+                            I_instr[8],  //10
+                            I_instr[10:9],  //9-8
+                            I_instr[6],  //7
+                            I_instr[7],  //6
+                            I_instr[2],  //5
+                            I_instr[11], //4
+                            I_instr[5:3], //3:1
+                            1'b0 //0
+                        };
+                        `C1_F3_LI: begin
+                            imm = { {26{I_instr[12]}}, I_instr[12], I_instr[6:2] };
+                        end
+                        `C1_F3_LUI_ADDI16SP: begin
+                            imm = (I_instr[11:7] == 2)
+                                ? {22'b0, I_instr[12], //TODO: tripple-check
+                                    I_instr[4:3], I_instr[5], I_instr[2], I_instr[6], 4'b0}
+                                : {14'b0, I_instr[12], I_instr[6:2], 12'b0 };
+                        end
+                        default: begin
+                            imm = 0;
+                        end
+                    endcase
+                end
+                else begin
+                end
            end
            2'b00: begin
                imm = 0;
 /*
     | 15 14 13 | 12        | 11 10|9 8 7| 6 5      | 4 3 2 | 1 0 |
- -  |    000   | nzuimm[5:4;9:6;2;3]               | rd   | 00  | C.ADDI4SPN (RES, nzuimm=0)
- -  |    010   | uimm[5:3]        | rs1 | uimm[2;6]| rd   | 00  | C.LW
- -  |    110   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.SW
+    |    000   | nzuimm[5:4;9:6;2;3]               | rd   | 00  | C.ADDI4SPN (RES, nzuimm=0)
+    |    010   | uimm[5:3]        | rs1 | uimm[2;6]| rd   | 00  | C.LW
+    |    110   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.SW
 */
                 if (c_funct3 == `C0_F3_ADDI4SPN) imm = 0;
                 else imm = { 25'b0, I_instr[5], I_instr[12:10], I_instr[6], 2'b00 };
@@ -334,13 +367,13 @@ module decoder
  -  |    000   | nzuimm[5:4;9:6;2;3]               | rd   | 00  | C.ADDI4SPN (RES, nzuimm=0)
  F  |    001   | uimm[5:3]        | rs1 | uimm[7:6]| rd   | 00  | C.FLD (RV32/64)
  D  |    001   | uimm[5:4;8]      | rs1 | uimm[7:6]| rd   | 00  | C.LQ (RV128)
- +  |    010   | uimm[5:3]        | rs1 | uimm[2;6]| rd   | 00  | C.LW
+c+  |    010   | uimm[5:3]        | rs1 | uimm[2;6]| rd   | 00  | C.LW
  F  |    011   | uimm[5:3]        | rs1 | uimm[2;6]| rd   | 00  | C.FLW (RV32)
  D  |    011   | uimm[5:3]        | rs1 | uimm[7:6]| rd   | 00  | C.LD (RV64/128)
  D  |    100   |                                          | 00  | Reserved
  D  |    101   | uimm[5:3]        | rs1 | uimm[7:6]| rs2  | 00  | C.FSD (RV32/64)
  D  |    101   | uimm[5:4;8]      | rs1 | uimm[7:6]| rs2  | 00  | C.SQ (RV128)
- +  |    110   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.SW
+c+  |    110   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.SW
  D  |    111   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.FSW (RV32)
  D  |    111   | uimm[5:3]        | rs1 | uimm[7:6]| rs2  | 00  | C.SD (RV64/128)
 */
@@ -369,13 +402,13 @@ module decoder
         `C_OPC_C1: begin
 /*
     | 15 14 13 | 12        | 11 10  | 9 8 7  | 6 5  |  4 3 2  | 1 0|
- -  |   000    | 0         |      0          |    0           | 01 | C.NOP
- -  |   000    | nzimm[5]  | rs1/rd=0        | nzimm[4:0]     | 01 | C.ADDI (HINT, nzimm=0)
- -  |   001    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.JAL (RV32)
+c+  |   000    | 0         |      0          |    0           | 01 | C.NOP
+c+  |   000    | nzimm[5]  | rs1/rd=0        | nzimm[4:0]     | 01 | C.ADDI (HINT, nzimm=0)
+c-  |   001    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.JAL (RV32)
  D  |   001    | imm[5]    | rs1/rd=0        | imm[4:0]       | 01 | C.ADDIW (RV64/128; RES, rd=0)
- -  |   010    | imm[5]    |   rd6=0         | imm[4:0]       | 01 | C.LI (HINT, rd=0)
- -  |   011    | nzimm[9]  | 2               |nzimm[4;6;8:7;5]| 01 | C.ADDI16SP (RES, nzimm=0)
- -  |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES, nzimm=0; HINT, rd=0)
+c-  |   010    | imm[5]    |   rd6=0         | imm[4:0]       | 01 | C.LI (HINT, rd=0)
+c-  |   011    | nzimm[9]  | 2               |nzimm[4;6;8:7;5]| 01 | C.ADDI16SP (RES, nzimm=0)
+c-  |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES, nzimm=0; HINT, rd=0)
 
     | 15 14 13 | 12        | 11 10  | 9 8 7  | 6 5  |  4 3 2  | 1 0|
  -  |   100    | nzuimm[5] | 00     | rs1/rd | nzuimm[4:0]    | 01 | C.SRLI (RV32 NSE, nzuimm[5]=1)
@@ -400,9 +433,13 @@ module decoder
             if (I_instr[15:13] != 3'b100) begin
                 o_rs1 = I_instr[11:7];
                 o_rd  = I_instr[11:7];
+                exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
+                exec_mux_alu_s2_sel = `MUX_ALUDAT2_IMM;
                 // exec_next_stage = `EXEC_TO_DEAD;
                 case (c_funct3)
                     `C1_F3_NOP_ADDI: begin
+                        alu_oper = `ALUOP_ADD;
+                        exec_writeback_from_alu = 1;
                     end
                     `C1_F3_JAL: begin
                     end
