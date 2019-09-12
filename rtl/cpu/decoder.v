@@ -114,6 +114,14 @@ c|  |   110    |      uimm[5:2;7:6]      | rs2          |  10  | C.SWSP
                if (c_funct3  == `C2_F3_SWSP) begin
                    imm = { 24'b0, I_instr[8:7],  I_instr[12:9], 2'b00 } ;
                end
+
+/*
+    | 15 14 13 | 12        | 11 10 9 8 7 | 6 5 4 3 2    | 1 0  |
+c|  |   000    | nzuimm[5] | rs1/rd!=0   | nzuimm[4:0]  |  10  | C.SLLI (HINT, rd=0; RV32 NSE, nzuimm[5]=1)
+*/
+               if (c_funct3 == `C2_F3_SLLI) begin
+                   imm = { 27'b0, I_instr[6:2]} ;
+               end
            end
            2'b01: begin
                imm = 0;
@@ -372,16 +380,22 @@ c+  |   010    | uimm[5]   | rd!=0       | uimm[4:2;7:6]|  10  | C.LWSP (RES, rd
 c+  |   100    | 0         | rs1!=0      | 0            |  10  | C.JR (RES, rs1=0)
 c+  |   100    | 0         | rd!=0       | rs2!=0       |  10  | C.MV (HINT, rd=0)
 cN  |   100    | 1         | 0           |  0           |  10  | C.EBREAK
-c|  |   100    | 1         | rs1!=0      |  0           |  10  | C.JALR
+c+  |   100    | 1         | rs1!=0      |  0           |  10  | C.JALR
 c+  |   100    | 1         | rs1/rd!=0   | rs2!=0       |  10  | C.ADD (HINT, rd=0)
  F  |   101    | uimm[5:3;8:6]           | rs2          |  10  | C.FSDSP (RV32/64)
  D  |   101    | uimm[5:4;9:6]           | rs2          |  10  | C.SQSP (RV128)
-c|  |   110    | uimm[5:2;7:6]           | rs2          |  10  | C.SWSP
+c+  |   110    | uimm[5:2;7:6]           | rs2          |  10  | C.SWSP
  F  |   111    | uimm[5:2;7:6]           | rs2          |  10  | C.FSWSP (RV32)
  D  |   111    | uimm[5:3;8:6]           | rs2          |  10  | C.SDSP (RV64/128)
 */
             case (c_funct3)
                 `C2_F3_SLLI: begin
+                    exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
+                    exec_mux_alu_s2_sel = `MUX_ALUDAT2_IMM;
+                    alu_oper = `ALUOP_SLL;
+                    exec_writeback_from_alu = 1;
+                    exec_next_stage = `EXEC_TO_FETCH;
+                    if (I_instr[12] == 1) begin exec_next_stage = `EXEC_TO_DEAD; end
                 end
                 `C2_F3_LWSP: begin
                     alu_oper = `ALUOP_ADD;
