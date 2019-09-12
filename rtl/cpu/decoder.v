@@ -166,7 +166,8 @@ module decoder
     |    010   | uimm[5:3]        | rs1 | uimm[2;6]| rd   | 00  | C.LW
     |    110   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.SW
 */
-                if (c_funct3 == `C0_F3_ADDI4SPN) imm = 0;
+                if (c_funct3 == `C0_F3_ADDI4SPN) imm = {
+                    22'b0, I_instr[10:7], I_instr[12:11], I_instr[5], I_instr[6], 2'b00};
                 else imm = { 25'b0, I_instr[5], I_instr[12:10], I_instr[6], 2'b00 };
            end
        endcase
@@ -404,7 +405,7 @@ c+  |    110   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.SW
     | 15 14 13 | 12        | 11 10  | 9 8 7  | 6 5  |  4 3 2  | 1 0|
 c+  |   000    | 0         |      0          |    0           | 01 | C.NOP
 c+  |   000    | nzimm[5]  | rs1/rd=0        | nzimm[4:0]     | 01 | C.ADDI (HINT, nzimm=0)
-c-  |   001    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.JAL (RV32)
+c+  |   001    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.JAL (RV32)
  D  |   001    | imm[5]    | rs1/rd=0        | imm[4:0]       | 01 | C.ADDIW (RV64/128; RES, rd=0)
 c+  |   010    | imm[5]    |   rd6=0         | imm[4:0]       | 01 | C.LI (HINT, rd=0)
 c-  |   011    | nzimm[9]  | 2               |nzimm[4;6;8:7;5]| 01 | C.ADDI16SP (RES, nzimm=0)
@@ -442,6 +443,15 @@ c+  |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES,
                         exec_writeback_from_alu = 1;
                     end
                     `C1_F3_JAL: begin
+                        o_rd = 1;
+                        write_reg = 1;
+                        exec_mux_reg_input_sel = `MUX_REGINPUT_ALU;
+                        // compute jal/jalr address
+                        alu_oper = `ALUOP_ADD;
+                        exec_mux_alu_s1_sel = `MUX_ALUDAT1_PC;
+                        exec_mux_alu_s2_sel = `MUX_ALUDAT2_IMM;
+                        exec_next_pc_from_alu = 1;
+                        exec_next_stage = `EXEC_TO_FETCH;
                     end
                     `C1_F3_LI: begin
                         exec_writeback_from_imm = 1;
