@@ -166,6 +166,8 @@ module decoder
                     endcase
                 end
                 else begin
+                    if (I_instr[11] == 1) imm = { {26{I_instr[12]}}, I_instr[12], I_instr[6:2] };
+                    else imm = { 26'b0, I_instr[12], I_instr[6:2] };
                 end
            end
            2'b00: begin
@@ -426,21 +428,6 @@ c+  |   001    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.JAL (RV32
 c+  |   010    | imm[5]    |   rd6=0         | imm[4:0]       | 01 | C.LI (HINT, rd=0)
 c-  |   011    | nzimm[9]  | 2               |nzimm[4;6;8:7;5]| 01 | C.ADDI16SP (RES, nzimm=0)
 c+  |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES, nzimm=0; HINT, rd=0)
-
-    | 15 14 13 | 12        | 11 10  | 9 8 7  | 6 5  |  4 3 2  | 1 0|
- -  |   100    | nzuimm[5] | 00     | rs1/rd | nzuimm[4:0]    | 01 | C.SRLI (RV32 NSE, nzuimm[5]=1)
- D  |   100    | 0         | 00     | rs1/rd | 0              | 01 | C.SRLI64 (RV128; RV32/64 HINT)
- -  |   100    | nzuimm[5] | 01     | rs1/rd | nzuimm[4:0]    | 01 | C.SRAI (RV32 NSE, nzuimm[5]=1)
- D  |   100    | 0         | 01     | rs1/rd | 0              | 01 | C.SRAI64 (RV128; RV32/64 HINT)
- -  |   100    | imm[5]    | 10     | rs1/rd | imm[4:0]       | 01 | C.ANDI
- -  |   100    | 0         | 11     | rs1/rd | 00   | rs2     | 01 | C.SUB
- -  |   100    | 0         | 11     | rs1/rd | 01   | rs2     | 01 | C.XOR
- -  |   100    | 0         | 11     | rs1/rd | 10   | rs2     | 01 | C.OR
- -  |   100    | 0         | 11     | rs1/rd | 11   | rs2     | 01 | C.AND
- D  |   100    | 1         | 11     | rs1/rd | 00   | rs2     | 01 | C.SUBW (RV64/128; RV32 RES)
- D  |   100    | 1         | 11     | rs1/rd | 01   | rs2     | 01 | C.ADDW (RV64/128; RV32 RES)
- D  |   100    | 1         | 11     |        | 10   |         | 01 | Reserved
- D  |   100    | 1         | 11     |        | 11   |         | 01 | Reserved
 c+  |   101    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.J
 c+  |   110    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BEQZ
 c+  |   111    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BNEZ
@@ -502,6 +489,48 @@ c+  |   111    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BNEZ
                 o_rs1 = { 2'b01, I_instr[9:7] };
                 o_rs2 = { 2'b01, I_instr[4:2] };
                 o_rd  = { 2'b01, I_instr[9:7] };
+                exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
+                exec_mux_alu_s2_sel = `MUX_ALUDAT2_IMM;
+                exec_writeback_from_alu = 1;
+                exec_next_stage = `EXEC_TO_FETCH;
+/*
+    | 15 14 13 | 12        | 11 10  | 9 8 7  | 6 5  |  4 3 2  | 1 0|
+ ?  |   100    | nzuimm[5] | 00     | rs1/rd | nzuimm[4:0]    | 01 | C.SRLI (RV32 NSE, nzuimm[5]=1)
+ D  |   100    | 0         | 00     | rs1/rd | 0              | 01 | C.SRLI64 (RV128; RV32/64 HINT)
+ ?  |   100    | nzuimm[5] | 01     | rs1/rd | nzuimm[4:0]    | 01 | C.SRAI (RV32 NSE, nzuimm[5]=1)
+ D  |   100    | 0         | 01     | rs1/rd | 0              | 01 | C.SRAI64 (RV128; RV32/64 HINT)
+ ?  |   100    | imm[5]    | 10     | rs1/rd | imm[4:0]       | 01 | C.ANDI
+ ?  |   100    | 0         | 11     | rs1/rd | 00   | rs2     | 01 | C.SUB
+ ?  |   100    | 0         | 11     | rs1/rd | 01   | rs2     | 01 | C.XOR
+ ?  |   100    | 0         | 11     | rs1/rd | 10   | rs2     | 01 | C.OR
+ ?  |   100    | 0         | 11     | rs1/rd | 11   | rs2     | 01 | C.AND
+ D  |   100    | 1         | 11     | rs1/rd | 00   | rs2     | 01 | C.SUBW (RV64/128; RV32 RES)
+ D  |   100    | 1         | 11     | rs1/rd | 01   | rs2     | 01 | C.ADDW (RV64/128; RV32 RES)
+ D  |   100    | 1         | 11     |        | 10   |         | 01 | Reserved
+ D  |   100    | 1         | 11     |        | 11   |         | 01 | Reserved
+ */
+                case (I_instr[11:10])
+                    2'b00: begin
+                        alu_oper = `ALUOP_SRL;
+                        if (I_instr[12]) exec_next_stage = `EXEC_TO_DEAD;
+                    end
+                    2'b01: begin
+                        alu_oper = `ALUOP_SRA;
+                        if (I_instr[12]) exec_next_stage = `EXEC_TO_DEAD;
+                    end
+                    2'b10: begin
+                        alu_oper = `ALUOP_AND;
+                    end
+                    2'b11: begin
+                        exec_mux_alu_s2_sel = `MUX_ALUDAT2_REGVAL2;
+                        case (I_instr[6:5])
+                            2'b00: alu_oper = `ALUOP_SUB;
+                            2'b01: alu_oper = `ALUOP_XOR;
+                            2'b10: alu_oper = `ALUOP_OR;
+                            2'b11: alu_oper = `ALUOP_AND;
+                        endcase
+                    end
+                endcase
             end
          end
         `C_OPC_C2: begin
