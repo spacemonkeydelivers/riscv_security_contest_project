@@ -322,55 +322,57 @@ c|  |   000    | nzuimm[5] | rs1/rd!=0   | nzuimm[4:0]  |  10  | C.SLLI (HINT, r
       case(c_op)
         `C_OPC_C0: begin
 /*
-    | 15 14 13 | 12        | 11 10 9 8 7 | 6 5 4 3 2 | 1 0 |
-    |    000   | 0 0 00 Illegal instruction
-    |    000   | nzuimm[5:4j9:6j2j3] rd0 00 C.ADDI4SPN (RES, nzuimm=0)
-    |    001   | uimm[5:3] rs10 uimm[7:6] rd0 00 C.FLD (RV32/64)
-    |    001   | uimm[5:4j8] rs10 uimm[7:6] rd0 00 C.LQ (RV128)
-    |    010   | uimm[5:3] rs10 uimm[2j6] rd0 00 C.LW
-    |    011   | uimm[5:3] rs10 uimm[2j6] rd0 00 C.FLW (RV32)
-    |    011   | uimm[5:3] rs10 uimm[7:6] rd0 00 C.LD (RV64/128)
-    |    100   | | 00 Reserved
-    |    101   | uimm[5:3] rs10 uimm[7:6] rs20 00 C.FSD (RV32/64)
-    |    101   | uimm[5:4j8] rs10 uimm[7:6] rs20 00 C.SQ (RV128)
-    |    110   | uimm[5:3] rs10 uimm[2j6] rs20 00 C.SW
-    |    111   | uimm[5:3] rs10 uimm[2j6] rs20 00 C.FSW (RV32)
-    |    111   | uimm[5:3] rs10 uimm[7:6] rs20 00 C.SD (RV64/128)
+    | 15 14 13 | 12        | 11 10 9 8 7 | 6 5      | 4 3 2 | 1 0 |
+    |    000   | 0         |     0       |          0       | 00  | Illegal instruction
+ -  |    000   | nzuimm[5:4;9:6;2;3]                | rd0   | 00  | C.ADDI4SPN (RES, nzuimm=0)
+ F  |    001   | uimm[5:3]        | rs10 | uimm[7:6]| rd0   | 00  | C.FLD (RV32/64)
+ D  |    001   | uimm[5:4;8]      | rs10 | uimm[7:6]| rd0   | 00  | C.LQ (RV128)
+ -  |    010   | uimm[5:3]        | rs10 | uimm[2;6]| rd0   | 00  | C.LW
+ F  |    011   | uimm[5:3]        | rs10 | uimm[2;6]| rd0   | 00  | C.FLW (RV32)
+ D  |    011   | uimm[5:3]        | rs10 | uimm[7:6]| rd0   | 00  | C.LD (RV64/128)
+ D  |    100   |                                            | 00  | Reserved
+ D  |    101   | uimm[5:3]        | rs10 | uimm[7:6]|rs20   | 00  | C.FSD (RV32/64)
+ D  |    101   | uimm[5:4;8]      | rs10 | uimm[7:6]|rs20   | 00  | C.SQ (RV128)
+ -  |    110   | uimm[5:3]        | rs10 | uimm[2;6]|rs20   | 00  | C.SW
+ D  |    111   | uimm[5:3]        | rs10 | uimm[2;6]|rs20   | 00  | C.FSW (RV32)
+ D  |    111   | uimm[5:3]        | rs10 | uimm[7:6]|rs20   | 00  | C.SD (RV64/128)
 */
          end
         `C_OPC_C1: begin
 /*
-    | 15 14 13 | 12        | 11 10 9 8 7 | 6 5 4 3 2 | 1 0 |
-    |   000    | 0         |      0      |    0      | 01  | C.NOP 
-    |   000    | nzimm[5]  | rs1/rd6=0   | nzimm[4:0]| 01  | C.ADDI (HINT, nzimm=0)
-    |   001    | imm[11;4;9:8;10;6;7;3:1j;]          | 01  | C.JAL (RV32)
-    |   001    | imm[5]    | rs1/rd6=0   | imm[4:0]  | 01  | C.ADDIW (RV64/128; RES, rd=0)
-    |   010    | imm[5]    |   rd6=0     |  imm[4:0] | 01  | C.LI (HINT, rd=0)
-    |   011    | nzimm[9]  | 2 | nzimm[4j6j8:7j5]    | 01  | C.ADDI16SP (RES, nzimm=0)
-    |   011    | nzimm[17] | rd6=f0; 2g nzimm[16:12] 01 C.LUI (RES, nzimm=0; HINT, rd=0)
-    |   100    | nzuimm[5] | 00 rs10/rd0 nzuimm[4:0] 01 C.SRLI (RV32 NSE, nzuimm[5]=1)
-    |   100    | 0         | 00 rs10/rd0 0 01 C.SRLI64 (RV128; RV32/64 HINT)
-    |   100    | nzuimm[5] | 01 rs10/rd0 nzuimm[4:0] 01 C.SRAI (RV32 NSE, nzuimm[5]=1)
-    |   100    | 0         | 01 rs10/rd0 0 01 C.SRAI64 (RV128; RV32/64 HINT)
-    |   100    | imm[5]    | 10 rs10/rd0 imm[4:0] 01 C.ANDI
-    |   100    | 0         |11 rs10/rd0 00 rs20 01 C.SUB
-    |   100    | 0         |11 rs10/rd0 01 rs20 01 C.XOR
-    |   100    | 0         |11 rs10/rd0 10 rs20 01 C.OR
-    |   100    | 0         |11 rs10/rd0 11 rs20 01 C.AND
-    |   100    | 1         |11 rs10/rd0 00 rs20 01 C.SUBW (RV64/128; RV32 RES)
-    |   100    | 1         |11 rs10/rd0 01 rs20 01 C.ADDW (RV64/128; RV32 RES)
-    |   100    | 1         |11 | 10 | 01 Reserved
-    |   100    | 1         |11 | 11 | 01 Reserved
-    |   101    | imm[11j4j9:8j10j6j7j3:1j5] 01 C.J
-    |   110    | imm[8;4:3]| rs10 imm[7:6j2:1j5] 01 C.BEQZ
-    |   111    | imm[8;4:3]| rs10 imm[7:6j2:1j5] 01 C.BNEZ
+    | 15 14 13 | 12        | 11 10  | 9 8 7 | 6 5  |  4 3 2  | 1 0 |
+ -  |   000    | 0         |      0         |    0           | 01  | C.NOP 
+ -  |   000    | nzimm[5]  | rs1/rd6=0      | nzimm[4:0]     | 01  | C.ADDI (HINT, nzimm=0)
+ -  |   001    |        imm[11;4;9:8;10;6;7;3:1;5]           | 01  | C.JAL (RV32)
+ D  |   001    | imm[5]    | rs1/rd6=0      | imm[4:0]       | 01  | C.ADDIW (RV64/128; RES, rd=0)
+ -  |   010    | imm[5]    |   rd6=0        | imm[4:0]       | 01  | C.LI (HINT, rd=0)
+ -  |   011    | nzimm[9]  | 2              |nzimm[4;6;8:7;5]| 01  | C.ADDI16SP (RES, nzimm=0)
+ -  |   011    | nzimm[17] | rd!={0, 2}     | nzimm[16:12]   | 01  | C.LUI (RES, nzimm=0; HINT, rd=0)
+
+    | 15 14 13 | 12        | 11 10  | 9 8 7 | 6 5  |  4 3 2  | 1 0|
+ -  |   100    | nzuimm[5] | 00     | rs1/rd| nzuimm[4:0]    | 01 | C.SRLI (RV32 NSE, nzuimm[5]=1)
+ D  |   100    | 0         | 00     | rs1/rd| 0              | 01 | C.SRLI64 (RV128; RV32/64 HINT)
+ -  |   100    | nzuimm[5] | 01     | rs1/rd| nzuimm[4:0]    | 01 | C.SRAI (RV32 NSE, nzuimm[5]=1)
+ D  |   100    | 0         | 01     | rs1/rd| 0              | 01 | C.SRAI64 (RV128; RV32/64 HINT)
+ -  |   100    | imm[5]    | 10     | rs1/rd| imm[4:0]       | 01 | C.ANDI
+ -  |   100    | 0         | 11     | rs1/rd| 00   | rs2     | 01 | C.SUB
+ -  |   100    | 0         | 11     | rs1/rd| 01   | rs2     | 01 | C.XOR
+ -  |   100    | 0         | 11     | rs1/rd| 10   | rs2     | 01 | C.OR
+ -  |   100    | 0         | 11     | rs1/rd| 11   | rs2     | 01 | C.AND
+ D  |   100    | 1         | 11     | rs1/rd| 00   | rs2     | 01 | C.SUBW (RV64/128; RV32 RES)
+ D  |   100    | 1         | 11     | rs1/rd| 01   | rs2     | 01 | C.ADDW (RV64/128; RV32 RES)
+ D  |   100    | 1         | 11     |       | 10   |         | 01 | Reserved
+ D  |   100    | 1         | 11     |       | 11   |         | 01 | Reserved
+ -  |   101    |        imm[11;4;9:8;10;6;7;3:1;5]           | 01 | C.J
+ -  |   110    | imm[8;4:3]         | rs10  | imm[7:6;2:1;5] | 01 | C.BEQZ
+ -  |   111    | imm[8;4:3]         | rs10  | imm[7:6;2:1;5] | 01 | C.BNEZ
 */
             exec_next_stage = `EXEC_TO_FETCH;
          end
         `C_OPC_C2: begin
 /*
     | 15 14 13 | 12        | 11 10 9 8 7 | 6 5 4 3 2    | 1 0  |
-c|  |   000    | nzuimm[5] | rs1/rd!=0   | nzuimm[4:0]  |  10  | C.SLLI (HINT, rd=0; RV32 NSE, nzuimm[5]=1)
+c+  |   000    | nzuimm[5] | rs1/rd!=0   | nzuimm[4:0]  |  10  | C.SLLI (HINT, rd=0; RV32 NSE, nzuimm[5]=1)
  h  |   000    | 0         | rs1/rd!=0   | 0            |  10  | C.SLLI64 (RV128; RV32/64 HINT; HINT, rd=0)
  F  |   001    | uimm[5]   | rd          | uimm[4:3;8:6]|  10  | C.FLDSP (RV32/64)
  D  |   001    | uimm[5]   | rd!=0       | uimm[4;9:6]  |  10  | C.LQSP (RV128; RES, rd=0)
