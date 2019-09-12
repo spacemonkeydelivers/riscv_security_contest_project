@@ -84,24 +84,83 @@ int __int_serve(struct s_esf_frame* frame, int n) {
     }
     return 0;
 }
+
+#define MTIME_BASE     0x40000000
+#define MTIMECMP_BASE  0x40000008
+#define MTIMEFREQ_BASE 0x40000010
+
+__attribute__((section(".__system.os")))
+uint64_t mtime() {
+    volatile uint32_t *r = (uint32_t *)MTIME_BASE;
+
+    uint32_t lo = 0;
+    uint32_t hi = 0;
+
+    // guard against rollover when reading
+    do {
+        hi = r[1];
+        lo = r[0];
+    } while (r[1] != hi);
+
+    return (((uint64_t)hi) << 32) | lo;
+}
+
+__attribute__((section(".__system.os")))
+static void set_mtimecmp(uint64_t time) {
+    volatile uint32_t *r = (uint32_t *)MTIMECMP_BASE;
+
+    r[1] = 0xffffffff;
+    r[0] = (uint32_t)time;
+    r[1] = (uint32_t)(time >> 32);
+}
+
+__attribute__((section(".__system.os")))
+static void set_mtimefreq(uint64_t freq) {
+    volatile uint32_t *r = (uint32_t *)MTIMEFREQ_BASE;
+
+    r[1] = (uint32_t)(freq >> 32);
+    r[0] = (uint32_t)freq;
+}
+
 __attribute__((section(".__system.os")))
 bool alarm_soc_timer(int interval)
 {
     if (interval < 0) {
         return false;
     }
-    int freq = 1;
-    int timer_base = 0x40000000;
-    __asm__ volatile ("sw %[threshold], 8(%[timer_base])\n\t"
-                      "sw zero, 0(%[timer_base])\n\t"
-                      "sw %[freq], 16(%[timer_base])\n\t"
-                      :
-                      : [timer_base]"r" (timer_base),
-                        [threshold]"r"(interval),
-                        [freq]"r"(freq)
-                      : "memory");
-    return true;
+    uint64_t time = mtime();
 
+    set_mtimecmp(time + interval);
+    set_mtimefreq(1);
+
+    uint32_t timer_enable = 0x80;
+    uint32_t val = 0;
+
+    // Enable interrupts
+    __asm__ volatile ("csrr %[reg], mie\n\t"
+                      "or %[new], %[reg], %[new]\n\t"
+                      "csrw mie, %[new]\n\t"
+                      :
+                      : [new]"r"(timer_enable),
+                        [reg]"r"(val));
+
+    return true;
+}
+
+void alarm_soc_timer_stop() {
+    uint32_t timer_disable = -1;
+    timer_disable ^= 0x80;
+    uint32_t val = 0;
+
+    // Disable interrupts
+    __asm__ volatile ("csrr %[reg], mie\n\t"
+                      "and %[new], %[reg], %[new]\n\t"
+                      "csrw mie, %[new]\n\t"
+                      "csrw mip, zero\n\t"
+                      :
+                      : [new]"r"(timer_disable),
+                        [reg]"r"(val));
+    set_mtimecmp(0);
 }
 
 __attribute__((section(".__system.os")))

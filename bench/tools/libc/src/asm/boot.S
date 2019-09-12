@@ -41,8 +41,8 @@ bss_init:
     call __soc_init
     addi sp, sp, 16
     # enable timer interrupts
-    li s0, 0x80
-    csrw mie, s0
+    # li s0, 0x80
+    # csrw mie, s0
     # enable global interrupts
     li s0, 8
     csrw mstatus, s0

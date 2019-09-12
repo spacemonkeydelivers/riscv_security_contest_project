@@ -7,7 +7,7 @@
 volatile int global = 0;
 volatile int unused = 0;
 
-#define D_TIMEOUT 100
+#define D_TIMEOUT 9000
 void timer_handler(int n, void* context)
 {
     (void)context;
@@ -17,10 +17,11 @@ void timer_handler(int n, void* context)
     }
     ++global;
 
-    if (global < 100) {
+    if (global < 10) {
         alarm_soc_timer(D_TIMEOUT);
     } else {
-        alarm_soc_timer(0);
+        // To stop timer interrupts
+        alarm_soc_timer_stop();
     }
 }
 
@@ -31,7 +32,7 @@ int main () {
         return EXIT_FAILURE;
     }
 
-    while (global < 100)
+    while (global < 10)
     {
         ++unused;
     }
