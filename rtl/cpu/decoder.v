@@ -150,10 +150,15 @@ module decoder
                                     I_instr[4:3], I_instr[5], I_instr[2], I_instr[6], 4'b0}
                                 : {14'b0, I_instr[12], I_instr[6:2], 12'b0 };
                         end
+/*
+    | 15 14 13 | 12        | 11 10  | 9 8 7  | 6 5  |  4 3 2  | 1 0|
+    |   110    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BEQZ
+    |   111    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BNEZ
+*/
                         `C1_F3_BEQ, `C1_F3_BNE: begin
-                            imm = { 22'b0,
+                            imm = { 23'b0,
                                 I_instr[12],
-                                I_instr[6:5], I_instr[2], I_instr[11:10], I_instr[4:3], 2'b0 };
+                                I_instr[6:5], I_instr[2], I_instr[11:10], I_instr[4:3], 1'b0 };
                         end
                         default: begin
                             imm = 0;
@@ -437,8 +442,8 @@ c+  |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES,
  D  |   100    | 1         | 11     |        | 10   |         | 01 | Reserved
  D  |   100    | 1         | 11     |        | 11   |         | 01 | Reserved
 c+  |   101    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.J
- +  |   110    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BEQZ
- +  |   111    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BNEZ
+c+  |   110    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BEQZ
+c+  |   111    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BNEZ
 */
             exec_next_stage = `EXEC_TO_FETCH;
 
@@ -482,6 +487,8 @@ c+  |   101    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.J
                     end
                     `C1_F3_BEQ, `C1_F3_BNE: begin // c.beqz, c.bnez
                         alu_oper = `ALUOP_ADD; // doesn't really matter
+                        o_rs1 = { 2'b01, I_instr[9:7] };
+                        o_rs2 = 0;
                         exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
                         exec_mux_alu_s2_sel = `MUX_ALUDAT2_REGVAL2;
                         exec_next_stage = `EXEC_TO_BRANCH;
