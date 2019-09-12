@@ -15,9 +15,9 @@ __start:
 .option push
 .option norvc
     li t3, 0x800003fb
-    li t4, 0x800005f7
+    li t4, 0x800001fb
     bne a1, t3, failed
-    bne a2, t2, failed
+    bne a2, t4, failed
     PASSED
 failed:
     FAILED 1
