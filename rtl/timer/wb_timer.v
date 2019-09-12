@@ -35,7 +35,7 @@ module wb_timer
 
    // IRQ pin, raised to HIGH if current time exceeds the threshold
    reg                                irq;
-   assign timer_irq_o = irq & irq_enabled;
+   assign timer_irq_o = irq;
 
    // ack signal for wishbone delayed by one clock with a reg
    reg                                ack;
