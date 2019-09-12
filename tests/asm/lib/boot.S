@@ -10,7 +10,8 @@
 __start:
     la t1, ON_EXCEPTION_handler
     csrw mtvec, t1
-    li t2, 0x80
+    // Interrupts should be disabled
+    li t2, 0x00
     csrw mie, t2
     li t2, 8
     csrw mstatus, 8
