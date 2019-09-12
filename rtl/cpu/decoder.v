@@ -128,6 +128,24 @@ c|  |   000    | nzuimm[5] | rs1/rd!=0   | nzuimm[4:0]  |  10  | C.SLLI (HINT, r
            end
            2'b00: begin
                imm = 0;
+/*
+    | 15 14 13 | 12        | 11 10|9 8 7| 6 5      | 4 3 2 | 1 0 |
+ -  |    000   | nzuimm[5:4;9:6;2;3]               | rd   | 00  | C.ADDI4SPN (RES, nzuimm=0)
+*/
+                if (c_funct3 == `C0_F3_ADDI4SPN) begin
+                    imm = 0;
+                end
+                else begin
+/*
+    | 15 14 13 | 12          11 10|9 8 7| 6 5      | 4 3 2 | 1 0 |
+ -  |    010   | uimm[5:3]        | rs1 | uimm[2;6]| rd   | 00  | C.LW
+*/
+/*
+    | 15 14 13 | 12          11 10|9 8 7| 6 5      | 4 3 2 | 1 0 |
+ -  |    110   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.SW
+*/
+                    imm = { 25'b0, I_instr[5], I_instr[12:10], I_instr[6], 2'b00 };
+                end
            end
        endcase
 
@@ -322,21 +340,42 @@ c|  |   000    | nzuimm[5] | rs1/rd!=0   | nzuimm[4:0]  |  10  | C.SLLI (HINT, r
       case(c_op)
         `C_OPC_C0: begin
 /*
-    | 15 14 13 | 12        | 11 10 9 8 7 | 6 5      | 4 3 2 | 1 0 |
-    |    000   | 0         |     0       |          0       | 00  | Illegal instruction
- -  |    000   | nzuimm[5:4;9:6;2;3]                | rd0   | 00  | C.ADDI4SPN (RES, nzuimm=0)
- F  |    001   | uimm[5:3]        | rs10 | uimm[7:6]| rd0   | 00  | C.FLD (RV32/64)
- D  |    001   | uimm[5:4;8]      | rs10 | uimm[7:6]| rd0   | 00  | C.LQ (RV128)
- -  |    010   | uimm[5:3]        | rs10 | uimm[2;6]| rd0   | 00  | C.LW
- F  |    011   | uimm[5:3]        | rs10 | uimm[2;6]| rd0   | 00  | C.FLW (RV32)
- D  |    011   | uimm[5:3]        | rs10 | uimm[7:6]| rd0   | 00  | C.LD (RV64/128)
- D  |    100   |                                            | 00  | Reserved
- D  |    101   | uimm[5:3]        | rs10 | uimm[7:6]|rs20   | 00  | C.FSD (RV32/64)
- D  |    101   | uimm[5:4;8]      | rs10 | uimm[7:6]|rs20   | 00  | C.SQ (RV128)
- -  |    110   | uimm[5:3]        | rs10 | uimm[2;6]|rs20   | 00  | C.SW
- D  |    111   | uimm[5:3]        | rs10 | uimm[2;6]|rs20   | 00  | C.FSW (RV32)
- D  |    111   | uimm[5:3]        | rs10 | uimm[7:6]|rs20   | 00  | C.SD (RV64/128)
+    | 15 14 13 | 12        | 11 10|9 8 7| 6 5      | 4 3 2 | 1 0 |
+    |    000   | 0         |     0      |          0       | 00  | Illegal instruction
+ -  |    000   | nzuimm[5:4;9:6;2;3]               | rd   | 00  | C.ADDI4SPN (RES, nzuimm=0)
+ F  |    001   | uimm[5:3]        | rs1 | uimm[7:6]| rd   | 00  | C.FLD (RV32/64)
+ D  |    001   | uimm[5:4;8]      | rs1 | uimm[7:6]| rd   | 00  | C.LQ (RV128)
+ -  |    010   | uimm[5:3]        | rs1 | uimm[2;6]| rd   | 00  | C.LW
+ F  |    011   | uimm[5:3]        | rs1 | uimm[2;6]| rd   | 00  | C.FLW (RV32)
+ D  |    011   | uimm[5:3]        | rs1 | uimm[7:6]| rd   | 00  | C.LD (RV64/128)
+ D  |    100   |                                          | 00  | Reserved
+ D  |    101   | uimm[5:3]        | rs1 | uimm[7:6]| rs2  | 00  | C.FSD (RV32/64)
+ D  |    101   | uimm[5:4;8]      | rs1 | uimm[7:6]| rs2  | 00  | C.SQ (RV128)
+ -  |    110   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.SW
+ D  |    111   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.FSW (RV32)
+ D  |    111   | uimm[5:3]        | rs1 | uimm[7:6]| rs2  | 00  | C.SD (RV64/128)
 */
+            o_rs1 = { 2'b01, I_instr[9:7] };
+            o_rs2 = { 2'b01, I_instr[4:2] };
+            o_rd =  { 2'b01, I_instr[4:2] };
+            exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
+            exec_mux_alu_s2_sel = `MUX_ALUDAT2_IMM;
+            case (c_funct3)
+                `C0_F3_ADDI4SPN: begin
+                    exec_next_stage = `EXEC_TO_DEAD;
+                end
+                `C0_F3_LW: begin
+                    alu_oper = `ALUOP_ADD;
+                    exec_next_stage = `EXEC_TO_LOAD;
+                end
+                `C0_F3_SW: begin
+                    alu_oper = `ALUOP_ADD;
+                    exec_next_stage = `EXEC_TO_STORE;
+                end
+                default: begin
+                    exec_next_stage = `EXEC_TO_DEAD;
+                end
+            endcase
          end
         `C_OPC_C1: begin
 /*
