@@ -144,9 +144,14 @@ module decoder
                         `C1_F3_LI: begin
                             imm = { {26{I_instr[12]}}, I_instr[12], I_instr[6:2] };
                         end
+/*
+    | 15 14 13 | 12        | 11 10  | 9 8 7  | 6 5  |  4 3 2  | 1 0|
+    |   011    | nzimm[9]  | 2               |nzimm[4;6;8:7;5]| 01 | C.ADDI16SP (RES, nzimm=0)
+    |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES, nzimm=0; HINT, rd=0)
+*/
                         `C1_F3_LUI_ADDI16SP: begin
                             imm = (I_instr[11:7] == 2)
-                                ? {22'b0, I_instr[12], //TODO: tripple-check
+                                ? { {22{I_instr[12]}}, I_instr[12], //TODO: tripple-check
                                     I_instr[4:3], I_instr[5], I_instr[2], I_instr[6], 4'b0}
                                 : {14'b0, I_instr[12], I_instr[6:2], 12'b0 };
                         end
@@ -426,7 +431,7 @@ c+  |   000    | nzimm[5]  | rs1/rd=0        | nzimm[4:0]     | 01 | C.ADDI (HIN
 c+  |   001    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.JAL (RV32)
  D  |   001    | imm[5]    | rs1/rd=0        | imm[4:0]       | 01 | C.ADDIW (RV64/128; RES, rd=0)
 c+  |   010    | imm[5]    |   rd6=0         | imm[4:0]       | 01 | C.LI (HINT, rd=0)
-c-  |   011    | nzimm[9]  | 2               |nzimm[4;6;8:7;5]| 01 | C.ADDI16SP (RES, nzimm=0)
+c+  |   011    | nzimm[9]  | 2               |nzimm[4;6;8:7;5]| 01 | C.ADDI16SP (RES, nzimm=0)
 c+  |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES, nzimm=0; HINT, rd=0)
 c+  |   101    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.J
 c+  |   110    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BEQZ
@@ -463,14 +468,15 @@ c+  |   111    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BNEZ
                     end
                     `C1_F3_LUI_ADDI16SP: begin
                         if (I_instr[11:7] == 2) begin
-                            exec_next_stage = `EXEC_TO_DEAD; //not implemented
+                            alu_oper = `ALUOP_ADD;
+                            exec_writeback_from_alu = 1;
                         end
                         else begin
                             exec_writeback_from_imm = 1;
                             exec_mux_reg_input_sel = `MUX_REGINPUT_IMM;
                             exec_next_stage = `EXEC_TO_FETCH;
-                            if ({I_instr[12], I_instr[6:2]} == 0) exec_next_stage = `EXEC_TO_DEAD;
                         end
+                        if ({I_instr[12], I_instr[6:2]} == 0) exec_next_stage = `EXEC_TO_DEAD;
                     end
                     `C1_F3_BEQ, `C1_F3_BNE: begin // c.beqz, c.bnez
                         alu_oper = `ALUOP_ADD; // doesn't really matter
@@ -495,15 +501,15 @@ c+  |   111    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BNEZ
                 exec_next_stage = `EXEC_TO_FETCH;
 /*
     | 15 14 13 | 12        | 11 10  | 9 8 7  | 6 5  |  4 3 2  | 1 0|
- ?  |   100    | nzuimm[5] | 00     | rs1/rd | nzuimm[4:0]    | 01 | C.SRLI (RV32 NSE, nzuimm[5]=1)
+c+  |   100    | nzuimm[5] | 00     | rs1/rd | nzuimm[4:0]    | 01 | C.SRLI (RV32 NSE, nzuimm[5]=1)
  D  |   100    | 0         | 00     | rs1/rd | 0              | 01 | C.SRLI64 (RV128; RV32/64 HINT)
- ?  |   100    | nzuimm[5] | 01     | rs1/rd | nzuimm[4:0]    | 01 | C.SRAI (RV32 NSE, nzuimm[5]=1)
+c+  |   100    | nzuimm[5] | 01     | rs1/rd | nzuimm[4:0]    | 01 | C.SRAI (RV32 NSE, nzuimm[5]=1)
  D  |   100    | 0         | 01     | rs1/rd | 0              | 01 | C.SRAI64 (RV128; RV32/64 HINT)
- ?  |   100    | imm[5]    | 10     | rs1/rd | imm[4:0]       | 01 | C.ANDI
- ?  |   100    | 0         | 11     | rs1/rd | 00   | rs2     | 01 | C.SUB
- ?  |   100    | 0         | 11     | rs1/rd | 01   | rs2     | 01 | C.XOR
- ?  |   100    | 0         | 11     | rs1/rd | 10   | rs2     | 01 | C.OR
- ?  |   100    | 0         | 11     | rs1/rd | 11   | rs2     | 01 | C.AND
+c+  |   100    | imm[5]    | 10     | rs1/rd | imm[4:0]       | 01 | C.ANDI
+ +  |   100    | 0         | 11     | rs1/rd | 00   | rs2     | 01 | C.SUB
+ +  |   100    | 0         | 11     | rs1/rd | 01   | rs2     | 01 | C.XOR
+ +  |   100    | 0         | 11     | rs1/rd | 10   | rs2     | 01 | C.OR
+ +  |   100    | 0         | 11     | rs1/rd | 11   | rs2     | 01 | C.AND
  D  |   100    | 1         | 11     | rs1/rd | 00   | rs2     | 01 | C.SUBW (RV64/128; RV32 RES)
  D  |   100    | 1         | 11     | rs1/rd | 01   | rs2     | 01 | C.ADDW (RV64/128; RV32 RES)
  D  |   100    | 1         | 11     |        | 10   |         | 01 | Reserved
