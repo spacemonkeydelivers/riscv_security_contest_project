@@ -6,6 +6,11 @@ set(ZEPHYR_APPS
     testing/integration
     portability/cmsis_rtos_v1/timer_synchronization
     portability/cmsis_rtos_v2/timer_synchronization
+    #ripe1
+    #ripe2
+    #ripe3
+    #ripe4
+    #ripe5
     # basic/threads # due too no SOURCES given to target: drivers__gpio
 )
 
