@@ -12,7 +12,8 @@ module wb_timer
     input wire                        wb_cyc_i,
     output wire                       wb_ack_o,
     output wire [WB_DATA_WIDTH - 1:0] wb_data_o,
-    output wire                       timer_irq_o);
+    output wire                       timer_irq_o,
+    output wire                       timer_mtimecmp_accessed_o);
 
    /*verilator public_module*/
    localparam DATA_WIDTH = 64;
@@ -47,6 +48,8 @@ module wb_timer
    assign timer_enabled = |tgt_clk;
 
    wire [2:0]                         addr = wb_addr_i[4:2];
+
+   assign timer_mtimecmp_accessed_o = (addr == MTIMECMP_LO) || (addr == MTIMECMP_HI);
 
    assign wb_data_o = addr == MTIME_LO    ? `LO(mtime) :
                       addr == MTIME_HI    ? `HI(mtime) :
