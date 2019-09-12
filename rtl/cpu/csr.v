@@ -61,9 +61,9 @@ module csr
             irq_en <= (csr_addr_i == `MSR_MSTATUS) ? csr_data_i[3] : irq_en;
             tags_en <= (csr_addr_i == `MSR_MTAGS) ? csr_data_i[0] : tags_en;
             tags_if_en <= (csr_addr_i == `MSR_MTAGS) ? csr_data_i[2] : tags_if_en;
-            tags_irq_clear <= (csr_addr_i == `MSR_MTAGS) ? csr_data_i[1] : 1'b0;
             irq_timer_en <= (csr_addr_i == `MSR_MIE) ? csr_data_i[7] : irq_timer_en;
          end
+         tags_irq_clear <= (csr_addr_i == `MSR_MTAGS) ? csr_data_i[1] : 1'b0;
       end
    end
    
