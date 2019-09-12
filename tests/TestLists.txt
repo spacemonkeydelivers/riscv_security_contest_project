@@ -6,6 +6,15 @@ test_add(store_byte_issue  basic/store_byte_issue.py)
 
 test_add(asm_simple             asm/examples/simple.s)
 
+test_add(asm_cext_srai          asm/compressed/c_srai.s ENABLE_C_EXT)
+test_add(asm_cext_srli          asm/compressed/c_srli.s ENABLE_C_EXT)
+test_add(asm_cext_and           asm/compressed/c_and.s ENABLE_C_EXT)
+test_add(asm_cext_xor           asm/compressed/c_xor.s ENABLE_C_EXT)
+test_add(asm_cext_or            asm/compressed/c_or.s ENABLE_C_EXT)
+test_add(asm_cext_addi4spn      asm/compressed/c_addi4spn.s ENABLE_C_EXT NIGHTLY)
+test_add(asm_cext_addi16sp      asm/compressed/c_addi16sp.s ENABLE_C_EXT NIGHTLY)
+test_add(asm_cext_andi          asm/compressed/c_andi.s ENABLE_C_EXT)
+
 test_add(asm_cext_beq           asm/compressed/c_beq.s ENABLE_C_EXT)
 test_add(asm_cext_bne           asm/compressed/c_bne.s ENABLE_C_EXT)
 test_add(asm_cext_j             asm/compressed/c_j.s ENABLE_C_EXT)
