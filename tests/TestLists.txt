@@ -175,7 +175,7 @@ endforeach()
 set(COMPLIANCE_SOURCES_ROOT ${CMAKE_SOURCE_DIR}/tests/compliance/rv32imc/src)
 file(GLOB COMPLIANCE_TESTS "${COMPLIANCE_SOURCES_ROOT}/*.S")
 set(FAILED_TESTS  ""
-                  "compliance_rv32imc_C-LUI.S")
+                  "")
 foreach(file ${COMPLIANCE_TESTS})
     get_filename_component(NAME "${file}" NAME)
     if (compliance_rv32imc_${NAME} IN_LIST FAILED_TESTS)

@@ -153,7 +153,7 @@ module decoder
                             imm = (I_instr[11:7] == 2)
                                 ? { {22{I_instr[12]}}, I_instr[12], //TODO: tripple-check
                                     I_instr[4:3], I_instr[5], I_instr[2], I_instr[6], 4'b0}
-                                : {14'b0, I_instr[12], I_instr[6:2], 12'b0 };
+                                : { {14{I_instr[12]}}, I_instr[12], I_instr[6:2], 12'b0 };
                         end
 /*
     | 15 14 13 | 12        | 11 10  | 9 8 7  | 6 5  |  4 3 2  | 1 0|
