@@ -100,52 +100,41 @@ module decoder
            end
            2'b10: begin
 /*
-| 15 14 13 | 12        | 11 10 9 8 7 | 6 5 4 3 2    | 1 0  |
-|      010 | uimm[5]   | rd!=0       | uimm[4:2;7:6]|  10 | C.LWSP (RES, rd=0)
-*/
-               imm = 0;
-               if (c_funct3  == `C2_F3_LWSP) begin
-                   imm = { 24'b0, I_instr[3:2], I_instr[12], I_instr[6:4], 2'b00 } ;
-               end
-/*
     | 15 14 13 | 12        | 11 10 9 8 7 | 6 5 4 3 2    | 1 0  |
-c|  |   110    |      uimm[5:2;7:6]      | rs2          |  10  | C.SWSP
+    |      010 | uimm[5]   | rd!=0       | uimm[4:2;7:6]|  10  | C.LWSP (RES, rd=0)
+    |   110    |      uimm[5:2;7:6]      | rs2          |  10  | C.SWSP
+    |   000    | nzuimm[5] | rs1/rd!=0   | nzuimm[4:0]  |  10  | C.SLLI (HINT, rd=0; RV32 NSE, nzuimm[5]=1)
 */
-               if (c_funct3  == `C2_F3_SWSP) begin
-                   imm = { 24'b0, I_instr[8:7],  I_instr[12:9], 2'b00 } ;
-               end
-
-/*
-    | 15 14 13 | 12        | 11 10 9 8 7 | 6 5 4 3 2    | 1 0  |
-c|  |   000    | nzuimm[5] | rs1/rd!=0   | nzuimm[4:0]  |  10  | C.SLLI (HINT, rd=0; RV32 NSE, nzuimm[5]=1)
-*/
-               if (c_funct3 == `C2_F3_SLLI) begin
-                   imm = { 27'b0, I_instr[6:2]} ;
-               end
+               case (c_funct3)
+                   `C2_F3_LWSP: imm = { 24'b0, I_instr[3:2], I_instr[12], I_instr[6:4], 2'b00 } ;
+                   `C2_F3_SWSP: imm = { 24'b0, I_instr[8:7],  I_instr[12:9], 2'b00 } ;
+                   `C2_F3_SLLI: imm = { 27'b0, I_instr[6:2]} ;
+                   default: imm = 0;
+               endcase
            end
            2'b01: begin
                imm = 0;
+/*
+    | 15 14 13 | 12        | 11 10  | 9 8 7  | 6 5  |  4 3 2  | 1 0|
+ -  |   000    | 0         |      0          |    0           | 01 | C.NOP
+ -  |   000    | nzimm[5]  | rs1/rd=0        | nzimm[4:0]     | 01 | C.ADDI (HINT, nzimm=0)
+ -  |   001    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.JAL (RV32)
+ D  |   001    | imm[5]    | rs1/rd=0        | imm[4:0]       | 01 | C.ADDIW (RV64/128; RES, rd=0)
+ -  |   010    | imm[5]    |   rd6=0         | imm[4:0]       | 01 | C.LI (HINT, rd=0)
+ -  |   011    | nzimm[9]  | 2               |nzimm[4;6;8:7;5]| 01 | C.ADDI16SP (RES, nzimm=0)
+ -  |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES, nzimm=0; HINT, rd=0)
+*/
            end
            2'b00: begin
                imm = 0;
 /*
     | 15 14 13 | 12        | 11 10|9 8 7| 6 5      | 4 3 2 | 1 0 |
  -  |    000   | nzuimm[5:4;9:6;2;3]               | rd   | 00  | C.ADDI4SPN (RES, nzuimm=0)
-*/
-                if (c_funct3 == `C0_F3_ADDI4SPN) begin
-                    imm = 0;
-                end
-                else begin
-/*
-    | 15 14 13 | 12          11 10|9 8 7| 6 5      | 4 3 2 | 1 0 |
  -  |    010   | uimm[5:3]        | rs1 | uimm[2;6]| rd   | 00  | C.LW
-*/
-/*
-    | 15 14 13 | 12          11 10|9 8 7| 6 5      | 4 3 2 | 1 0 |
  -  |    110   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.SW
 */
-                    imm = { 25'b0, I_instr[5], I_instr[12:10], I_instr[6], 2'b00 };
-                end
+                if (c_funct3 == `C0_F3_ADDI4SPN) imm = 0;
+                else imm = { 25'b0, I_instr[5], I_instr[12:10], I_instr[6], 2'b00 };
            end
        endcase
 
@@ -340,18 +329,18 @@ c|  |   000    | nzuimm[5] | rs1/rd!=0   | nzuimm[4:0]  |  10  | C.SLLI (HINT, r
       case(c_op)
         `C_OPC_C0: begin
 /*
-    | 15 14 13 | 12        | 11 10|9 8 7| 6 5      | 4 3 2 | 1 0 |
-    |    000   | 0         |     0      |          0       | 00  | Illegal instruction
+    | 15 14 13 | 12        | 11 10|9 8 7| 6 5      | 4 3 2| 1 0 |
+    |    000   | 0         |     0      |          0      | 00  | Illegal instruction
  -  |    000   | nzuimm[5:4;9:6;2;3]               | rd   | 00  | C.ADDI4SPN (RES, nzuimm=0)
  F  |    001   | uimm[5:3]        | rs1 | uimm[7:6]| rd   | 00  | C.FLD (RV32/64)
  D  |    001   | uimm[5:4;8]      | rs1 | uimm[7:6]| rd   | 00  | C.LQ (RV128)
- -  |    010   | uimm[5:3]        | rs1 | uimm[2;6]| rd   | 00  | C.LW
+ +  |    010   | uimm[5:3]        | rs1 | uimm[2;6]| rd   | 00  | C.LW
  F  |    011   | uimm[5:3]        | rs1 | uimm[2;6]| rd   | 00  | C.FLW (RV32)
  D  |    011   | uimm[5:3]        | rs1 | uimm[7:6]| rd   | 00  | C.LD (RV64/128)
  D  |    100   |                                          | 00  | Reserved
  D  |    101   | uimm[5:3]        | rs1 | uimm[7:6]| rs2  | 00  | C.FSD (RV32/64)
  D  |    101   | uimm[5:4;8]      | rs1 | uimm[7:6]| rs2  | 00  | C.SQ (RV128)
- -  |    110   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.SW
+ +  |    110   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.SW
  D  |    111   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.FSW (RV32)
  D  |    111   | uimm[5:3]        | rs1 | uimm[7:6]| rs2  | 00  | C.SD (RV64/128)
 */
@@ -379,34 +368,58 @@ c|  |   000    | nzuimm[5] | rs1/rd!=0   | nzuimm[4:0]  |  10  | C.SLLI (HINT, r
          end
         `C_OPC_C1: begin
 /*
-    | 15 14 13 | 12        | 11 10  | 9 8 7 | 6 5  |  4 3 2  | 1 0 |
- -  |   000    | 0         |      0         |    0           | 01  | C.NOP 
- -  |   000    | nzimm[5]  | rs1/rd6=0      | nzimm[4:0]     | 01  | C.ADDI (HINT, nzimm=0)
- -  |   001    |        imm[11;4;9:8;10;6;7;3:1;5]           | 01  | C.JAL (RV32)
- D  |   001    | imm[5]    | rs1/rd6=0      | imm[4:0]       | 01  | C.ADDIW (RV64/128; RES, rd=0)
- -  |   010    | imm[5]    |   rd6=0        | imm[4:0]       | 01  | C.LI (HINT, rd=0)
- -  |   011    | nzimm[9]  | 2              |nzimm[4;6;8:7;5]| 01  | C.ADDI16SP (RES, nzimm=0)
- -  |   011    | nzimm[17] | rd!={0, 2}     | nzimm[16:12]   | 01  | C.LUI (RES, nzimm=0; HINT, rd=0)
+    | 15 14 13 | 12        | 11 10  | 9 8 7  | 6 5  |  4 3 2  | 1 0|
+ -  |   000    | 0         |      0          |    0           | 01 | C.NOP
+ -  |   000    | nzimm[5]  | rs1/rd=0        | nzimm[4:0]     | 01 | C.ADDI (HINT, nzimm=0)
+ -  |   001    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.JAL (RV32)
+ D  |   001    | imm[5]    | rs1/rd=0        | imm[4:0]       | 01 | C.ADDIW (RV64/128; RES, rd=0)
+ -  |   010    | imm[5]    |   rd6=0         | imm[4:0]       | 01 | C.LI (HINT, rd=0)
+ -  |   011    | nzimm[9]  | 2               |nzimm[4;6;8:7;5]| 01 | C.ADDI16SP (RES, nzimm=0)
+ -  |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES, nzimm=0; HINT, rd=0)
 
-    | 15 14 13 | 12        | 11 10  | 9 8 7 | 6 5  |  4 3 2  | 1 0|
- -  |   100    | nzuimm[5] | 00     | rs1/rd| nzuimm[4:0]    | 01 | C.SRLI (RV32 NSE, nzuimm[5]=1)
- D  |   100    | 0         | 00     | rs1/rd| 0              | 01 | C.SRLI64 (RV128; RV32/64 HINT)
- -  |   100    | nzuimm[5] | 01     | rs1/rd| nzuimm[4:0]    | 01 | C.SRAI (RV32 NSE, nzuimm[5]=1)
- D  |   100    | 0         | 01     | rs1/rd| 0              | 01 | C.SRAI64 (RV128; RV32/64 HINT)
- -  |   100    | imm[5]    | 10     | rs1/rd| imm[4:0]       | 01 | C.ANDI
- -  |   100    | 0         | 11     | rs1/rd| 00   | rs2     | 01 | C.SUB
- -  |   100    | 0         | 11     | rs1/rd| 01   | rs2     | 01 | C.XOR
- -  |   100    | 0         | 11     | rs1/rd| 10   | rs2     | 01 | C.OR
- -  |   100    | 0         | 11     | rs1/rd| 11   | rs2     | 01 | C.AND
- D  |   100    | 1         | 11     | rs1/rd| 00   | rs2     | 01 | C.SUBW (RV64/128; RV32 RES)
- D  |   100    | 1         | 11     | rs1/rd| 01   | rs2     | 01 | C.ADDW (RV64/128; RV32 RES)
- D  |   100    | 1         | 11     |       | 10   |         | 01 | Reserved
- D  |   100    | 1         | 11     |       | 11   |         | 01 | Reserved
- -  |   101    |        imm[11;4;9:8;10;6;7;3:1;5]           | 01 | C.J
- -  |   110    | imm[8;4:3]         | rs10  | imm[7:6;2:1;5] | 01 | C.BEQZ
- -  |   111    | imm[8;4:3]         | rs10  | imm[7:6;2:1;5] | 01 | C.BNEZ
+    | 15 14 13 | 12        | 11 10  | 9 8 7  | 6 5  |  4 3 2  | 1 0|
+ -  |   100    | nzuimm[5] | 00     | rs1/rd | nzuimm[4:0]    | 01 | C.SRLI (RV32 NSE, nzuimm[5]=1)
+ D  |   100    | 0         | 00     | rs1/rd | 0              | 01 | C.SRLI64 (RV128; RV32/64 HINT)
+ -  |   100    | nzuimm[5] | 01     | rs1/rd | nzuimm[4:0]    | 01 | C.SRAI (RV32 NSE, nzuimm[5]=1)
+ D  |   100    | 0         | 01     | rs1/rd | 0              | 01 | C.SRAI64 (RV128; RV32/64 HINT)
+ -  |   100    | imm[5]    | 10     | rs1/rd | imm[4:0]       | 01 | C.ANDI
+ -  |   100    | 0         | 11     | rs1/rd | 00   | rs2     | 01 | C.SUB
+ -  |   100    | 0         | 11     | rs1/rd | 01   | rs2     | 01 | C.XOR
+ -  |   100    | 0         | 11     | rs1/rd | 10   | rs2     | 01 | C.OR
+ -  |   100    | 0         | 11     | rs1/rd | 11   | rs2     | 01 | C.AND
+ D  |   100    | 1         | 11     | rs1/rd | 00   | rs2     | 01 | C.SUBW (RV64/128; RV32 RES)
+ D  |   100    | 1         | 11     | rs1/rd | 01   | rs2     | 01 | C.ADDW (RV64/128; RV32 RES)
+ D  |   100    | 1         | 11     |        | 10   |         | 01 | Reserved
+ D  |   100    | 1         | 11     |        | 11   |         | 01 | Reserved
+ -  |   101    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.J
+ -  |   110    | imm[8;4:3]         | rs10   | imm[7:6;2:1;5] | 01 | C.BEQZ
+ -  |   111    | imm[8;4:3]         | rs10   | imm[7:6;2:1;5] | 01 | C.BNEZ
 */
             exec_next_stage = `EXEC_TO_FETCH;
+
+            if (I_instr[15:13] != 3'b100) begin
+                o_rs1 = I_instr[11:7];
+                o_rd  = I_instr[11:7];
+                // exec_next_stage = `EXEC_TO_DEAD;
+                case (c_funct3)
+                    `C1_F3_NOP_ADDI: begin
+                    end
+                    `C1_F3_JAL: begin
+                    end
+                    `C1_F3_LI: begin
+                    end
+                    `C1_F3_LUI_ADDI16SP: begin
+                    end
+                    default: begin
+                    end
+                endcase
+            end
+            else begin
+                o_rs1 = { 2'b01, I_instr[9:7] };
+                o_rs2 = { 2'b01, I_instr[4:2] };
+                o_rd  = { 2'b01, I_instr[9:7] };
+                // exec_next_stage = `EXEC_TO_DEAD;
+            end
          end
         `C_OPC_C2: begin
 /*
