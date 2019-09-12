@@ -406,9 +406,9 @@ c+  |   000    | 0         |      0          |    0           | 01 | C.NOP
 c+  |   000    | nzimm[5]  | rs1/rd=0        | nzimm[4:0]     | 01 | C.ADDI (HINT, nzimm=0)
 c-  |   001    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.JAL (RV32)
  D  |   001    | imm[5]    | rs1/rd=0        | imm[4:0]       | 01 | C.ADDIW (RV64/128; RES, rd=0)
-c-  |   010    | imm[5]    |   rd6=0         | imm[4:0]       | 01 | C.LI (HINT, rd=0)
+c+  |   010    | imm[5]    |   rd6=0         | imm[4:0]       | 01 | C.LI (HINT, rd=0)
 c-  |   011    | nzimm[9]  | 2               |nzimm[4;6;8:7;5]| 01 | C.ADDI16SP (RES, nzimm=0)
-c-  |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES, nzimm=0; HINT, rd=0)
+c+  |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES, nzimm=0; HINT, rd=0)
 
     | 15 14 13 | 12        | 11 10  | 9 8 7  | 6 5  |  4 3 2  | 1 0|
  -  |   100    | nzuimm[5] | 00     | rs1/rd | nzuimm[4:0]    | 01 | C.SRLI (RV32 NSE, nzuimm[5]=1)
