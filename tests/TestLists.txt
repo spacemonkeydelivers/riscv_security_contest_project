@@ -6,6 +6,8 @@ test_add(store_byte_issue  basic/store_byte_issue.py)
 
 test_add(asm_simple             asm/examples/simple.s)
 
+test_add(asm_cext_li            asm/compressed/c_li.s ENABLE_C_EXT)
+test_add(asm_cext_lui           asm/compressed/c_lui.s ENABLE_C_EXT)
 test_add(asm_cext_addi          asm/compressed/c_addi.s ENABLE_C_EXT)
 test_add(asm_cext_lw            asm/compressed/c_lw.s ENABLE_C_EXT)
 test_add(asm_cext_sw            asm/compressed/c_sw.s ENABLE_C_EXT)

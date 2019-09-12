@@ -444,10 +444,23 @@ c-  |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES,
                     `C1_F3_JAL: begin
                     end
                     `C1_F3_LI: begin
+                        exec_writeback_from_imm = 1;
+                        exec_mux_reg_input_sel = `MUX_REGINPUT_IMM;
+                        exec_next_stage = `EXEC_TO_FETCH;
                     end
                     `C1_F3_LUI_ADDI16SP: begin
+                        if (I_instr[11:7] == 2) begin
+                            exec_next_stage = `EXEC_TO_DEAD; //not implemented
+                        end
+                        else begin
+                            exec_writeback_from_imm = 1;
+                            exec_mux_reg_input_sel = `MUX_REGINPUT_IMM;
+                            exec_next_stage = `EXEC_TO_FETCH;
+                            if ({I_instr[12], I_instr[6:2]} == 0) exec_next_stage = `EXEC_TO_DEAD;
+                        end
                     end
                     default: begin
+                        exec_next_stage = `EXEC_TO_DEAD;
                     end
                 endcase
             end
