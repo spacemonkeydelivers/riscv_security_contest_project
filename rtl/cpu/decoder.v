@@ -107,6 +107,13 @@ module decoder
                if (c_funct3  == `C2_F3_LWSP) begin
                    imm = { 24'b0, I_instr[3:2], I_instr[12], I_instr[6:4], 2'b00 } ;
                end
+/*
+    | 15 14 13 | 12        | 11 10 9 8 7 | 6 5 4 3 2    | 1 0  |
+c|  |   110    |      uimm[5:2;7:6]      | rs2          |  10  | C.SWSP
+*/
+               if (c_funct3  == `C2_F3_SWSP) begin
+                   imm = { 24'b0, I_instr[8:7],  I_instr[12:9], 2'b00 } ;
+               end
            end
            2'b01: begin
                imm = 0;
@@ -373,14 +380,6 @@ c|  |   110    | uimm[5:2;7:6]           | rs2          |  10  | C.SWSP
  F  |   111    | uimm[5:2;7:6]           | rs2          |  10  | C.FSWSP (RV32)
  D  |   111    | uimm[5:3;8:6]           | rs2          |  10  | C.SDSP (RV64/128)
 */
-        /*
-         `OP_STORE:  begin // compute store address on ALU
-            alu_oper = `ALUOP_ADD;
-            exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
-            exec_mux_alu_s2_sel = `MUX_ALUDAT2_IMM;
-            exec_next_stage = `EXEC_TO_STORE;
-         end
-        */
             case (c_funct3)
                 `C2_F3_SLLI: begin
                 end
@@ -439,7 +438,10 @@ c|  |   110    | uimm[5:2;7:6]           | rs2          |  10  | C.SWSP
                 end
                 `C2_F3_SWSP: begin
                     o_rs1 = 2 ;
-                    exec_next_stage = `EXEC_TO_DEAD;
+                    alu_oper = `ALUOP_ADD;
+                    exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
+                    exec_mux_alu_s2_sel = `MUX_ALUDAT2_IMM;
+                    exec_next_stage = `EXEC_TO_STORE;
                 end
                 default: begin
                     exec_next_stage = `EXEC_TO_DEAD;
