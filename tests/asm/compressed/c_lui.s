@@ -5,11 +5,14 @@ __start:
 
 .option push
 .option norvc
-    li t1, 0x0001f000
+    li a0, 0xaaaaaaaa
+    li a1, 0xbbbbbbbb
+    li t1, 0xfffff000
     li t3, 0x00001000
 .option pop
 
-    c.lui a0, 31
+    // well... don't ask. see https://github.com/riscv/riscv-tools/issues/182
+    c.lui a0, (1<<20) - 1
     c.lui a1, 1
 
 .option push
