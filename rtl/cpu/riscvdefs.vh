@@ -13,8 +13,10 @@
     `define C0_F3_LW       3'b010
     `define C0_F3_SW       3'b110
 
-    `define C1_F3_NOP
-    `define C1_F3_NOP_JAL
+    `define C1_F3_NOP_ADDI      3'b000
+    `define C1_F3_JAL           3'b001
+    `define C1_F3_LI            3'b010
+    `define C1_F3_LUI_ADDI16SP  3'b011
 
     `define C2_F3_SLLI   3'b000
     `define C2_F3_LWSP   3'b010
