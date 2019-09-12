@@ -9,9 +9,9 @@
     `define C_OPC_C1    2'b01
     `define C_OPC_C2    2'b10
 
-    `define C0_F3_ADDI4SPN
-    `define C0_F3_LW
-    `define C0_F3_SW
+    `define C0_F3_ADDI4SPN 3'b000
+    `define C0_F3_LW       3'b010
+    `define C0_F3_SW       3'b110
 
     `define C1_F3_NOP
     `define C1_F3_NOP_JAL
