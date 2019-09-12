@@ -11,8 +11,8 @@ test_add(asm_cext_srli          asm/compressed/c_srli.s ENABLE_C_EXT)
 test_add(asm_cext_and           asm/compressed/c_and.s ENABLE_C_EXT)
 test_add(asm_cext_xor           asm/compressed/c_xor.s ENABLE_C_EXT)
 test_add(asm_cext_or            asm/compressed/c_or.s ENABLE_C_EXT)
-test_add(asm_cext_addi4spn      asm/compressed/c_addi4spn.s ENABLE_C_EXT NIGHTLY)
-test_add(asm_cext_addi16sp      asm/compressed/c_addi16sp.s ENABLE_C_EXT NIGHTLY)
+test_add(asm_cext_addi4spn      asm/compressed/c_addi4spn.s ENABLE_C_EXT)
+test_add(asm_cext_addi16sp      asm/compressed/c_addi16sp.s ENABLE_C_EXT)
 test_add(asm_cext_andi          asm/compressed/c_andi.s ENABLE_C_EXT)
 
 test_add(asm_cext_beq           asm/compressed/c_beq.s ENABLE_C_EXT)
@@ -174,8 +174,7 @@ endforeach()
 #C
 set(COMPLIANCE_SOURCES_ROOT ${CMAKE_SOURCE_DIR}/tests/compliance/rv32imc/src)
 file(GLOB COMPLIANCE_TESTS "${COMPLIANCE_SOURCES_ROOT}/*.S")
-set(FAILED_TESTS  "compliance_rv32imc_C-ADDI16SP.S"
-                  "compliance_rv32imc_C-ADDI4SPN.S"
+set(FAILED_TESTS  ""
                   "compliance_rv32imc_C-LUI.S")
 foreach(file ${COMPLIANCE_TESTS})
     get_filename_component(NAME "${file}" NAME)

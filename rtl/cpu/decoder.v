@@ -388,7 +388,7 @@ module decoder
 /*
     | 15 14 13 | 12        | 11 10|9 8 7| 6 5      | 4 3 2| 1 0 |
     |    000   | 0         |     0      |          0      | 00  | Illegal instruction
- -  |    000   | nzuimm[5:4;9:6;2;3]               | rd   | 00  | C.ADDI4SPN (RES, nzuimm=0)
+c+  |    000   | nzuimm[5:4;9:6;2;3]               | rd   | 00  | C.ADDI4SPN (RES, nzuimm=0)
  F  |    001   | uimm[5:3]        | rs1 | uimm[7:6]| rd   | 00  | C.FLD (RV32/64)
  D  |    001   | uimm[5:4;8]      | rs1 | uimm[7:6]| rd   | 00  | C.LQ (RV128)
 c+  |    010   | uimm[5:3]        | rs1 | uimm[2;6]| rd   | 00  | C.LW
@@ -408,7 +408,10 @@ c+  |    110   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.SW
             exec_mux_alu_s2_sel = `MUX_ALUDAT2_IMM;
             case (c_funct3)
                 `C0_F3_ADDI4SPN: begin
-                    exec_next_stage = `EXEC_TO_DEAD;
+                    o_rs1 = 2;
+                    alu_oper = `ALUOP_ADD;
+                    exec_writeback_from_alu = 1;
+                    if (I_instr[12:5] == 0) exec_next_stage = `EXEC_TO_DEAD;
                 end
                 `C0_F3_LW: begin
                     alu_oper = `ALUOP_ADD;
