@@ -361,10 +361,10 @@ c|  |   000    | nzuimm[5] | rs1/rd!=0   | nzuimm[4:0]  |  10  | C.SLLI (HINT, r
  D  |   001    | uimm[5]   | rd!=0       | uimm[4;9:6]  |  10  | C.LQSP (RV128; RES, rd=0)
 c+  |   010    | uimm[5]   | rd!=0       | uimm[4:2;7:6]|  10  | C.LWSP (RES, rd=0)
  F  |   011    | uimm[5]   | rd          | uimm[4:2;7:6]|  10  | C.FLWSP (RV32)
- -  |   011    | uimm[5]   | rd!=0       | uimm[4:3;8:6]|  10  | C.LDSP (RV64/128; RES, rd=0)
+ D  |   011    | uimm[5]   | rd!=0       | uimm[4:3;8:6]|  10  | C.LDSP (RV64/128; RES, rd=0)
 c+  |   100    | 0         | rs1!=0      | 0            |  10  | C.JR (RES, rs1=0)
 c+  |   100    | 0         | rd!=0       | rs2!=0       |  10  | C.MV (HINT, rd=0)
-c|  |   100    | 1         | 0           |  0           |  10  | C.EBREAK
+cN  |   100    | 1         | 0           |  0           |  10  | C.EBREAK
 c|  |   100    | 1         | rs1!=0      |  0           |  10  | C.JALR
 c+  |   100    | 1         | rs1/rd!=0   | rs2!=0       |  10  | C.ADD (HINT, rd=0)
  F  |   101    | uimm[5:3;8:6]           | rs2          |  10  | C.FSDSP (RV32/64)
@@ -395,17 +395,24 @@ c|  |   110    | uimm[5:2;7:6]           | rs2          |  10  | C.SWSP
                 `C2_F3_JR/*, `C2_F3_MV, `C2_F3_EBREAK,  `C2_F3_JALR, `C2_F3_CADD*/: begin
                     exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
                     exec_mux_alu_s2_sel = `MUX_ALUDAT2_REGVAL2;
+
                     if (I_instr[12]) begin
-                        if ((o_rs2 != 0) && (o_rd != 0)) begin // c.add
+                        if ( (I_instr[11:7] != 0) && (I_instr[6:2] != 0) ) begin // c.add
                             alu_oper = `ALUOP_ADD;
-                            exec_next_stage = `EXEC_TO_FETCH;
                             exec_writeback_from_alu = 1;
+                            exec_next_stage = `EXEC_TO_FETCH;
                         end
-                        if ((o_rs1 != 0) && (o_rd == 0)) begin // c.jalr
-                            exec_next_stage = `EXEC_TO_DEAD;
+                        if ( (I_instr[11:7] != 0) && (I_instr[6:2] == 0)) begin // c.jalr
+                            write_reg = 1;
+                            exec_mux_reg_input_sel = `MUX_REGINPUT_ALU;
+
+                            alu_oper = `ALUOP_ADD;
+                            exec_next_pc_from_alu = 1;
+                            exec_next_stage = `EXEC_TO_FETCH;
+                            o_rd = 1;
                         end
-                        if ((o_rs1 == 0) && (o_rd == 0)) begin // c.ebreak
-                            exec_next_stage = `EXEC_TO_DEAD;
+                        if ((I_instr[11:7] == 0) && (I_instr[6:2] == 0)) begin // c.ebreak
+                            exec_next_stage = `EXEC_TO_DEAD; // we do not implement ebreak
                         end
                     end
                     else begin
@@ -414,10 +421,6 @@ c|  |   110    | uimm[5:2;7:6]           | rs2          |  10  | C.SWSP
                                 exec_next_stage = `EXEC_TO_DEAD;
                             end
                             else begin
-                                // return address computed during decode, write to register
-                                write_reg = 1;
-                                exec_mux_reg_input_sel = `MUX_REGINPUT_ALU;
-
                                 // compute jal/jalr address
                                 alu_oper = `ALUOP_ADD;
                                 exec_next_pc_from_alu = 1;
