@@ -66,6 +66,7 @@ module soc
    wire wb_timer_ack;
    wire [WB_DATA_WIDTH - 1:0] wb_timer_data_out;
    wire timer_irq;
+   wire timer_mtimecmp_accessed;
    wire tags_mismatch_irq;
    
    // uart interface
@@ -108,7 +109,8 @@ module soc
       .wb_cyc_i (wb_timer_cyc),
       .wb_ack_o (wb_timer_ack),
       .wb_data_o (wb_timer_data_out),
-      .timer_irq_o (timer_irq)
+      .timer_irq_o (timer_irq),
+      .timer_mtimecmp_accessed_o (timer_mtimecmp_accessed)
    );
    
    wb_ext
@@ -246,7 +248,8 @@ module soc
       .STB_O (wb_cpu_stb),
       .WE_O (wb_cpu_we),
       .check_tags_o (check_tags),
-      .clear_tag_mismatch_o (clear_tags_mismatch)
+      .clear_tag_mismatch_o (clear_tags_mismatch),
+      .clear_mip_timer_i (timer_mtimecmp_accessed)
    );
 
    wb_uart

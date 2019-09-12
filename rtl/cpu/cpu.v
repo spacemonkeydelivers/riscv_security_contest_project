@@ -24,13 +24,14 @@ module cpu
    output STB_O,
    output WE_O,
    output check_tags_o,
-   output clear_tag_mismatch_o
+   output clear_tag_mismatch_o,
+   input wire clear_mip_timer_i
 );
    
     /*verilator public_module*/
     /*verilator no_inline_module*/
   
-    wire interrupt_occured = TIMER_INTERRUPT_I || TAGS_INTERRUPT_I;
+    wire interrupt_occured = (TIMER_INTERRUPT_I && irq_timer_en) || TAGS_INTERRUPT_I;
     wire clk, reset;
     assign clk = CLK_I;
     assign reset = RST_I;
@@ -223,6 +224,7 @@ module cpu
                                                  csr_data_in;
 
    wire irq_en;
+   wire irq_timer_en;
    wire tags_en;
    wire tags_if_en;
    wire tags_irq_clear;
@@ -242,6 +244,7 @@ module cpu
       .csr_exists_o (csr_exists),
       .csr_ro_o (csr_ro),
       .csr_irq_en_o (irq_en),
+      .csr_irq_timer_en_o (irq_timer_en),
       .csr_tags_en_o (tags_en),
       .csr_tags_if_en_o (tags_if_en),
       .csr_tags_irq_clear_o (tags_irq_clear)
@@ -272,16 +275,16 @@ module cpu
     localparam STATE_DEAD           = 5'd12;
     localparam STATE_PRE_FETCH      = 5'd13;
     localparam STATE_STORE1         = 5'd14;
-    localparam STATE_LOAD1          = 5'd15;
+    localparam STATE_LOAD1               = 5'd15;
     localparam STATE_MRET_UPDATE_MSTATUS = 5'd16;
     localparam STATE_MRET_READ_EPC       = 5'd17;
-    localparam STATE_POST_EXEC       = 5'd18;
-    localparam STATE_MISALIGNED_ADDR = 5'd19;
-    localparam STATE_CSR2    = 5'd20;
-    localparam STATE_MRET    = 5'd21;
-    localparam STATE_FETCH_MORE     = 5'd22;
+    localparam STATE_POST_EXEC           = 5'd18;
+    localparam STATE_MISALIGNED_ADDR     = 5'd19;
+    localparam STATE_CSR2                = 5'd20;
+    localparam STATE_MRET                    = 5'd21;
+    localparam STATE_FETCH_MORE              = 5'd22;
     localparam STATE_PREPAIR_UNALIGNED_FETCH = 5'd23;
-    localparam STATE_DECODE16 = 5'd24; // NOT used for now... Maybe we don't need it
+    localparam STATE_DECODE16                = 5'd24; // NOT used for now... Maybe we don't need it
 
 
    reg [1:0] csr_op_type;
@@ -340,18 +343,20 @@ module cpu
 
 
 //=================================================================================================
-   localparam TRAP_STATE_RESET        = 3'd0;
-   localparam TRAP_STATE_IDLE         = 3'd1;
-   localparam TRAP_STATE_LOAD_STATUS  = 3'd2;
-   localparam TRAP_STATE_STORE_STATUS = 3'd3;
-   localparam TRAP_STATE_STORE_EPC    = 3'd4;
-   localparam TRAP_STATE_STORE_TVAL   = 3'd5;
-   localparam TRAP_STATE_LOAD_TVEC    = 3'd6;
-   localparam TRAP_STATE_DEAD         = 3'd7;
+   localparam TRAP_STATE_RESET        = 4'd0;
+   localparam TRAP_STATE_IDLE         = 4'd1;
+   localparam TRAP_STATE_LOAD_STATUS  = 4'd2;
+   localparam TRAP_STATE_STORE_STATUS = 4'd3;
+   localparam TRAP_STATE_STORE_EPC    = 4'd4;
+   localparam TRAP_STATE_STORE_TVAL   = 4'd5;
+   localparam TRAP_STATE_LOAD_TVEC    = 4'd6;
+   localparam TRAP_STATE_LOAD_MIP     = 4'd7;
+   localparam TRAP_STATE_STORE_MIP    = 4'd8;
+   localparam TRAP_STATE_DEAD         = 4'd9;
 
    reg trap_occured;
-   reg [2:0] trap_state;
-   reg [2:0] next_trap_state;
+   reg [3:0] trap_state;
+   reg [3:0] next_trap_state;
    wire handling_trap = !((trap_state == TRAP_STATE_RESET) || (trap_state == TRAP_STATE_IDLE));
 
    always @ (posedge clk) begin
@@ -395,11 +400,23 @@ module cpu
             trap_csr_data_in = pc;
          end
          TRAP_STATE_STORE_TVAL: begin
-            next_trap_state = TRAP_STATE_LOAD_TVEC;
+            next_trap_state = (TIMER_INTERRUPT_I && irq_timer_en) ? TRAP_STATE_LOAD_MIP : TRAP_STATE_LOAD_TVEC;
             trap_csr_en = 1;
             trap_csr_we = 1;
             trap_csr_addr = `MSR_MTVAL;
             trap_csr_data_in = pc;
+         end
+         TRAP_STATE_LOAD_MIP: begin
+            next_trap_state = TRAP_STATE_STORE_MIP;
+            trap_csr_en = 1;
+            trap_csr_addr = `MSR_MIP;
+         end
+         TRAP_STATE_STORE_MIP: begin
+            next_trap_state = TRAP_STATE_LOAD_TVEC;
+            trap_csr_en = 1;
+            trap_csr_we = 1;
+            trap_csr_addr = `MSR_MIP;
+            trap_csr_data_in = {csr_data_out[31:8], 1'b1, csr_data_out[6:0]};
          end
          TRAP_STATE_LOAD_TVEC: begin
             next_trap_state = TRAP_STATE_IDLE;
@@ -688,9 +705,17 @@ module cpu
                   bus_op = `BUSOP_WRITEW; // FUNC_SW
                end
             endcase
+            csr_en = 1;
+            csr_addr = `MSR_MIP;
          end
          STATE_STORE2: begin
             next_state = STATE_UPDATE_PC;
+            if (clear_mip_timer_i) begin
+               csr_en = 1;
+               csr_we = 1;
+               csr_addr = `MSR_MIP;
+               csr_data_in = {csr_data_out[31:8], 1'b0, csr_data_out[6:0]};
+            end
          end
          STATE_BRANCH2: begin
             next_state = STATE_UPDATE_PC;

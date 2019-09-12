@@ -19,6 +19,7 @@ module csr
    output wire                        csr_exists_o,
    output wire                        csr_ro_o,
    output wire                        csr_irq_en_o,
+   output wire                        csr_irq_timer_en_o,
    output wire                        csr_tags_en_o,
    output wire                        csr_tags_if_en_o,
    output wire                        csr_tags_irq_clear_o
@@ -39,6 +40,8 @@ module csr
 
    reg irq_en;
    assign csr_irq_en_o = irq_en;
+   reg irq_timer_en;
+   assign csr_irq_timer_en_o = irq_timer_en;
    reg tags_en;
    assign csr_tags_en_o = tags_en;
    reg tags_if_en;
@@ -49,14 +52,18 @@ module csr
    always @ (posedge clk_i) begin
       if (rst_i) begin
          irq_en <= 0;
+         irq_timer_en <= 0;
          tags_en <= 0;
          tags_if_en <= 0;
          tags_irq_clear <= 0;
       end else begin
-         irq_en <= (csr_addr_i == `MSR_MSTATUS) ? csr_data_i[3] : irq_en;
-         tags_en <= (csr_addr_i == `MSR_MTAGS) ? csr_data_i[0] : tags_en;
-         tags_if_en <= (csr_addr_i == `MSR_MTAGS) ? csr_data_i[2] : tags_if_en;
-         tags_irq_clear <= (csr_addr_i == `MSR_MTAGS) ? csr_data_i[1] : 1'b0;
+         if (csr_we_i) begin
+            irq_en <= (csr_addr_i == `MSR_MSTATUS) ? csr_data_i[3] : irq_en;
+            tags_en <= (csr_addr_i == `MSR_MTAGS) ? csr_data_i[0] : tags_en;
+            tags_if_en <= (csr_addr_i == `MSR_MTAGS) ? csr_data_i[2] : tags_if_en;
+            tags_irq_clear <= (csr_addr_i == `MSR_MTAGS) ? csr_data_i[1] : 1'b0;
+            irq_timer_en <= (csr_addr_i == `MSR_MIE) ? csr_data_i[7] : irq_timer_en;
+         end
       end
    end
    
