@@ -437,8 +437,8 @@ c+  |   011    | nzimm[17] | rd!={0, 2}      | nzimm[16:12]   | 01 | C.LUI (RES,
  D  |   100    | 1         | 11     |        | 10   |         | 01 | Reserved
  D  |   100    | 1         | 11     |        | 11   |         | 01 | Reserved
 c+  |   101    |        imm[11;4;9:8;10;6;7;3:1;5]            | 01 | C.J
- -  |   110    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BEQZ
- -  |   111    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BNEZ
+ +  |   110    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BEQZ
+ +  |   111    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BNEZ
 */
             exec_next_stage = `EXEC_TO_FETCH;
 
