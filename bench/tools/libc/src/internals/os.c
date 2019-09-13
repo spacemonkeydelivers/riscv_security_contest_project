@@ -90,7 +90,7 @@ int __int_serve(struct s_esf_frame* frame, int n) {
 #define MTIMEFREQ_BASE 0x40000010
 
 __attribute__((section(".__system.os")))
-uint64_t mtime() {
+uint64_t __mtime() {
     volatile uint32_t *r = (uint32_t *)MTIME_BASE;
 
     uint32_t lo = 0;
@@ -106,7 +106,7 @@ uint64_t mtime() {
 }
 
 __attribute__((section(".__system.os")))
-static void set_mtimecmp(uint64_t time) {
+static void __set_mtimecmp(uint64_t time) {
     volatile uint32_t *r = (uint32_t *)MTIMECMP_BASE;
 
     r[1] = 0xffffffff;
@@ -115,7 +115,7 @@ static void set_mtimecmp(uint64_t time) {
 }
 
 __attribute__((section(".__system.os")))
-static void set_mtimefreq(uint64_t freq) {
+static void __set_mtimefreq(uint64_t freq) {
     volatile uint32_t *r = (uint32_t *)MTIMEFREQ_BASE;
 
     r[1] = (uint32_t)(freq >> 32);
@@ -128,10 +128,10 @@ bool alarm_soc_timer(int interval)
     if (interval < 0) {
         return false;
     }
-    uint64_t time = mtime();
+    uint64_t time = __mtime();
 
-    set_mtimecmp(time + interval);
-    set_mtimefreq(1);
+    __set_mtimecmp(time + interval);
+    __set_mtimefreq(1);
 
     uint32_t timer_enable = 0x80;
     uint32_t val = 0;
@@ -160,7 +160,7 @@ void alarm_soc_timer_stop() {
                       :
                       : [new]"r"(timer_disable),
                         [reg]"r"(val));
-    set_mtimecmp(0);
+    __set_mtimecmp(0);
 }
 
 __attribute__((section(".__system.os")))
