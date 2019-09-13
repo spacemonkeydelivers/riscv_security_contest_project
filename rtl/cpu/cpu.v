@@ -627,8 +627,7 @@ module cpu
                 csr_we = 1;
                 if (TAGS_INTERRUPT_I && tags_en) begin
                     csr_data_in = CAUSE_TAG_MISMATCH;
-                end
-                if (TIMER_INTERRUPT_I) begin
+                end else if (TIMER_INTERRUPT_I) begin
                     csr_data_in = CAUSE_TIMER_INTERRUPT;
                 end
             end
