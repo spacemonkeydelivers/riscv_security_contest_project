@@ -101,14 +101,18 @@ class CmdExamine:
                   'u': '{0:#010x}: {1}',
                   'x': '{0:#010x}: {1:#0' + str(width + 2) + 'x}',
                   't': '{0:#010x}: {1:#0' + str(width + 2) + 'b}',
-                  'i': '{0:#010x}: {1}',
+                  'i': '{0:#010x}: \t{1}',
                 }
                 for d in data:
                     a = d[0]
                     d = d[1]
                     if out == 'i':
                         d = self.debugger._disasm.display(a, self.soc)
-                    print(fmts[out].format(a, d))
+                        if d != None:
+                            print(fmts[out].format(a, d.split(':')[1]))
+                        d = self.debugger._disasm.display(a + 2, self.soc)
+                        if d != None:
+                            print(fmts[out].format(a + 2, d.split(':')[1]))
                 print('_______________________')
 
                 if out == 't':
