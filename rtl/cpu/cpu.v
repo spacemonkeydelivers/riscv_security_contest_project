@@ -46,6 +46,7 @@ module cpu
     localparam CAUSE_INVALID_INSTRUCTION    = 32'h00000002;
     localparam CAUSE_BREAK                  = 32'h00000003;
     localparam CAUSE_ECALL                  = 32'h0000000b;
+    localparam CAUSE_TIMER_INTERRUPT        = 32'h80000007;
     localparam CAUSE_EXTERNAL_INTERRUPT     = 32'h8000000b;
     localparam CAUSE_TAG_MISMATCH           = 32'h80000010;
 
@@ -628,7 +629,7 @@ module cpu
                     csr_data_in = CAUSE_TAG_MISMATCH;
                 end
                 if (TIMER_INTERRUPT_I) begin
-                    csr_data_in = CAUSE_EXTERNAL_INTERRUPT;
+                    csr_data_in = CAUSE_TIMER_INTERRUPT;
                 end
             end
          end
