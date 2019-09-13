@@ -11,7 +11,7 @@ volatile int unused = 0;
 void timer_handler(int n, void* context)
 {
     (void)context;
-    if (n != RISCV_INT_EXT_M) {
+    if (n != RISCV_INT_TIMER_M) {
         printf("\nERROR: interrupt number is not correct!\n");
         exit(42);
     }
@@ -26,7 +26,7 @@ void timer_handler(int n, void* context)
 }
 
 int main () {
-    register_int_handler(RISCV_INT_EXT_M, &timer_handler);
+    register_int_handler(RISCV_INT_TIMER_M, &timer_handler);
 
     if (!alarm_soc_timer(D_TIMEOUT)) {
         return EXIT_FAILURE;
