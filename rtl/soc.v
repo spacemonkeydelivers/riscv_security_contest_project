@@ -9,7 +9,7 @@
 module soc
 #(
    parameter FIRMWARE_FILE = "",
-   parameter SOC_RAM_SIZE = 8192
+   parameter SOC_RAM_SIZE = 65536
 )
 (
    input  wire clk_i,
