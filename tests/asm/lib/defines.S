@@ -64,6 +64,7 @@
    __test_exit \status, TARGET
 .endm
 
+#define UART_DIV_ADDR  0x80000000
 #define UART_BASE_ADDR 0x80000004
 
 #define GRANULE_TAG_WIDTH 4

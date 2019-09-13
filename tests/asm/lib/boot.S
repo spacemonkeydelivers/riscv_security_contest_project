@@ -14,6 +14,9 @@ __start:
     csrw mie, t2
     li t2, 8
     csrw mstatus, 8
+    li t2, 13889
+    li t1, UART_DIV_ADDR
+    sw t2, 0(t1)
     j main
 
 #endif // D_RISCV_SOC_TESTS_BOOT_INCLUDE_GUARD
