@@ -90,7 +90,8 @@ void RV_SOC::tick(unsigned num)
     assert(m_soc);
     for (unsigned i = 0; i < num; i++)
     {
-
+        // dirty hack to skip headache for running on sim and fpga
+        m_soc->soc->uart0->cfg_divider = 1;
         if (m_tickCnt == 0) {
 
             m_soc->clk_i = 0;
