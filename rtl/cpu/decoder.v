@@ -411,6 +411,7 @@ c+  |    110   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.SW
                     o_rs1 = 2;
                     alu_oper = `ALUOP_ADD;
                     exec_writeback_from_alu = 1;
+                    exec_next_stage = `EXEC_TO_FETCH;
                     if (I_instr[12:5] == 0) exec_next_stage = `EXEC_TO_DEAD;
                 end
                 `C0_F3_LW: begin
