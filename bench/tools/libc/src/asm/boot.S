@@ -40,13 +40,12 @@ bss_init:
     addi sp, sp, -16
     call __soc_init
     addi sp, sp, 16
-    # enable timer interrupts
-    # li s0, 0x80
-    # csrw mie, s0
+    # Disable interrupts
+    csrwi mie, 0
     # enable global interrupts
     li s0, 8
     csrw mstatus, s0
-# Configure uaer to 9600 baud    
+# Configure uart to 9600 baud
     li a1, 0x80000000
     li a0, 13889
     sw a0, 0(a1)
