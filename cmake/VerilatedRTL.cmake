@@ -84,6 +84,7 @@ add_custom_target(
 set(TESTBENCH_SRC bench/rtl/soc.cpp bench/rtl/ui.cpp)
 
 add_library(bench SHARED ${TESTBENCH_SRC})
+target_compile_options(bench PUBLIC "-DD_SOC_RAM_SIZE=${SOC_RAM_SIZE}")
 add_dependencies(bench Vmodel platform_headers)
 target_include_directories(bench PUBLIC
     ${VERILATOR_INCLUDE}
