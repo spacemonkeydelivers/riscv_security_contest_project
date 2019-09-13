@@ -49,3 +49,13 @@ tick 3
 go pc=0x30
 go
 
+w add reg t0
+w add mem 0x100
+w show
+w rem 0
+
+w 1234
+w add reg 123123
+w add mem 123
+w add mem xxx
+
