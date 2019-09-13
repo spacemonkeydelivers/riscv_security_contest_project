@@ -237,6 +237,7 @@ module decoder
       exec_writeback_from_alu = 0;
       exec_next_pc_from_alu = 0;
       exec_mux_reg_input_sel = 0;
+      exec_next_stage = `EXEC_TO_FETCH;
       exec_mux_alu_s2_sel = 0;
       exec_mux_alu_s1_sel = 0;
       alu_oper = `ALUOP_ADD;
