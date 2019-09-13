@@ -10,7 +10,7 @@ LDFLAGS    = $(RISCV_LDFLAGS_COMMON)
 LDSCRIPT   = $(RISCV_C_LD_SCRIPT)
 
 <% if asm_c_ext %>
-CFLAGS += -march=rv32imc
+CFLAGS += -march=rv32ic
 <% end %>
 
 LIBC = <%= disable_security ? "c_ns" : "c" %>
