@@ -22,7 +22,8 @@ module fpga(
                     CONTROL_TRAN_CLEAN     = 4'd5,
                     CONTROL_TRAN_READY     = 4'd6,
                     CONTROL_TRAN_SIZE_LOW  = 4'd7,
-                    CONTROL_TRAN_SIZE_HIGH = 4'd8;
+                    CONTROL_TRAN_SIZE_HIGH = 4'd8,
+                    CONTROL_CPU_HALT       = 4'd9;
    assign irq_o = 0;
 
    // latches to avoid metastability
@@ -69,15 +70,18 @@ module fpga(
       end
    end
    
-   wire [2:0] addr = addr_i[3:1];
-   localparam [2:0] REG_SANITY        = 3'd0,
-                    REG_LOW_ADDR      = 3'd1,
-                    REG_HIGH_ADDR     = 3'd2,
-                    REG_LOW_DATA_IN   = 3'd3,
-                    REG_HIGH_DATA_IN  = 3'd4,
-                    REG_CONTROL       = 3'd5,
-                    REG_LOW_DATA_OUT  = 3'd6,
-                    REG_HIGH_DATA_OUT = 3'd7;
+   wire [3:0] addr = addr_i[4:1];
+   localparam [3:0] REG_SANITY        = 4'd0,
+                    REG_LOW_ADDR      = 4'd1,
+                    REG_HIGH_ADDR     = 4'd2,
+                    REG_LOW_DATA_IN   = 4'd3,
+                    REG_HIGH_DATA_IN  = 4'd4,
+                    REG_CONTROL       = 4'd5,
+                    REG_LOW_DATA_OUT  = 4'd6,
+                    REG_HIGH_DATA_OUT = 4'd7,
+                    REG_LOW_CPU_PC    = 4'd8,
+                    REG_HIGH_CPU_PC   = 4'd9,
+                    REG_CPU_STATE     = 4'd10;
 
    reg [15:0] regs_internal [0:7];
 
@@ -87,6 +91,9 @@ module fpga(
    wire [15:0] to_cpu = (addr == REG_LOW_DATA_OUT)  ? data_from_soc_low :
                         (addr == REG_HIGH_DATA_OUT) ? data_from_soc_high :
                         (addr == REG_CONTROL)       ? {regs_internal[addr][15:7], tran_ready, regs_internal[addr][5:0]} :
+                        (addr == REG_LOW_CPU_PC)    ? cpu_pc[15:0] :
+                        (addr == REG_HIGH_CPU_PC)   ? cpu_pc[31:16] :
+                        (addr == REG_CPU_STATE)     ? cpu_state : 
                                                       regs_internal[addr];
    
    wire [31:0] addr_to_soc = {regs_internal[REG_HIGH_ADDR], regs_internal[REG_LOW_ADDR]};
@@ -103,6 +110,10 @@ module fpga(
    assign data_o[4] = regs_internal[REG_CONTROL][CONTROL_TRAN_READY];
    assign data_o[5] = uart_rx;
    assign data_o[6] = uart_tx;
+
+   wire [31:0] cpu_pc;
+   wire [4:0]  cpu_state;
+   wire        cpu_halt = regs_internal[REG_CONTROL][CONTROL_CPU_HALT];
 
    wire tran_ready;
    soc
@@ -121,7 +132,10 @@ module fpga(
       .ext_tran_write_i (regs_internal[REG_CONTROL][CONTROL_TRAN_WE]),
       .ext_tran_clear_i (regs_internal[REG_CONTROL][CONTROL_TRAN_CLEAN]),
       .ext_tran_data_o ({data_from_soc_high, data_from_soc_low}),
-      .ext_tran_ready_o (tran_ready)
+      .ext_tran_ready_o (tran_ready),
+      .ext_cpu_halt_i (cpu_halt),
+      .pc_o (cpu_pc),
+      .state_o (cpu_state)
    );
 
    // always loop to deal with fpga-to-arm iface data
@@ -139,6 +153,7 @@ module fpga(
          regs_internal[REG_CONTROL] <= 0;
          regs_internal[REG_CONTROL][CONTROL_CPU_RESET] <= 1;
          regs_internal[REG_CONTROL][CONTROL_SOC_RESET] <= 1;
+         regs_internal[REG_CONTROL][CONTROL_CPU_HALT] <= 1;
       end
       else begin
          if (iface_accessed) begin

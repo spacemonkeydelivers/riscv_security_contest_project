@@ -25,7 +25,10 @@ module cpu
    output WE_O,
    output check_tags_o,
    output clear_tag_mismatch_o,
-   input wire clear_mip_timer_i
+   input wire clear_mip_timer_i,
+   input wire external_halt_i,
+   output wire [31:0] pc_o,
+   output wire [4:0]  state_o
 );
    
     /*verilator public_module*/
@@ -430,7 +433,7 @@ module cpu
    end
 //=================================================================================================
     wire busy;
-    assign busy = alu_busy | bus_busy | csr_busy | handling_trap | handling_mret;
+    assign busy = alu_busy | bus_busy | csr_busy | handling_trap | handling_mret | external_halt_i;
 
     // evaluate branch conditions
     wire branch;
@@ -439,6 +442,8 @@ module cpu
 
    reg [4:0] state;
    reg [4:0] next_state;
+   assign state_o = state;
+   assign pc_o = pc;
 
    reg [31:0] pc;
    reg [31:0] next_pc;

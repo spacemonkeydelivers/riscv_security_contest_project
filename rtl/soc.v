@@ -25,7 +25,11 @@ module soc
    input  wire                       ext_tran_write_i,
    input  wire                       ext_tran_clear_i,
    output wire [WB_DATA_WIDTH - 1:0] ext_tran_data_o,
-   output wire                       ext_tran_ready_o
+   output wire                       ext_tran_ready_o,
+
+   input wire                        ext_cpu_halt_i,
+   output wire [31:0]                pc_o,
+   output wire [4:0]                 state_o
 );
    /*verilator no_inline_module*/
 
@@ -249,7 +253,10 @@ module soc
       .WE_O (wb_cpu_we),
       .check_tags_o (check_tags),
       .clear_tag_mismatch_o (clear_tags_mismatch),
-      .clear_mip_timer_i (timer_mtimecmp_accessed)
+      .clear_mip_timer_i (timer_mtimecmp_accessed),
+      .external_halt_i (ext_cpu_halt_i),
+      .pc_o (pc_o),
+      .state_o (state_o)
    );
 
    wb_uart

@@ -13,6 +13,9 @@ class FPGA_SOC:
     REGISTER_CONTROL        = 0xa
     REGISTER_DATA_OUT_LOW   = 0xc
     REGISTER_DATA_OUT_HIGH  = 0xe
+    REGISTER_CPU_PC_LOW     = 0x10
+    REGISTER_CPU_PC_HIGH    = 0x12
+    REGISTER_CPU_STATE      = 0x14
     SANE_CONSTANT           = 0x50FE
     BIT_CPU_RESET             = 0
     BIT_SOC_RESET             = 1
@@ -23,6 +26,7 @@ class FPGA_SOC:
     BIT_TRANSACTION_READY     = 6
     BIT_TRANSACTION_SIZE_LOW  = 7
     BIT_TRANSACTION_SIZE_HIGH = 8
+    BIT_CPU_HALT              = 9
     UART_BAUDE_DIVIDER_ADDR   = 0x80000000
     UART_TRANSMIT_BYTE_ADDR   = 0x80000004
     UART_9600_DIVIDER         = 13889
@@ -34,6 +38,37 @@ class FPGA_SOC:
     def upload_firmware(self, firmware_path):
         pass
 #        self._soc.uploadBitstream(firmware_path)
+
+    def get_cpu_state(self):
+        # halt cpu
+        self.__set_cpu_halt()
+        self.__update_control_register()
+        # get pc
+        state = self._soc.readShort(self.REGISTER_CPU_STATE) & 0xFFFF
+        # run cpu
+        self.__clear_cpu_halt()
+        self.__update_control_register()
+        return state
+
+    def print_cpu_state(self):
+        state = self.get_cpu_state()
+        print("CPU state: {0}".format(state))
+
+    def get_cpu_pc(self):
+        # halt cpu
+        self.__set_cpu_halt()
+        self.__update_control_register()
+        # get pc
+        low_pc = self._soc.readShort(self.REGISTER_CPU_PC_LOW) & 0xFFFF
+        high_pc = self._soc.readShort(self.REGISTER_CPU_PC_HIGH) & 0xFFFF
+        # run cpu
+        self.__clear_cpu_halt()
+        self.__update_control_register()
+        return ((high_pc << 16) | low_pc)
+
+    def print_cpu_pc(self):
+        pc = self.get_cpu_pc()
+        print("PC: 0x{:08X}".format(pc))
 
     def print_ram(self, start_address, num_words):
         print("{:10} : {:10}".format("address", "data"))
@@ -61,12 +96,13 @@ class FPGA_SOC:
     
     def check_sanity(self):
         tmp = self._soc.readShort(self.REGISTER_SANITY)
+        print(hex(tmp))
         assert(tmp == self.SANE_CONSTANT)
         return (tmp == self.SANE_CONSTANT)
    
     def halt_soc(self):
         # set cpu to reset
-        self.__set_cpu_reset()
+        self.__set_cpu_halt()
         # set soc to run
         self.__clear_soc_reset()
         # set bus to external
@@ -76,8 +112,10 @@ class FPGA_SOC:
         self.__update_control_register()
 
     def run_soc(self):
+        self.__clear_cpu_halt()
+        self.__set_cpu_reset()
         # set soc to reset
-        self.__set_soc_reset()
+#        self.__set_soc_reset()
         # set bus to cpu
         self.__set_bus_master_cpu()
         self.__update_control_register()
@@ -208,6 +246,12 @@ class FPGA_SOC:
         high_data_out = self._soc.readShort(self.REGISTER_DATA_OUT_HIGH) & 0xFFFF
         return ((high_data_out << 16) | low_data_out)
 
+    def __set_cpu_halt(self):
+        self.__set_control_bit(self.BIT_CPU_HALT)
+
+    def __clear_cpu_halt(self):
+        self.__clear_control_bit(self.BIT_CPU_HALT)
+
     def __set_cpu_reset(self):
         self.__set_control_bit(self.BIT_CPU_RESET)
 
@@ -260,16 +304,10 @@ soc.uart_print("Test")
 #for i in range(32, 127):
 #    soc.write_word(0x80000004, i)
 
-soc.write_word(0x0, 0x12345678)
-soc.write_word(0x100, 0xABCDEF)
-soc.write_word(0x104, 0xABCDEF)
-print(hex(soc.read_word(0x0)))
-print(hex(soc.read_word(0x100)))
-print(hex(soc.read_word(0x104)))
-
 print("#######################")
 
-soc.upload_image("/mnt/smd/test.v")
+soc.upload_image("/mnt/smd/fpga_tests/asm_uart.v")
+#soc.upload_image("/mnt/smd/fpga_tests/libc_printk.v")
 
 #soc.write_word(0x0,  0x10000113)
 #soc.write_word(0x4,  0x12300513)
@@ -287,7 +325,13 @@ soc.run_soc()
 
 time.sleep(3)
 
+soc.print_cpu_pc()
+soc.print_cpu_state()
+
 soc.halt_soc()
 #
 print("#######################")
 soc.print_ram(0x100, 2)
+
+print(hex(soc.get_cpu_pc()))
+print(soc.get_cpu_state())

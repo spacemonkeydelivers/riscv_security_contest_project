@@ -29,7 +29,7 @@ module wb_uart
    wire uart_accessed = wb_cyc_i && wb_stb_i;
 
    reg ack;
-   assign wb_ack_o = ack;
+   assign wb_ack_o = ack && wb_cyc_i;
 
    reg [WB_DATA_WIDTH - 1:0] data_out;
    assign wb_data_o = data_out;
@@ -64,7 +64,7 @@ module wb_uart
                end
                UART_ADDR_DATA_TO_TRANSMIT: begin
                   if (wb_we_i) begin
-                     tx_started <= 1;
+                     tx_started <= !tx_finished;
                      if (tx_finished) begin
                         tx_started <= 0;
                         ack <= 1;
