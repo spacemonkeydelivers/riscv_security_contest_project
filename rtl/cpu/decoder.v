@@ -161,7 +161,7 @@ module decoder
     |   111    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BNEZ
 */
                         `C1_F3_BEQ, `C1_F3_BNE: begin
-                            imm = { 23'b0,
+                            imm = { {23{I_instr[12]}},
                                 I_instr[12],
                                 I_instr[6:5], I_instr[2], I_instr[11:10], I_instr[4:3], 1'b0 };
                         end
