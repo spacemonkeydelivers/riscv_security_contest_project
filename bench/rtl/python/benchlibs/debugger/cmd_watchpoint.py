@@ -64,10 +64,14 @@ class CmdWatchpoint:
         if ( len(args) < 3 ):
             print '[-] Insufficient number of arguments passed. Add address to watch.'
             return None
-        if (args[2][:2] == '0x'):
-            address = int(args[2][2:],16) #Cutting 0x off
-        else:
-            address = int(args[2]) 
+        try:
+            if (args[2][:2] == '0x'):
+                address = int(args[2][2:],16) #Cutting 0x off
+            else:
+                address = int(args[2]) 
+        except Exception as e:
+            print '[-] Provided value is not integer'
+            return None
         word_index = address / self._word_size
         memory_value = self.soc.read_word_ram(word_index)
 
