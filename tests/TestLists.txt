@@ -110,7 +110,7 @@ test_add(c_example_abs     c/examples/cmd_line
          --cmd="${CMAKE_SOURCE_DIR}/tests/c/examples/cmd_line/cmd.line")
 
 test_add(c_fibonacci            c/fibo)
-test_add(c_fibonacci_compressed c/fibo NIGHTLY ENABLE_C_EXT)
+test_add(c_fibonacci_compressed c/fibo ENABLE_C_EXT)
 
 test_add(c_ripe_ha1  c/ripe --cmd="./cfg/h_attack_1.cfg" WARN_DISABLE INVERT_RESULT)
 test_add(c_ripe_ha2  c/ripe --cmd="./cfg/h_attack_2.cfg" WARN_DISABLE INVERT_RESULT)
