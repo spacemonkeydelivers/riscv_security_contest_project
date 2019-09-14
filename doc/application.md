@@ -41,10 +41,10 @@ So, in order to bootstrap our project you'll need:
 - compile the design for Xilinx
 
 Building the toolchain:  
-    1. git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_toolchain
-    2. cd riscv_security_contest_toolchain  
-    3. ./configure --prefix=<RISCV_TOOLCHAIN_PATH> -with-arch=rv32imc --with-abi=ilp32  
-    4. make newlib -j10  
+1. git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_toolchain
+1. cd riscv_security_contest_toolchain  
+1. ./configure --prefix=<RISCV_TOOLCHAIN_PATH> -with-arch=rv32imc --with-abi=ilp32  
+1. make newlib -j10  
 
 Building the project:  
     1. git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_project
