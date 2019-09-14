@@ -1,0 +1,32 @@
+From b5f74380d3a42c70587321e8a8c18503133cc201 Mon Sep 17 00:00:00 2001
+From: brown25 <asetium@gmail.com>
+Date: Wed, 4 Sep 2019 20:57:14 +0300
+Subject: [PATCH 2/2] Added RND csr for memory tagging usage
+
+---
+ include/opcode/riscv-opc.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/include/opcode/riscv-opc.h b/include/opcode/riscv-opc.h
+index 4ef70a8f2c..73ebfb5eea 100644
+--- a/include/opcode/riscv-opc.h
++++ b/include/opcode/riscv-opc.h
+@@ -683,6 +683,7 @@
+ #define CSR_MTVAL 0x343
+ #define CSR_MIP 0x344
+ #define CSR_TAGS 0x345
++#define CSR_RND 0x346
+ #define CSR_PMPCFG0 0x3a0
+ #define CSR_PMPCFG1 0x3a1
+ #define CSR_PMPCFG2 0x3a2
+@@ -1227,6 +1228,7 @@ DECLARE_CSR(mcause, CSR_MCAUSE)
+ DECLARE_CSR(mtval, CSR_MTVAL)
+ DECLARE_CSR(mip, CSR_MIP)
+ DECLARE_CSR(tags, CSR_TAGS)
++DECLARE_CSR(rnd, CSR_RND)
+ DECLARE_CSR(pmpcfg0, CSR_PMPCFG0)
+ DECLARE_CSR(pmpcfg1, CSR_PMPCFG1)
+ DECLARE_CSR(pmpcfg2, CSR_PMPCFG2)
+-- 
+2.20.1
+
