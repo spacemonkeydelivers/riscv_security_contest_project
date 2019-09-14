@@ -49,7 +49,7 @@ module alu(
     `else
     reg[63:0] product;
     reg[31:0] mulcand;
-    reg[32:0] top_prod;
+    wire [32:0] top_prod;
 
     wire[63:0] neg_product;
     assign neg_product = -product;
@@ -102,7 +102,7 @@ module alu(
         mulsu = tmp_src1 * tmp_src2u;
     end
     `else
-    reg lsb;
+    wire lsb;
     reg[5:0] bit_mul;
     initial bit_mul = 0;
     assign top_prod = product[63:32] + mulcand;
