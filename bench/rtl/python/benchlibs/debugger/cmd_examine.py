@@ -106,7 +106,7 @@ class CmdExamine:
                 for d in data:
                     a = d[0]
                     d = d[1]
-                    if ( out == 'x' ):
+                    if ( out != 'i' ):
                         print(fmts[out].format(a, d))
 
                     if out == 'i':
