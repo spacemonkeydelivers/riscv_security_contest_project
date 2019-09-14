@@ -64,10 +64,10 @@ Building the project:
   - In order to dump instructions trace, use environment variable DBG: DBG="+vcd +trace" ctest -R asm_uart -V -j10  
 
 Running zephyr+ripe tests:  
-1. ctest -R zephyr_ripe -j10 -V  
+1. `ctest -R zephyr_ripe -V` (note that simulation may take a while)
 
 Compiling the design for fpga: 
-1. git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_project
+1. `git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_project`
 1. cd riscv_security_contest_project/fpga  
 1. edit project.cfg file and replace XILINX variable with a proper one  
 1. make  
