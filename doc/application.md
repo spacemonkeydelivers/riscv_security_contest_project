@@ -72,7 +72,9 @@ Compiling the design for fpga:
 1. edit project.cfg file and replace XILINX variable with a proper one  
 1. `make`
 
-Please find the resources consumption log for FPGA in attachment.
+Please find the resources consumption log for FPGA in
+[$TRUNK/doc](https://github.com/spacemonkeydelivers/riscv_security_contest_project/blob/master/doc/) folder.
+
 Thank you for your time, looking forward to your reply
 
 Best regards
