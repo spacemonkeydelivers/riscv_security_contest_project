@@ -84,13 +84,24 @@ add_custom_target(
     platform_headers ALL
     DEPENDS "${SOC_ENUMS}"
 )
+set(VMODEL_INCLUDES_HEADER "${RTL_MODEL_BUILD_ROOT}/Vsoc_includes.h")
+add_custom_command(
+    OUTPUT "${VMODEL_INCLUDES_HEADER}"
+    COMMAND find rtlsim/ -name 'Vsoc*.h' | sed 's/^/\#include </' | sed 's/$$/>/' >Vsoc_includes.h
+    WORKING_DIRECTORY ${RTL_MODEL_BUILD_ROOT}
+    DEPENDS ${RTL_SRC_FILES}
+)
+add_custom_target(
+    generate_vsoc_enums
+    DEPENDS "${VMODEL_INCLUDES_HEADER}" Vmodel
+)
 
 # Set a list of sources
 set(TESTBENCH_SRC bench/rtl/soc.cpp bench/rtl/ui.cpp)
 
 add_library(bench SHARED ${TESTBENCH_SRC})
 target_compile_options(bench PUBLIC "-DD_SOC_RAM_SIZE=${SOC_RAM_SIZE}")
-add_dependencies(bench Vmodel platform_headers)
+add_dependencies(bench Vmodel platform_headers generate_vsoc_enums)
 target_include_directories(bench PUBLIC
     ${VERILATOR_INCLUDE}
     ${VERILATOR_INCLUDE}/vltstd
