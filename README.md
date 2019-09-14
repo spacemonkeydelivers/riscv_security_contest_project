@@ -1,9 +1,9 @@
 # Participants
-- Anatoly Parshintsev  
-- Igor Chervatyuk  
-- Fedor Veselovsky  
-- Sergey Matveev  
 - Alexey Baturo  
+- Anatoly Parshintsev  
+- Fedor Veselovsky  
+- Igor Chervatyuk  
+- Sergey Matveev  
 
 # Testing
 
@@ -70,5 +70,6 @@ eventually switch to ecall/scall.
 | Tiny printf | libc: printf implementation | [github](https://github.com/mpaland/printf) | MIT |
 | __moddi3/__divdi3 | libc: sw division from libgcc | [github mirror](https://github.com/gcc-mirror/gcc/tree/master/libgcc) | GPL2+ |
 | __mulsi3 | libc: sw multiplication | [github mirror](https://github.com/gcc-mirror/gcc/blob/master/libgcc/config/epiphany/mulsi3.c) | GPL2+ |
+| TODO | TODO | TODO |
 
 
