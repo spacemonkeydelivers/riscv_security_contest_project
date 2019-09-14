@@ -106,6 +106,9 @@ class CmdExamine:
                 for d in data:
                     a = d[0]
                     d = d[1]
+                    if ( out == 'x' ):
+                        print(fmts[out].format(a, d))
+
                     if out == 'i':
                         d = self.debugger._disasm.display(a, self.soc)
                         if d != None:
