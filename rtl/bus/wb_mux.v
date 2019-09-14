@@ -5,6 +5,8 @@ module wb_mux
    parameter WB_SEL_WIDTH  = 4
 )
 (
+   input  wire                       clk_i,
+   input  wire                       rst_i,
    input  wire                       bus_master_i,
 
    input  wire [WB_ADDR_WIDTH - 1:0] wb_ext_addr_i,
@@ -94,7 +96,7 @@ module wb_mux
 
    assign wb_cpu_ack_o = (access_timer) ? wb_timer_ack_i :
                          (access_ram)   ? wb_ram_ack_i :
-                         (access_uart)  ? wb_uart_ack_i : 1'b1;
+                         (access_uart)  ? wb_uart_ack_i : ack;
    
    assign wb_cpu_data_o = (access_timer) ? wb_timer_data_i :
                           (access_ram)   ? wb_ram_data_i   :
@@ -107,5 +109,19 @@ module wb_mux
    assign wb_ext_data_o = (access_timer) ? wb_timer_data_i :
                           (access_ram)   ? wb_ram_data_i   :
                           (access_uart)  ? wb_uart_data_i  : WB_WRONG_DATA;
+
+
+   reg ack;
+   always @ (posedge clk_i) begin
+      if (rst_i) begin
+         ack <= 0;
+      end else begin
+         if (wb_master_stb_i && !ack) begin
+            ack <= 1;
+         end else begin
+            ack <= 0;
+         end
+      end
+   end
 endmodule
 
