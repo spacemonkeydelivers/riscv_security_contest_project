@@ -1,0 +1,101 @@
+From 788d88dccca8847a0bdced75144ca47a02277ae2 Mon Sep 17 00:00:00 2001
+From: ecco_the_dolphin <kupokupokupopo@gmail.com>
+Date: Sat, 14 Sep 2019 19:05:25 +0300
+Subject: [PATCH] quick-and-dirty wrappers over malloc to enable address
+ tagging
+
+---
+ newlib/libc/stdlib/malloc.c  | 52 ++++++++++++++++++++++++++++++++++--
+ newlib/libc/stdlib/mallocr.c |  2 ++
+ 2 files changed, 52 insertions(+), 2 deletions(-)
+
+diff --git a/newlib/libc/stdlib/malloc.c b/newlib/libc/stdlib/malloc.c
+index f5ac29208..28836b6e5 100644
+--- a/newlib/libc/stdlib/malloc.c
++++ b/newlib/libc/stdlib/malloc.c
+@@ -155,19 +155,67 @@ Supporting OS subroutines required: <<sbrk>>.  */
+ #include <reent.h>
+ #include <stdlib.h>
+ #include <malloc.h>
++#include <stdio.h>
+ 
+ #ifndef _REENT_ONLY
+ 
++/*
++void* _malloc_r(_reent*, size_t) {
++
++}
++void _free_r(_reent*, void*) {
++}
++*/
++
++#define GRANULE_SIZE 16
++int sec_tag = 1; // it would be better to have an initialization routine
++static unsigned  __sec_generate_tag() {
++    // tag #15 is reserved for OS code
++    do {
++        sec_tag = (sec_tag + 1) & 0xff;
++    } while (sec_tag == 0 || sec_tag == 15);
++    return sec_tag;
++}
++static unsigned __sec_protect_ptr(void* ptr, unsigned size) {
++    unsigned tag = __sec_generate_tag();
++    unsigned raw_ptr = (unsigned)ptr;
++
++    unsigned untagged_ptr = (raw_ptr & (~(0xf << 26)));
++    unsigned granules_to_tag = size / GRANULE_SIZE + ((size % GRANULE_SIZE) ? 1 : 0);
++    unsigned address_to_tag = untagged_ptr;
++    for (unsigned i = 0; i < granules_to_tag; ++i) {
++        __asm__ __volatile__(
++                "st %[tag], 0(%[address])"
++                :
++                : [tag]"r"(tag), [address]"r"(address_to_tag)
++                : "t0", "memory");
++        address_to_tag += 16;
++    }
++    unsigned result =  untagged_ptr | (tag << 26);
++    return result;
++}
++unsigned __sec_untag_ptr(void* ptr) {
++    return ((unsigned)ptr) & ((1 << 26) - 1);
++}
++
+ void *
+ malloc (size_t nbytes)		/* get a block */
+ {
+-  return _malloc_r (_REENT, nbytes);
++  void * raw_ptr =  _malloc_r (_REENT, nbytes);
++  if (!raw_ptr) {
++      return (void*)0;
++  }
++  void * protected_ptr = (void*)__sec_protect_ptr(raw_ptr, nbytes);
++  printf("s_malloc: ptr before %p, ptr after %p; [%d]?\n", raw_ptr, protected_ptr, nbytes);
++  return protected_ptr;
+ }
+ 
+ void
+ free (void *aptr)
+ {
+-  _free_r (_REENT, aptr);
++    void* raw_ptr = (void*)__sec_untag_ptr(aptr);
++    printf("s_free: ptr before %p, ptr_after %p\n", aptr, raw_ptr);
++    _free_r (_REENT, raw_ptr);
+ }
+ 
+ #endif
+diff --git a/newlib/libc/stdlib/mallocr.c b/newlib/libc/stdlib/mallocr.c
+index 26d1c89cc..462ff9445 100644
+--- a/newlib/libc/stdlib/mallocr.c
++++ b/newlib/libc/stdlib/mallocr.c
+@@ -1393,6 +1393,8 @@ nextchunk-> +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 
+ 
+ 
++#define MALLOC_ALIGNMENT 16
++
+ /*  sizes, alignments */
+ 
+ #define SIZE_SZ                (sizeof(INTERNAL_SIZE_T))
+-- 
+2.20.1
+
