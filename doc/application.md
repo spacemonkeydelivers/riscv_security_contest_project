@@ -16,37 +16,37 @@ So, in order to bootstrap our project you'll need:
 - run zephyr + ripe tests on verilator
 - compile the design for Xilinx
 
-Building the toolchain:
-    1. git clone --recursive <github toolchain repo>
-    2. cd riscv-gnu-toolchain
-    3. ./configure --prefix=<RISCV_TOOLCHAIN_PATH> -with-arch=rv32imc --with-abi=ilp32
-    4. make newlib -j10
+Building the toolchain:  
+    1. git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_toolchain  
+    2. cd riscv_security_contest_toolchain  
+    3. ./configure --prefix=<RISCV_TOOLCHAIN_PATH> -with-arch=rv32imc --with-abi=ilp32  
+    4. make newlib -j10  
 
 Building the project:
-    1. git clone --recursive <github project repo>
-    2. cd riscv_core ?????
-    3. cd zephyrproject
-    4. run pip3 install --user west
-    5. west init -l zephyr/
-    6. west update
-    7. pip3 install -r zephyr/scripts/requirements.txt
-    8. cd ../ && mkdir build && cd build
-    9. RISCV_TOOLCHAIN=<RISCV_TOOLCHAIN_PATH> cmake  ../ && make -j10
-    10. Running all the existing tests with: ctest -j10 
-        10.1. In order to run some tests by regexp, use -R: ctest -R asm_uart -j10
-        10.2. In order to see some more verbose output, use -V: ctest -R asm_uart -V -j10
-        10.3. In order to dump vcd trace, use environment variable DBG: DBG="+vcd" ctest -R asm_uart -V -j10
-        10.4. In order to dump instructions trace, use environment variable DBG: DBG="+vcd +trace" ctest -R asm_uart -V -j10
+    1. git clone --recursive <github project repo>  
+    2. cd riscv_core ?????  
+    3. cd zephyrproject  
+    4. run pip3 install --user west  
+    5. west init -l zephyr/  
+    6. west update  
+    7. pip3 install -r zephyr/scripts/requirements.txt  
+    8. cd ../ && mkdir build && cd build  
+    9. RISCV_TOOLCHAIN=<RISCV_TOOLCHAIN_PATH> cmake  ../ && make -j10  
+    10. Running all the existing tests with: ctest -j10   
+        10.1. In order to run some tests by regexp, use -R: ctest -R asm_uart -j10  
+        10.2. In order to see some more verbose output, use -V: ctest -R asm_uart -V -j10  
+        10.3. In order to dump vcd trace, use environment variable DBG: DBG="+vcd" ctest -R asm_uart -V -j10  
+        10.4. In order to dump instructions trace, use environment variable DBG: DBG="+vcd +trace" ctest -R asm_uart -V -j10  
 
-Running zephyr+ripe tests:
-    1. ctest -R zephyr_ripe -j10 -V
-
-Compiling the design for fpga:
-    1. git clone --recursive <github project repo>
-    2. cd riscv_core/fpga
-    3. edit project.cfg file and replace XILINX variable with a proper one
-    4. make
-
+Running zephyr+ripe tests:  
+    1. ctest -R zephyr_ripe -j10 -V  
+  
+Compiling the design for fpga:  
+    1. git clone --recursive <github project repo>  
+    2. cd riscv_core/fpga  
+    3. edit project.cfg file and replace XILINX variable with a proper one  
+    4. make  
+  
 Please find the resources consumption log for FPGA in attachment.
 Thanks for the attention and waiting for your reply.
 
