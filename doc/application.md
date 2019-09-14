@@ -16,8 +16,8 @@ For most of us this was the largest HW project we've ever worked on :). As such
 we believe that the schedule was a little bit too tight, for us - as we've spent
 a significant amount of time debugging our SOC.
 
-As our primary (and only :() HW mitigation techique we've implemeted HW memory
-tagging (heavily inspired by ARM's MTE). Our implemention can protect
+As our primary (and only) HW mitigation techique **we've implemeted HW memory
+tagging** (heavily inspired by ARM's MTE). Our implemention can protect
 dynamic memory allocations. We do not have support for stack protection.
 
 We've elaborated different techniques to mitigate the security issues:
@@ -73,6 +73,6 @@ Compiling the design for fpga:
 1. make  
 
 Please find the resources consumption log for FPGA in attachment.
-Thanks for the attention and waiting for your reply.
+Thank you for your time, looking forward to your reply
 
 Best regards
