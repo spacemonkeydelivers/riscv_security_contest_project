@@ -234,6 +234,12 @@ uint32_t RV_SOC::readReg(unsigned num)
     return m_soc->soc->cpu0->reg_inst->regfile[num];
 }
 
+void RV_SOC::setPC(uint32_t pc)
+{
+    // assert(validPc());
+    m_soc->soc->cpu0->pc = pc;
+}
+
 uint32_t RV_SOC::getPC() const
 {
     // assert(validPc());

@@ -21,6 +21,7 @@ class RiscVSoc:
         self._braindead_threshold = 50
         self._stall_threshold = self._braindead_threshold / 2 * 3
         self._ticks_to_run = 5 * 10 ** 6
+        self._min_address = 0
 
         self._uart = None
         import atexit
@@ -94,7 +95,7 @@ class RiscVSoc:
         self._stall_cnt = self._stall_cnt + 1
 
     def run(self, limit, expect_failure = False, break_on = None):
-
+        self._soc.setPC(self._min_address)
         iterations = 0
         while (self._stall_cnt < self._stall_threshold):
             self.tick()
@@ -160,6 +161,7 @@ class RiscVSoc:
         self._ticks_to_run = value
 
     def load_data_to_ram(self, path_to_image, offset_in_words = 0, external = False):
+        self._min_address = 0
         if external:
             self._soc.toggleCpuReset(True)
             self._soc.switchBusMasterToExternal(True)
@@ -167,19 +169,21 @@ class RiscVSoc:
         offset = 0
         for line in data:
             if line[0] == '@':
-                offset = int(line[1:], 16) / 4
+                offset = int(line[1:], 16) / self._word_size
                 if self._debug:
                     print("Changing offset while loading to RAM to: 0x{0:08x}".format(offset))
+                if (offset * self._word_size < self._min_address):
+                    self._min_address = offset * self._word_size
             else:
                 b = line.split()
-                for k in range(0, len(b), 4):
+                for k in range(0, len(b), self._word_size):
                     word = int("".join(b[k:k+4][::-1]), 16)
                     if external:
                         self._soc.writeWordExt(offset, word)
                     else:
                         self._soc.writeWord(offset, word)
                     if self._debug:
-                        print("Writing 0x{0:08x} to address 0x{1:08x}".format(word, offset * 4))
+                        print("Writing 0x{0:08x} to address 0x{1:08x}".format(word, offset * self._word_size))
                     offset += 1
         if external:
             self._soc.toggleCpuReset(False)
