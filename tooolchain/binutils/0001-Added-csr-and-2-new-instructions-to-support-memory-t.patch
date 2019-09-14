@@ -1,0 +1,88 @@
+From 814d94c7d6d95b42141db653a8f763928e294626 Mon Sep 17 00:00:00 2001
+From: Alexey Baturo <baturo.alexey@gmail.com>
+Date: Wed, 21 Aug 2019 23:00:05 +0300
+Subject: [PATCH 1/2] Added csr and 2 new instructions to support memory
+ tagging
+
+---
+ include/opcode/riscv-opc.h | 8 ++++++++
+ opcodes/riscv-opc.c        | 2 ++
+ 2 files changed, 10 insertions(+)
+
+diff --git a/include/opcode/riscv-opc.h b/include/opcode/riscv-opc.h
+index f09200c073..4ef70a8f2c 100644
+--- a/include/opcode/riscv-opc.h
++++ b/include/opcode/riscv-opc.h
+@@ -123,6 +123,8 @@
+ #define MASK_LW  0x707f
+ #define MATCH_LD 0x3003
+ #define MASK_LD  0x707f
++#define MATCH_LT 0x7003
++#define MASK_LT  0x707f
+ #define MATCH_LBU 0x4003
+ #define MASK_LBU  0x707f
+ #define MATCH_LHU 0x5003
+@@ -137,6 +139,8 @@
+ #define MASK_SW  0x707f
+ #define MATCH_SD 0x3023
+ #define MASK_SD  0x707f
++#define MATCH_ST 0x7023
++#define MASK_ST  0x707f
+ #define MATCH_FENCE 0xf
+ #define MASK_FENCE  0x707f
+ #define MATCH_FENCE_I 0x100f
+@@ -678,6 +682,7 @@
+ #define CSR_MCAUSE 0x342
+ #define CSR_MTVAL 0x343
+ #define CSR_MIP 0x344
++#define CSR_TAGS 0x345
+ #define CSR_PMPCFG0 0x3a0
+ #define CSR_PMPCFG1 0x3a1
+ #define CSR_PMPCFG2 0x3a2
+@@ -892,6 +897,7 @@ DECLARE_INSN(lb, MATCH_LB, MASK_LB)
+ DECLARE_INSN(lh, MATCH_LH, MASK_LH)
+ DECLARE_INSN(lw, MATCH_LW, MASK_LW)
+ DECLARE_INSN(ld, MATCH_LD, MASK_LD)
++DECLARE_INSN(lt, MATCH_LT, MASK_LT)
+ DECLARE_INSN(lbu, MATCH_LBU, MASK_LBU)
+ DECLARE_INSN(lhu, MATCH_LHU, MASK_LHU)
+ DECLARE_INSN(lwu, MATCH_LWU, MASK_LWU)
+@@ -899,6 +905,7 @@ DECLARE_INSN(sb, MATCH_SB, MASK_SB)
+ DECLARE_INSN(sh, MATCH_SH, MASK_SH)
+ DECLARE_INSN(sw, MATCH_SW, MASK_SW)
+ DECLARE_INSN(sd, MATCH_SD, MASK_SD)
++DECLARE_INSN(st, MATCH_ST, MASK_ST)
+ DECLARE_INSN(fence, MATCH_FENCE, MASK_FENCE)
+ DECLARE_INSN(fence_i, MATCH_FENCE_I, MASK_FENCE_I)
+ DECLARE_INSN(mul, MATCH_MUL, MASK_MUL)
+@@ -1219,6 +1226,7 @@ DECLARE_CSR(mepc, CSR_MEPC)
+ DECLARE_CSR(mcause, CSR_MCAUSE)
+ DECLARE_CSR(mtval, CSR_MTVAL)
+ DECLARE_CSR(mip, CSR_MIP)
++DECLARE_CSR(tags, CSR_TAGS)
+ DECLARE_CSR(pmpcfg0, CSR_PMPCFG0)
+ DECLARE_CSR(pmpcfg1, CSR_PMPCFG1)
+ DECLARE_CSR(pmpcfg2, CSR_PMPCFG2)
+diff --git a/opcodes/riscv-opc.c b/opcodes/riscv-opc.c
+index b7e8d79a48..db2d3c750e 100644
+--- a/opcodes/riscv-opc.c
++++ b/opcodes/riscv-opc.c
+@@ -302,6 +302,7 @@ const struct riscv_opcode riscv_opcodes[] =
+ {"sra",         0, {"I", 0},   "d,s,>",   MATCH_SRAI, MASK_SRAI, match_opcode, INSN_ALIAS },
+ {"sub",         0, {"C", 0},   "Cs,Cw,Ct",  MATCH_C_SUB, MASK_C_SUB, match_opcode, INSN_ALIAS },
+ {"sub",         0, {"I", 0},   "d,s,t",  MATCH_SUB, MASK_SUB, match_opcode, 0 },
++{"lt",          0, {"I", 0},   "d,o(s)",  MATCH_LT, MASK_LT, match_opcode, INSN_DREF|INSN_1_BYTE },
+ {"lb",          0, {"I", 0},   "d,o(s)",  MATCH_LB, MASK_LB, match_opcode, INSN_DREF|INSN_1_BYTE },
+ {"lb",          0, {"I", 0},   "d,A",  0, (int) M_LB, match_never, INSN_MACRO },
+ {"lbu",         0, {"I", 0},   "d,o(s)",  MATCH_LBU, MASK_LBU, match_opcode, INSN_DREF|INSN_1_BYTE },
+@@ -333,6 +334,7 @@ const struct riscv_opcode riscv_opcodes[] =
+ {"sltu",        0, {"I", 0},   "d,s,j",  MATCH_SLTIU, MASK_SLTIU, match_opcode, INSN_ALIAS },
+ {"sgt",         0, {"I", 0},   "d,t,s",  MATCH_SLT, MASK_SLT, match_opcode, INSN_ALIAS },
+ {"sgtu",        0, {"I", 0},   "d,t,s",  MATCH_SLTU, MASK_SLTU, match_opcode, INSN_ALIAS },
++{"st",          0, {"I", 0},   "t,q(s)",  MATCH_ST, MASK_ST, match_opcode, INSN_DREF|INSN_1_BYTE },
+ {"sb",          0, {"I", 0},   "t,q(s)",  MATCH_SB, MASK_SB, match_opcode, INSN_DREF|INSN_1_BYTE },
+ {"sb",          0, {"I", 0},   "t,A,s",  0, (int) M_SB, match_never, INSN_MACRO },
+ {"sh",          0, {"I", 0},   "t,q(s)",  MATCH_SH, MASK_SH, match_opcode, INSN_DREF|INSN_2_BYTE },
+-- 
+2.20.1
+
