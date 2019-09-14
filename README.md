@@ -1,7 +1,9 @@
-# Zephyr builds and OVP/RTL models
-
-Please refer to our [wiki](https://git.yggdrasill.ga/riscv_softcore_security_contest/riscv_core/wikis/home)
-for information regarding build zephyr and a subsequent OVP/RTL boot procedures.
+# Participants
+- Anatoly Parshintsev  
+- Igor Chervatyuk  
+- Fedor Veselovsky  
+- Sergey Matveev  
+- Alexey Baturo  
 
 # Testing
 
@@ -60,8 +62,7 @@ eventually switch to ecall/scall.
     **TODO: add test for working with timer and test CPU's IRQ**  
 
 **4. Building toolchain for the project**  
-    4.1. Please refer to https://git.yggdrasill.ga/riscv_softcore_security_contest/riscv-gnu-toolchain  
-    4.2. git clone --recursive https://git.yggdrasill.ga/riscv_softcore_security_contest/riscv-gnu-toolchain  
+    4.2. git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_toolchain
     4.3. cd riscv-gnu-toolchain  
     4.4. ./configure --prefix=<install path> --with-arch=rv32i --with-abi=ilp32  
     4.5. make newlib -j20  
