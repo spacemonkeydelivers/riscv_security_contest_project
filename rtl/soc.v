@@ -37,7 +37,7 @@ module soc
    localparam WB_ADDR_WIDTH = 32;
    localparam WB_SEL_WIDTH  = 4;
 
-   localparam CPU_RESET_ADDR = 32'h0;
+   localparam CPU_RESET_ADDR = 32'd4096;
    localparam CPU_EXCEPTION_ADDR = 32'h00AA_1155;
    
    // external interface
