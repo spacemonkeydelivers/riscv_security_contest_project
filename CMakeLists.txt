@@ -29,7 +29,7 @@ endif()
 find_package(Boost COMPONENTS python)
 
 if (NOT DEFINED ENV{RISCV_TOOLCHAIN})
-    set(RISCV_TOOLCHAIN_PATH /tank/work/dev/toolchains/riscv32i-tags-newlib-gcc)
+    set(RISCV_TOOLCHAIN_PATH /mnt/neptune/the-toolchain)
     message("RISCV_TOOLCHAIN_PATH is NOT set, using the default value: ${RISCV_TOOLCHAIN_PATH}")
     if (NOT EXISTS "${RISCV_TOOLCHAIN_PATH}")
         message(FATAL_ERROR "No toolchain was detected at the default path, please set RISCV_TOOLCHAIN_PATH")

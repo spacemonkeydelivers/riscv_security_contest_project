@@ -44,11 +44,11 @@ config RISCV_ROM_BASE_ADDR
 
 config RISCV_ROM_SIZE
 	hex
-	default 0x18000
+	default 0x20000
 
 config RISCV_RAM_BASE_ADDR
 	hex
-	default	0x18000
+	default	0x20000
 
 config RISCV_RAM_SIZE
 	hex
