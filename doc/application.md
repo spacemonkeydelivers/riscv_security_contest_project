@@ -6,7 +6,7 @@ field, but we'd love to get one. With this said we'd like to submit our attempt
 for this contest.  Obviously, we didn't meet the contest requirements, since we
 didn't have the exact FPGA board by Microsemi, instead we've been using
 Starterkit board named
-SK-AT91SAM9G45-XC6SLX(http://starterkit.ru/html/index.php?name=shop&op=view&id=50)
+[SK-AT91SAM9G45-XC6SLX](http://starterkit.ru/html/index.php?name=shop&op=view&id=50)
 with Xilinx Spartan6 XC6SLX16. We've tested our design both on FPGA and
 verilated simulation.  But we would really love to get the feedback from you
 folks comparing our efforts with other contestants, but with no intents to have
