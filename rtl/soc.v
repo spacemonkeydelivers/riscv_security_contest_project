@@ -154,6 +154,8 @@ module soc
    )
    mux0
    (
+      .clk_i (clk_i),
+      .rst_i (rst_i),
       .bus_master_i (bus_master_selector_i),
       // external
       .wb_ext_addr_i (wb_ext_addr),
