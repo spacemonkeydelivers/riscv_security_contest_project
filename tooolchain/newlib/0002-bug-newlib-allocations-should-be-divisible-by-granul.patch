@@ -1,0 +1,63 @@
+From 7e504cbbbff9ff78a1c54778b817b032f72381fb Mon Sep 17 00:00:00 2001
+From: ecco_the_dolphin <kupokupokupopo@gmail.com>
+Date: Sat, 14 Sep 2019 22:49:46 +0300
+Subject: [PATCH] [bug] newlib: allocations should be divisible by granule
+
+---
+ riscv-newlib/newlib/libc/stdlib/malloc.c | 20 ++++++++------------
+ 1 file changed, 8 insertions(+), 12 deletions(-)
+
+diff --git a/riscv-newlib/newlib/libc/stdlib/malloc.c b/riscv-newlib/newlib/libc/stdlib/malloc.c
+index 28836b6e5..6dc3cd7e8 100644
+--- a/riscv-newlib/newlib/libc/stdlib/malloc.c
++++ b/riscv-newlib/newlib/libc/stdlib/malloc.c
+@@ -159,14 +159,6 @@ Supporting OS subroutines required: <<sbrk>>.  */
+ 
+ #ifndef _REENT_ONLY
+ 
+-/*
+-void* _malloc_r(_reent*, size_t) {
+-
+-}
+-void _free_r(_reent*, void*) {
+-}
+-*/
+-
+ #define GRANULE_SIZE 16
+ int sec_tag = 1; // it would be better to have an initialization routine
+ static unsigned  __sec_generate_tag() {
+@@ -198,15 +190,19 @@ unsigned __sec_untag_ptr(void* ptr) {
+     return ((unsigned)ptr) & ((1 << 26) - 1);
+ }
+ 
++#define alignto(p, bits)      (((p) >> bits) << bits)
++#define aligntonext(p, bits)  alignto(((p) + (1 << bits) - 1), bits)
+ void *
+ malloc (size_t nbytes)		/* get a block */
+ {
+-  void * raw_ptr =  _malloc_r (_REENT, nbytes);
++  size_t alloc_size = aligntonext(nbytes, 4);
++  // printf("requesting nbytes = %d, allocating = %d\n", nbytes, alloc_size);
++  void * raw_ptr =  _malloc_r (_REENT, alloc_size);
+   if (!raw_ptr) {
+       return (void*)0;
+   }
+-  void * protected_ptr = (void*)__sec_protect_ptr(raw_ptr, nbytes);
+-  printf("s_malloc: ptr before %p, ptr after %p; [%d]?\n", raw_ptr, protected_ptr, nbytes);
++  void * protected_ptr = (void*)__sec_protect_ptr(raw_ptr, alloc_size); // yes, we tag the whole alloc size
++  // printf("s_malloc: ptr before %p, ptr after %p; [%d]?\n", raw_ptr, protected_ptr, nbytes);
+   return protected_ptr;
+ }
+ 
+@@ -214,7 +210,7 @@ void
+ free (void *aptr)
+ {
+     void* raw_ptr = (void*)__sec_untag_ptr(aptr);
+-    printf("s_free: ptr before %p, ptr_after %p\n", aptr, raw_ptr);
++    // printf("s_free: ptr before %p, ptr_after %p\n", aptr, raw_ptr);
+     _free_r (_REENT, raw_ptr);
+ }
+ 
+-- 
+2.20.1
+
