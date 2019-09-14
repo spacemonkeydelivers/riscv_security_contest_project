@@ -475,6 +475,7 @@ module cpu
          next_addr_from_csr <= 0;
          check_tags <= 0;
          prev_pc <= 0;
+         exec_done <= 0;
       end
       else begin
 
@@ -509,6 +510,7 @@ module cpu
                          || (state == STATE_LOAD1)
                          || (state == STATE_STORE1))
                      ? next_check_tags : check_tags;
+         exec_done <= ((state == STATE_PRE_FETCH) || (state == STATE_EXEC)) ? next_exec_done : exec_done;
       end
    end
 
@@ -516,8 +518,12 @@ module cpu
    // TODO: we should add an assert here, this should not really happen
    wire addr_misaligned = |next_pc[0];
 
+   reg exec_done;
+   reg next_exec_done;
+
    reg check;
    always @ (*) begin
+      next_exec_done = 0;
       next_check_tags = 0;
       trap_occured = 0;
       mret_occured = 0;
@@ -564,7 +570,7 @@ module cpu
             mux_reg_input_sel = (writeback_from_alu || exec_writeback_from_alu) ? `MUX_REGINPUT_ALU :
                                 (exec_writeback_from_imm                      ) ?  exec_mux_reg_input_sel :
                                                                                   `MUX_REGINPUT_BUS;
-            reg_we = writeback_from_alu || writeback_from_bus || exec_writeback_from_imm || exec_writeback_from_alu;
+            reg_we = (writeback_from_alu || writeback_from_bus || exec_writeback_from_imm || exec_writeback_from_alu) && exec_done;
             if (addr_misaligned) begin
                trap_occured = 1;
                csr_en = 1;
@@ -581,6 +587,7 @@ module cpu
             next_check_tags = tags_if_en;
          end
          STATE_PRE_FETCH: begin
+            next_exec_done = 0;
             next_state = STATE_FETCH;
             mux_bus_addr_sel = `MUX_BUSADDR_PC;
             bus_en = 1;
@@ -633,6 +640,7 @@ module cpu
             end
          end
          STATE_EXEC: begin
+            next_exec_done = 1;
             case (exec_next_stage)
                `EXEC_TO_FETCH:  next_state = STATE_POST_EXEC;
 //               `EXEC_TO_FETCH:  next_state = STATE_UPDATE_PC;
