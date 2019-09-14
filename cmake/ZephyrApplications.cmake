@@ -11,6 +11,7 @@ set(ZEPHYR_APPS
     ripe3
     ripe4
     ripe5
+    mte_demo
     # basic/threads # due too no SOURCES given to target: drivers__gpio
 )
 
