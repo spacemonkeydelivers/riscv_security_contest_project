@@ -162,6 +162,7 @@ class RiscVSoc:
 
     def load_data_to_ram(self, path_to_image, offset_in_words = 0, external = False):
         self._min_address = 0
+        addr_set = False
         if external:
             self._soc.toggleCpuReset(True)
             self._soc.switchBusMasterToExternal(True)
@@ -169,6 +170,9 @@ class RiscVSoc:
         offset = 0
         for line in data:
             if line[0] == '@':
+                if not addr_set:
+                    self._min_address = offset * self._word_size
+                    addr_set = True
                 offset = int(line[1:], 16) / self._word_size
                 if self._debug:
                     print("Changing offset while loading to RAM to: 0x{0:08x}".format(offset))
