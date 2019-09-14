@@ -8,7 +8,7 @@ We've elaborated different techniques to mitigate the security issues:
 - _implementing shadowstack_: this is a common technique, but the terms of the contest forbid changing the zephyr sources, so we have to skip this one;
 - _implementing hardware assisted CFI_: LLVM allows to use CFI to ensure control flow integrity in a pure software way. Our idea was to extend this approach and dump all possible targets of indirect jumps/returns and implement & train Bloom's filter to check if a transition is valid;
 - _implementing memory tagging_: another common technique, but it requires changes in compiler to implement full support;
-Unfortunatelly we could barely get simple memory tagging done and debug the SoC. This allows us to mitigate several security issues related to heap only with some extra hw support and adjusting libc implementation.
+Unfortunatelly in the given time we could only implement memory tagging support for heap protection and debug the SoC. This allows us to mitigate several security issues related to heap only with some extra hw support and adjusting libc implementation.
 
 So, in order to bootstrap our project you'll need:
 - build toolchain
