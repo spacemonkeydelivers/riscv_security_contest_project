@@ -2,6 +2,8 @@
 `include "cpu/aludefs.vh"
 `include "cpu/cpudefs.vh"
 
+`define TRAP_ON_ILLIGAL 1
+
 /*
 CR type: .insn cr opcode2, func4, rd, rs2
      +---------+--------+-----+---------+
@@ -413,7 +415,11 @@ c+  |    110   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.SW
                     alu_oper = `ALUOP_ADD;
                     exec_writeback_from_alu = 1;
                     exec_next_stage = `EXEC_TO_FETCH;
+`ifdef TRAP_ON_ILLIGAL
+                    if (I_instr[12:5] == 0) exec_next_stage = `EXEC_TO_TRAP;
+`else
                     if (I_instr[12:5] == 0) exec_next_stage = `EXEC_TO_DEAD;
+`endif
                 end
                 `C0_F3_LW: begin
                     alu_oper = `ALUOP_ADD;
@@ -424,7 +430,11 @@ c+  |    110   | uimm[5:3]        | rs1 | uimm[2;6]| rs2  | 00  | C.SW
                     exec_next_stage = `EXEC_TO_STORE;
                 end
                 default: begin
+`ifdef TRAP_ON_ILLIGAL
+                    exec_next_stage = `EXEC_TO_TRAP;
+`else
                     exec_next_stage = `EXEC_TO_DEAD;
+`endif
                 end
             endcase
          end
@@ -481,7 +491,11 @@ c+  |   111    | imm[8;4:3]         | rs1`   | imm[7:6;2:1;5] | 01 | C.BNEZ
                             exec_mux_reg_input_sel = `MUX_REGINPUT_IMM;
                             exec_next_stage = `EXEC_TO_FETCH;
                         end
+`ifdef TRAP_ON_ILLIGAL
+                        if ({I_instr[12], I_instr[6:2]} == 0) exec_next_stage = `EXEC_TO_TRAP;
+`else
                         if ({I_instr[12], I_instr[6:2]} == 0) exec_next_stage = `EXEC_TO_DEAD;
+`endif
                     end
                     `C1_F3_BEQ, `C1_F3_BNE: begin // c.beqz, c.bnez
                         alu_oper = `ALUOP_ADD; // doesn't really matter
@@ -523,11 +537,19 @@ c+  |   100    | imm[5]    | 10     | rs1/rd | imm[4:0]       | 01 | C.ANDI
                 case (I_instr[11:10])
                     2'b00: begin
                         alu_oper = `ALUOP_SRL;
+`ifdef TRAP_ON_ILLIGAL
+                        if (I_instr[12]) exec_next_stage = `EXEC_TO_TRAP;
+`else
                         if (I_instr[12]) exec_next_stage = `EXEC_TO_DEAD;
+`endif
                     end
                     2'b01: begin
                         alu_oper = `ALUOP_SRA;
+`ifdef TRAP_ON_ILLIGAL
+                        if (I_instr[12]) exec_next_stage = `EXEC_TO_TRAP;
+`else
                         if (I_instr[12]) exec_next_stage = `EXEC_TO_DEAD;
+`endif
                     end
                     2'b10: begin
                         alu_oper = `ALUOP_AND;
@@ -572,7 +594,11 @@ c+  |   110    | uimm[5:2;7:6]           | rs2          |  10  | C.SWSP
                     alu_oper = `ALUOP_SLL;
                     exec_writeback_from_alu = 1;
                     exec_next_stage = `EXEC_TO_FETCH;
+`ifdef TRAP_ON_ILLIGAL
+                    if (I_instr[12] == 1) begin exec_next_stage = `EXEC_TO_TRAP; end
+`else
                     if (I_instr[12] == 1) begin exec_next_stage = `EXEC_TO_DEAD; end
+`endif
                 end
                 `C2_F3_LWSP: begin
                     alu_oper = `ALUOP_ADD;
@@ -580,7 +606,11 @@ c+  |   110    | uimm[5:2;7:6]           | rs2          |  10  | C.SWSP
                     exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
                     exec_mux_alu_s2_sel = `MUX_ALUDAT2_IMM;
                     exec_next_stage = `EXEC_TO_LOAD;
+`ifdef TRAP_ON_ILLIGAL
+                    if (o_rd == 0) begin exec_next_stage = `EXEC_TO_TRAP; end
+`else
                     if (o_rd == 0) begin exec_next_stage = `EXEC_TO_DEAD; end
+`endif
                 end
                 `C2_F3_JR/*, `C2_F3_MV, `C2_F3_EBREAK,  `C2_F3_JALR, `C2_F3_CADD*/: begin
                     exec_mux_alu_s1_sel = `MUX_ALUDAT1_REGVAL1;
@@ -602,13 +632,21 @@ c+  |   110    | uimm[5:2;7:6]           | rs2          |  10  | C.SWSP
                             o_rd = 1;
                         end
                         if ((I_instr[11:7] == 0) && (I_instr[6:2] == 0)) begin // c.ebreak
+`ifdef TRAP_ON_ILLIGAL
+                            exec_next_stage = `EXEC_TO_TRAP; // we do not implement ebreak
+`else
                             exec_next_stage = `EXEC_TO_DEAD; // we do not implement ebreak
+`endif
                         end
                     end
                     else begin
                         if (o_rs2 == 0) begin //C.JR
                             if (o_rs1 == 0) begin //RES, when rs1 == 0
+`ifdef TRAP_ON_ILLIGAL
+                                exec_next_stage = `EXEC_TO_TRAP;
+`else
                                 exec_next_stage = `EXEC_TO_DEAD;
+`endif
                             end
                             else begin
                                 // compute jal/jalr address
@@ -635,12 +673,20 @@ c+  |   110    | uimm[5:2;7:6]           | rs2          |  10  | C.SWSP
                     exec_next_stage = `EXEC_TO_STORE;
                 end
                 default: begin
+`ifdef TRAP_ON_ILLIGAL
+                    exec_next_stage = `EXEC_TO_TRAP;
+`else
                     exec_next_stage = `EXEC_TO_DEAD;
+`endif
                 end
             endcase
         end
         default: begin
+`ifdef TRAP_ON_ILLIGAL
+            exec_next_stage = `EXEC_TO_TRAP;
+`else
             exec_next_stage = `EXEC_TO_DEAD;
+`endif
         end
       endcase
     end
