@@ -22,9 +22,9 @@ Building the toolchain:
     3. ./configure --prefix=<RISCV_TOOLCHAIN_PATH> -with-arch=rv32imc --with-abi=ilp32  
     4. make newlib -j10  
 
-Building the project:
-    1. git clone --recursive <github project repo>  
-    2. cd riscv_core ?????  
+Building the project:  
+    1. git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_project
+    2. cd riscv_security_contest_project  
     3. cd zephyrproject  
     4. run pip3 install --user west  
     5. west init -l zephyr/  
@@ -42,8 +42,8 @@ Running zephyr+ripe tests:
     1. ctest -R zephyr_ripe -j10 -V  
   
 Compiling the design for fpga:  
-    1. git clone --recursive <github project repo>  
-    2. cd riscv_core/fpga  
+    1. git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_project
+    2. cd riscv_security_contest_project/fpga  
     3. edit project.cfg file and replace XILINX variable with a proper one  
     4. make  
   
