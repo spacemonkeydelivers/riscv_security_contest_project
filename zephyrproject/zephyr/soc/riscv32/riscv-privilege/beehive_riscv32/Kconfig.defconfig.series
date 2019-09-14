@@ -40,18 +40,18 @@ config XIP
 
 config RISCV_ROM_BASE_ADDR
 	hex
-	default 0x0
+	default 0x1000
 
 config RISCV_ROM_SIZE
 	hex
-	default 0x8800
+	default 0x18000
 
 config RISCV_RAM_BASE_ADDR
 	hex
-	default	0x8800
+	default	0x18000
 
 config RISCV_RAM_SIZE
 	hex
-	default 0x4000
+	default 0x18000
 
 endif # SOC_SERIES_BEEHIVE_RISCV32

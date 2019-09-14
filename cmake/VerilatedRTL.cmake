@@ -16,8 +16,9 @@ set(SIZE_16K  16384)
 set(SIZE_32K  32768)
 set(SIZE_64K  65536)
 set(SIZE_128K 131072)
+set(SIZE_256K 262144)
 if (NOT DEFINED SOC_RAM_SIZE)
-    set(SOC_RAM_SIZE ${SIZE_64K})
+    set(SOC_RAM_SIZE ${SIZE_256K})
 endif()
 
 add_custom_command(

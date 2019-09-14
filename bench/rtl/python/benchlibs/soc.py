@@ -174,6 +174,7 @@ class RiscVSoc:
                     self._min_address = offset * self._word_size
                     addr_set = True
                 offset = int(line[1:], 16) / self._word_size
+
                 if self._debug:
                     print("Changing offset while loading to RAM to: 0x{0:08x}".format(offset))
                 if (offset * self._word_size < self._min_address):
@@ -192,6 +193,7 @@ class RiscVSoc:
         if external:
             self._soc.toggleCpuReset(False)
             self._soc.switchBusMasterToExternal(False)
+
 
     def print_ram(self, start_word_index = 0, num_words = 8, external = False):
         if external:
