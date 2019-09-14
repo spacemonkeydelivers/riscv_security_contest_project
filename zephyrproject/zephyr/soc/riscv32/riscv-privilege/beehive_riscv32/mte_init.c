@@ -6,7 +6,7 @@ static int beehive_mte_init(struct device *dev)
 {
     ARG_UNUSED(dev);
 
-    int en_value = 0;
+    int en_value = 1;
     __asm__ __volatile__(
             "csrw tags, %[en_value]"
             :
