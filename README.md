@@ -21,11 +21,6 @@ If you want to run with **tracing** enable, use the following command:
  DBG="+trace" ctest -R lb -V
 ```
 
-
-## Debugging
-
-Please refer to this [Debugging infrastructure](https://git.yggdrasill.ga/riscv_softcore_security_contest/riscv_core/wikis/Debug-Infrastructure#the-debugger)
-
 ## TODO:
 
 make this exit sequence compatible with compliance tests. That is we should
