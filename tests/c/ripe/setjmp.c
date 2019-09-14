@@ -18,7 +18,7 @@ int setjmp(jmp_buf jmp)
            "sw ra, 	(0x30)(a0)\n\t"
            "sw sp, 	(0x34)(a0)\n\t"
            "li a0, 0\n\t"
-           "ret\n\t"
+           "li a5, 0\n\t"
             : /* No outputs. */
             : /* TODO: figure out how to pass *status* to this *ecall* properly */
             : "memory");
