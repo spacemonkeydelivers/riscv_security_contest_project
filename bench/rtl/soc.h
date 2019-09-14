@@ -30,6 +30,7 @@ public:
     uint64_t getRamSize() const;
     uint64_t getWordSize() const;
     uint32_t getPC() const;
+    void  setPC(uint32_t pc);
     uint32_t getRegFileSize() const;
 
     void clearRam();
