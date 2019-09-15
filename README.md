@@ -95,6 +95,43 @@ If you want to run with **tracing** enable, use the following command:
  DBG="+trace" ctest -R malloc -V
 ```
 
+## Running Zephyr-based programs
+
+By default, when the project is built, our build scripts build several
+zephyr-based programs, namely these ones:
+
+- **zephyr_ripe[1-5]**
+- **zephyr_philosophers**
+- **zephyr_hello_world**
+- **zephyr_mte_demo**
+- and some others
+
+**zephyr_ripe[1-5]** are pre-built images of the attacks which we should
+mitigate.  Our design demonstrates mitigation for tests **zephyr_ripe1** and
+**zephyr_ripe5**.
+
+The purpose of **zepyhyr_mte_demo** is to demonstrate how
+**SecureMonitorPanic** interrupt works in cases when our HW detect an
+out-of-bounds access.
+
+**zephyr_philosophers** demonstrates that other zephyr subsystems work as
+expected with our design. To see dynamic output (from uart) one should do:
+`cd $BUILD_DIR ; tail -f tests/zephyr_philosophers/io.txt` - this way you can
+see what is printed to the uart port as the simulation goes on.
+
+Please do note for tests that depend on the timer functionality the simulation
+process is quite slow.  For example, one may have to wait about **4 minutes**
+for an `eating philosopher` to become a `thinking philosopher`.
+
+**Important note:** for zephyr-based tests "test exit code" , reported by `ctest`
+does not indicate the actual pass/fail status of the test. To figure out how
+test terminates, one has to check `io.txt` file of the test. **io.txt** file
+is located at:
+
+```
+$BUILD_DIR/tests/<test_name>/io.txt
+```
+
 # Risc-V core
 
 HDL files describing our design are located in [rtl](rtl/) folder.
