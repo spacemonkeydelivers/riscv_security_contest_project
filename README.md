@@ -38,7 +38,7 @@ testing infrastructure are also expected.
 - Igor Chervatyuk
 - Sergey Matveev
 
-## Special thanks:
+## Special thanks to:
 - Arnaud Samama from Thales Group
 - ARM corporation
 - Kurapov Petr
