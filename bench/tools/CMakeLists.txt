@@ -10,7 +10,7 @@ endif()
 set(TOOLCHAIN ${RISCV_TOOLCHAIN_PATH})
 set(FLAGS "-ffreestanding -nostdinc -nodefaultlibs -nostdlib -Os -Wall -Werror -Wextra")
 set(FLAGS "${FLAGS} -I${PLATFORM_FILES_ROOT}/include")
-set(FLAGS "${FLAGS} -march=${SUPPORTED_RISCV_ARCH}")
+set(FLAGS "${FLAGS} -march=${DEFAULT_ARCH_C_TESTS}")
 ExternalProject_Add(
     libc
     CONFIGURE_COMMAND ""

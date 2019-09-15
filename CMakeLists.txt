@@ -6,7 +6,10 @@ enable_testing()
 # Project's name
 project(riscv_soc)
 
-set(SUPPORTED_RISCV_ARCH "rv32i")
+set(DEFAULT_ARCH_C_TESTS "rv32i")
+set(DEFAULT_ARCH_ASM_TESTS "rv32im")
+set(DEFAULT_ARCH_COMPLIANCE_TESTS "rv32im")
+set(DEFAULT_ARCH_ZEPHYR_TESTS "rv32imc") # this one is not used at the moment
 # DO NOT USE!!!
 option(BUILD_OVP_MODELS "Build OVP VLNV library (Imperas installation is required)" OFF)
 

@@ -5,12 +5,13 @@ LIBC_INCLUDES = $(RISCV_PSEUDOLIBC_INCLUDES)
 
 CC         = $(RISCV_CC)
 OBJCOPY    = $(RISCV_OBJCOPY)
-CFLAGS     = $(RISCV_CFLAGS_COMMON) -march=rv32i -mabi=ilp32 <%= disable_warnings ? "-w" : "" %>
 LDFLAGS    = $(RISCV_LDFLAGS_COMMON)
 LDSCRIPT   = $(RISCV_C_LD_SCRIPT)
 
+CFLAGS     = $(RISCV_CFLAGS_COMMON) <%= disable_warnings ? "-w" : "" %>
+CFLAGS    +=  -march=$(MARCH_C_TESTS) -mabi=ilp32
 <% if asm_c_ext %>
-CFLAGS += -march=rv32ic
+CFLAGS += -march=rv32imc
 <% end %>
 
 LIBC = <%= disable_security ? "c_ns" : "c" %>

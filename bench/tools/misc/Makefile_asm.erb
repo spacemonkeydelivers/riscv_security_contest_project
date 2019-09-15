@@ -2,15 +2,16 @@ include <%= ENV['TOOLS_DISTRIB'] %>/share/testsMakefile.include
 
 CC         = $(RISCV_CC)
 OBJCOPY    = $(RISCV_OBJCOPY)
-# YES, we support M instructions in assembly tests
-CFLAGS     = $(RISCV_CFLAGS_COMMON) -I$(RISCV_ASM_INCLUDES) -march=rv32im  -mabi=ilp32
-<% if asm_c_ext %>
-CFLAGS += -march=rv32imc
-<% end %>
-CFLAGS += -DENABLE_FPGA_EXIT
-
 LDFLAGS    = $(RISCV_LDFLAGS_COMMON)
 LDSCRIPT   = $(RISCV_ASM_LD_SCRIPT)
+
+# YES, we support M instructions in assembly tests
+CFLAGS     = $(RISCV_CFLAGS_COMMON) -I$(RISCV_ASM_INCLUDES)
+CFLAGS    += -march=$(MARCH_ASM_TESTS) -mabi=ilp32
+CFLAGS    += -DENABLE_FPGA_EXIT
+<% if asm_c_ext %>
+CFLAGS    += -march=rv32imc
+<% end %>
 
 SRC  = <%= input_asm %>
 
