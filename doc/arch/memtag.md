@@ -1,8 +1,8 @@
 # Memory tagging Extention
 
-**Disclaimer:** The design of this extension is "heavily inspired" (it's
-actially a rip-off with cosmetic changes) by "Armv8.5 Memory Tagging Extension"
-(see ARM ARM, chapter D6).
+**Disclaimer:** The design of this extension is "heavily inspired"
+(well, actually, it's a rip-off with cosmetic changes) by
+"Armv8.5 Memory Tagging Extension" (see ARM ARM, chapter D6).
 
 ## Introduction
 
@@ -22,7 +22,7 @@ mark the physical locations are stored in a dedicated memory which is
 accessible only by special instructions (load/store tag: **lt**/**st**) -
 ordinary instructions can't access this memory. 
 
-In order to extend the existing memory operations to be able to associate the
+To extend the existing memory operations to be able to associate the
 expected tag with memory access performed the following technique is used. The
 **tag** is encoded in the virtual address of the memory reference, like this:
 ```
@@ -51,6 +51,18 @@ fields:
 - ICEN: enables tag checking on instruction fetch
 - IACK: write of a non-zero value acknowledges pending "Secure Monitor Panic" interrupt.
 - LSEN: enables tag checkin on load/store operation.
+```
+**HW RNG:** non-standard CSR "rnd".
+```
+name: rnd
+id: 0x346
+fields:
+| 31 |  ...  |   0   |
+|       DATA         |
+- DATA: reading this field results in pseudo-random number to be returned.
+We use LFSR as a generator for the pseudo-random sequences. Not very "secure",
+yes, but this is only a demo project. The intent is is to use this register
+to generate random memory tag.
 ```
 **New Interrupt:** "Secure Monitor Panic"
 ```
