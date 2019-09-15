@@ -119,9 +119,9 @@ expected with our design. To see dynamic output (from uart) one should do:
 `cd $BUILD_DIR ; tail -f tests/zephyr_philosophers/io.txt` - this way you can
 see what is printed to the uart port as the simulation goes on.
 
-Please do note for tests that depend on the timer functionality the simulation
-process is quite slow.  For example, one may have to wait about **4 minutes**
-for an `eating philosopher` to become a `thinking philosopher`.
+Please do note, that for tests that depend on the timer functionality the
+simulation process is quite slow.  For example, one may have to wait about
+**4 minutes** for an `eating philosopher` to become a `thinking philosopher`.
 
 **Important note:** for zephyr-based tests "test exit code" , reported by `ctest`
 does not indicate the actual pass/fail status of the test. To figure out how
@@ -131,6 +131,15 @@ is located at:
 ```
 $BUILD_DIR/tests/<test_name>/io.txt
 ```
+
+Alternatively the user can run `ctest` with `-V` option, like this:
+
+```
+ctest -R zephyr_ripe1 -V
+```
+
+Then, the contents of `io.txt* shall be printed to standard output once
+simulation is complete.
 
 # Risc-V core
 
