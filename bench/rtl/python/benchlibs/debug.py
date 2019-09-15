@@ -96,12 +96,16 @@ class Debugger:
         if new_state == self._bench.en_state.FETCH:
             if (self._trace['state'] != new_state):
 
-                self.print_utrace()
-
-                self._trace['states'].clear()
                 pc = self._soc.pc()
                 msg = self._disasm.display(pc, self._soc)
-                print(msg)
+                if msg != None:
+                    print(msg)
+                else:
+                    print('{:#x}: DISASSEMBLER ERROR'.format(pc))
+                self.print_utrace()
+                print('')
+
+                self._trace['states'].clear()
 
         self._trace['state'] = new_state
         if self._trace['states'].has_key(str(new_state)):

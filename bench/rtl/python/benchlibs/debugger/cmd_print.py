@@ -50,14 +50,16 @@ class CmdPrint:
         upc = self.soc.upc()
         print '--- CPU state ---'
         print 'step: #{}, utick: {}'.format(step_ctr, tick_ctr)
+        print 'pc: {:#x} /upc: {:x}'.format(pc, upc)
         disasm = self.debugger._disasm.display(pc, self.soc)
         udisasm = self.debugger._disasm.display(upc, self.soc)
-        if disasm != udisasm:
-            print 'stale pc: {}'.format(disasm)
-            print 'unstable pc: {}'.format(udisasm)
+        if pc != upc:
+            print 'stale disasm: {}'.format(disasm)
+            print 'unstable disasm: {}'.format(udisasm)
         else:
-            print disasm
+            print 'disasm: {}'.format(disasm)
             print 'pc is stable'
+
         state = self.soc._soc.cpuState()
         print 'state: {}'.format(state)
         self.debugger.print_utrace()

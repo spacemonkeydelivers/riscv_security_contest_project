@@ -58,18 +58,32 @@ class Disassembler:
             disas = info["disas"]
 
             data = soc.read_word_ram(word_index = address / 4)
-            # Splitting data into high and low values
-            high, low = divmod(data, 0x10000)    
-            if ( (data == raw) or (high == raw) or (low == raw) ):
-                return '{}:{}'.format(hex(address), disas)
-            elif ( raw % 0x10000 == high ):
-                # This clause assumes we have a full 4 byte instruction that by accident started at middle of regular 4 bytes.
-                # We check this by only checking if 2 bytes equals starting 2 bytes of expected instruction. I don't like this, but it works.
-                return '{}:{}'.format(hex(address + 2), disas)
+            if (address % 4) == 0:
+                if (data & 3) != 3: # short instruction
+                    data = data & 0xffff
+
+                if raw != data:
+                    return (
+                    "DISASSEMBLER ERROR - text CORRUPTION detected!"
+                    "content={:#x}, expected=[{:#x}, {}]"
+                    ).format(data, raw, disas)
+                else:
+                    return '{:#x}:{} || raw: {:#04x}'.format(address, disas, raw)
+            elif (address % 4) == 2:
+                data_low = (data >> 16) & 0xffff
+                if (data_low & 3) == 3: # we have an unaligned 4-byte instruction
+                   data_high = soc.read_word_ram(word_index = address / 4 + 1) & 0xffff
+                   data = data_low | (data_high << 16)
+                else:
+                   data = data_low
+                if data == raw:
+                    return '{:#x}:{} || raw: {:#x}'.format(address, disas, raw)
+                else:
+                    return (
+                    "DISASSEMBLER ERROR - text CORRUPTION detected (2-byte border)!"
+                    "content={:#x}, expected=[{:#x}, {}]"
+                    ).format(data, raw, disas)
             else:
-                #print "ADDRESS: {}; DEBUG:{}, {}, {}".format(hex(address), hex(high), hex(low), hex(raw))
-                return None
-                #'disasm failure. text CORRUPTION detected! content={:#x}, expected=[{:#x}, {}]'.format(
-                #  data, raw, disas)
+                return "DISASSEMBLER ERROR - unaligned address detected"
         else:
-            '{}: UNDEFINED'.format(hex(address))
+          return '{:#x}: DISASSEMBLER ERROR: NO DISASSEMBLY INFORMATION AVAILABLE'.format(address)

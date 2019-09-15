@@ -49,7 +49,7 @@ class CmdWatchpoint:
         if ( index == None ):
             print '[-] Have not found register in CPU Register file.'
             return None
-        
+
         register_value = self.soc.read_register(index)
         self.watchpoints[self.watchpoint_table_size] = [register, hex(register_value), 'register']
         self.watchpoint_table_size += 1
@@ -68,7 +68,7 @@ class CmdWatchpoint:
             if (args[2][:2] == '0x'):
                 address = int(args[2][2:],16) #Cutting 0x off
             else:
-                address = int(args[2]) 
+                address = int(args[2])
         except Exception as e:
             print '[-] Provided value is not integer'
             return None
@@ -76,7 +76,7 @@ class CmdWatchpoint:
         memory_value = self.soc.read_word_ram(word_index)
 
         self.watchpoints[self.watchpoint_table_size] = [
-            hex(address), 
+            hex(address),
             hex(memory_value),
             'memory',
             ]
@@ -87,7 +87,7 @@ class CmdWatchpoint:
             word_index,
             self.watchpoints[self.watchpoint_table_size - 1][1],
             )
-    
+
     def watchpoint_callback(self):
         # (IC) Python dictionaries evaluates to False if empty.
         if ( self.watchpoints != False):
@@ -95,27 +95,27 @@ class CmdWatchpoint:
                 trigger = watchpoint[0]
                 saved_value = watchpoint[1]
                 location = watchpoint[2]
-                
+
                 if ( location == 'register'):
                     #print 'Testing register callback'
                     index = REG_INDEXES.get(trigger)
                     current_value = self.soc.read_register(index)
                     if ( int(saved_value[2:], 16) != current_value ):
-                        print '\t[*] Watchpoint {} hit. Register {} changed its value from {} to {}'.format(
+                        print '    [*] Watchpoint {} hit. Register {} changed its value from {} to {}'.format(
                             key,
                             trigger,
                             saved_value,
                             hex(current_value),
                             )
                         self.watchpoints[key] = [trigger, hex(current_value), location]
-                
+
                 if ( location == 'memory'):
                     #print 'Testing register memory'
                     address = int(trigger[2:],16) #Cutting 0x off
                     word_index = address / self._word_size
                     current_value = self.soc.read_word_ram(word_index)
                     if ( int(saved_value[2:], 16) != current_value):
-                        print '\t[*] Watchpoint {} hit. Value at address {} changed its value from {} to {}'.format(
+                        print '    [*] Watchpoint {} hit. Value at address {} changed its value from {} to {}'.format(
                             key,
                             trigger,
                             saved_value,
@@ -128,7 +128,7 @@ class CmdWatchpoint:
             trigger = watchpoint[0]
             saved_value = watchpoint[1]
             location = watchpoint[2]
-            print '\t[#{}, {}: {}. Value: {}]'.format(key, location, trigger, saved_value)
+            print '    [#{}, {}: {}. Value: {}]'.format(key, location, trigger, saved_value)
 
     def run(self, args):
         if ( len(args) == 0 ):
@@ -147,7 +147,7 @@ class CmdWatchpoint:
             else:
                 print '[-] Wrong argument. Use either "reg" or "mem".'
             return None
-       
+
         if ( args[0] == 'rem' ):
             if ( len(args) < 2 ):
                 print '[-] Insufficient number of arguments passed. Specify watchpoint to delete.'
@@ -159,15 +159,15 @@ class CmdWatchpoint:
             except:
                 print '[-] Invalid watchpoint to delete.'
             return None
-            
+
         if ( args[0] == 'callback'):
             self.watchpoint_callback()
-            return None 
+            return None
 
         if ( args[0] == 'show'):
             self.show()
             return None
-       
+
         print('Error: incorrect <watchpoint> command')
         return None
 
