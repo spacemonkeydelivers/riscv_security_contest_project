@@ -155,6 +155,7 @@ class Debugger:
             print("Error: unknown command {}".format(cmd))
 
     def repl(self):
+        self._soc.setResetPC()
         while True:
             try:
                 user_input = prompt('>',

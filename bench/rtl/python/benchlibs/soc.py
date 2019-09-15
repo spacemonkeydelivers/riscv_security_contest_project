@@ -148,6 +148,9 @@ class RiscVSoc:
     def reset(self):
         self._soc.reset()
 
+    def setResetPC(self):
+        self._soc.setPC(self._min_address)
+
     def get_soc_ram_size(self):
         return self._soc.ramSize() * 4
 
