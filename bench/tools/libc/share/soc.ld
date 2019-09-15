@@ -21,6 +21,7 @@ SECTIONS
         __text_end = . ;
     }
     .rodata : {
+        . = ALIGN(16) ;
         *(.rodata)
     }
     .bss : {
