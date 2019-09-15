@@ -171,28 +171,70 @@ class RiscVSoc:
             self._soc.switchBusMasterToExternal(True)
         data = map(lambda x: x.strip(), open(path_to_image, "r").readlines())
         offset = 0
+        addr = 0
         for line in data:
             if line[0] == '@':
-                offset = int(line[1:], 16) / self._word_size
+                print("#################################")
+                addr = int(line[1:], 16)
+                offset = addr / self._word_size
                 if not addr_set:
-                    self._min_address = offset * self._word_size
+                    self._min_address = addr
                     addr_set = True
 
                 if self._debug:
                     print("Changing offset while loading to RAM to: 0x{0:08x}".format(offset))
-                if (offset * self._word_size < self._min_address):
+                if (addr < self._min_address):
                     self._min_address = offset * self._word_size
             else:
                 b = line.split()
-                for k in range(0, len(b), self._word_size):
-                    word = int("".join(b[k:k+4][::-1]), 16)
-                    if external:
-                        self._soc.writeWordExt(offset, word)
+                cur_addr = addr
+                cur_len = len(b)
+                cur_pos = 0
+                while cur_len:
+                    cur_align = cur_addr & 0b11
+                    bytes_to_write = 0
+                    addr_adjust = 0
+                    cur_data = 0
+                    addr_to_access = cur_addr / self._word_size
+                    if cur_len >= (self._word_size - cur_align):
+                        bytes_to_write = self._word_size - cur_align
+                        addr_adjust = self._word_size - cur_align
                     else:
-                        self._soc.writeWord(offset, word)
+                        bytes_to_write = cur_len
+                        addr_adjust = cur_len
+                    if (cur_align != 0):
+                        if external:
+                            cur_data = self._soc.readWordExt(addr_to_access)
+                        else:
+                            cur_data = self._soc.readWord(addr_to_access)
+                    mask = 0
+                    if (bytes_to_write == 1):
+                        mask = 0xff << cur_align * 8
+                    elif (bytes_to_write == 2):
+                        mask = 0xffff << cur_align * 8
+                    elif (bytes_to_write == 3):
+                        mask = 0xffffff << cur_align * 8
+                    else:
+                        mask = 0xffffffff
+                    byte_data = b[cur_pos:cur_pos + bytes_to_write]
+                    for i in range(self._word_size - bytes_to_write):
+                        if cur_align:
+                            byte_data.insert(0, "00")
+                        else:
+                            byte_data.append("00")
+                    data = int("".join(byte_data[::-1]), 16)
+
+                    data_to_write = (~mask & cur_data) | (data)
+                    if external:
+                        self._soc.writeWordExt(addr_to_access, data_to_write)
+                    else:
+                        self._soc.writeWord(addr_to_access, data_to_write)
                     if self._debug:
-                        print("Writing 0x{0:08x} to address 0x{1:08x}".format(word, offset * self._word_size))
-                    offset += 1
+                        print("Writing 0x{0:08x} to address 0x{1:08x}".format(data_to_write, addr_to_access * self._word_size))
+                    cur_len -= addr_adjust
+                    cur_addr += addr_adjust
+                    cur_pos += bytes_to_write
+                addr = cur_addr
         if external:
             self._soc.toggleCpuReset(False)
             self._soc.switchBusMasterToExternal(False)
