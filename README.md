@@ -1,67 +1,138 @@
+# Overview
+
+This repository is a publically-available copy of a work performed by a team
+of SW engineers in an attempt to participate in
+[RISCV security contest](https://riscv.org/2019/07/risc-v-softcpu-core-contest).
+
+
+This repository contains:
+
+1. HDL design (verilog) of an IMC-compliant RISC-V core integrated in a
+custom SOC. The soc is called "beehive-riscv!".
+1. Our design introduces new extention to support HW memory tagging. The design
+of an extention is documented [here](doc/arch/memtag.md).
+1. Testing infrastructure and libraries used to test the design. This includes
+scripts to enable simulation (verilator) and emulation (an fpga by xilinx).
+1. Design documents used for development.
+1. A copy of zephyr OS for RISV platform with a set of custom patches enhancing
+(at least we hope so) security.
+1. The project also requires GNU toolchain with a set of custom patches. It is
+available from this
+[sattelite repository](https://github.com/spacemonkeydelivers/riscv_security_contest_toolchain).
+
+A copy of our application is available [here](doc/application.md)
+
+**The contents of the repository is frozen**. Only cosmetic changes to the
+documention/readme files are expected
+(unless contest organizers allow us to do otherwise). Occasional fixes to the
+testing infrastructure are also expected.
+
 # Participants
-- Alexey Baturo  
-- Anatoly Parshintsev  
-- Fedor Veselovsky  
-- Igor Chervatyuk  
-- Sergey Matveev  
 
-# Testing
+- Alexey Baturo
+- Anatoly Parshintsev
+- Fedor Veselovsky
+- Igor Chervatyuk
+- Sergey Matveev
 
-## Running
+## Special thanks:
+- Arnaud Samama from thalesgroup
+- ARM corporation
+- Kurapov Petr
+- [maikmerten](https://github.com/maikmerten/spu32)
+- Petushkov Igor
 
-To run test use the following command
+# License
 
+**MIT**.
+Unless some used open-source component prevents that. We are not lawyers.
+
+
+# Bulding the project
+
+Build the toolchain:
+1. `git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_toolchain`
+1. `cd riscv_security_contest_toolchain`
+1. `./configure --prefix=<RISCV_TOOLCHAIN_PATH> -with-arch=rv32imc --with-abi=ilp32`
+1. `make newlib -j10`
+
+Build RTL simulator (verilator) and run tests:
+1. `git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_project`
+1. `cd riscv_security_contest_project`
+1. `cd zephyrproject`
+1. `run pip3 install --user west`
+1. `west init -l zephyr/`
+1. `west update`
+1. `pip3 install -r zephyr/scripts/requirements.txt`
+1. `cd ../ && mkdir build && cd build`
+1. `RISCV_TOOLCHAIN=<RISCV_TOOLCHAIN_PATH> cmake  ../ && make -j10`
+1. Running all the existing tests with: `ctest -j10`
+
+# Testing infrastructure
+
+Our testing infrastructure is rather sophisticated and allows a wide range of
+testing scenarious. The primary focus was to make simulation of an
+assembly-based or c-based programs as simple (for the user) as possible.
+**At the moment of our submission it was still at the stage of an active
+development**.
+
+We use cmake to create "test list files" and ctest to run our tests.  Execution
+of each test is driven by a python script. This python script contains an
+embedded debugger and facilities to dump .vcd and trace files.
+
+To know which commands are executed during test run one may pass `-V` option
+to **ctest** program.
+
+## Examples:
+
+To run test use the following command:
 ```
 ctest -R "expr_to_match_test_name"
 ```
 
 If you want to run with **tracing** enable, use the following command:
-
 ```
- DBG="+trace" ctest -R lb -V
-```
-
-## TODO:
-
-make this exit sequence compatible with compliance tests. That is we should
-eventually switch to ecall/scall.
-
-# riscv_core
-
-**1. How to build & use:**
-```
-    1. mkdir build
-    2. cd build
-    3. RISCV_TOOLCHAIN=<path to riscv toolchain> cmake -DSOC_RAM_SIZE=65536 $TRUNK
-    # NOTE_1: D_SOC_RAM_SIZE can be less, but conformance and some c tests need at least 64K to work
-    # NOTE_2: The value for RISCV_TOOLCHAIN is expected to be '/tank/work/dev/toolchains/riscv32i-newlib-gcc/
-    4. make -j8
-    5. ctest -j8
+ DBG="+trace" ctest -R malloc -V
 ```
 
-**2. SoC memory map**  
-    Memory map for this particular SoC is located in 32 bit address space and consists of:  
+# Risc-V core
+
+HDL files describing our design are located in [rtl](rtl/) folder.
+
+- Instruction set: **IMC** compliant + custom [memtag extention](doc/arch/memtag.md).
+- Peripheral: riscv-compliant timer, uart (transmit part only).
+
+To speedup core development we used [cpu32 core](https://github.com/maikmerten/spu32)
+and extended it to be IMC compatible.
+
+## SOC memory map
+
+Memory map for this particular SoC is located in 32 bit address space and consists of:
+
 ```
-    0x00000000 : 0x3FFFFFFF - RAM address space. It's wrapped with RAM size.
-    0x40000000 : 0x7FFFFFFF - Timer address space
-    0x80000000 : 0xBFFFFFFF - Uart address space
-    0xC0000000 : 0xFFFFFFFF - nothing mapped here yet
+- 0x00000000 : 0x3FFFFFFF - RAM address space. It's wrapped with RAM size.
+- 0x40000000 : 0x7FFFFFFF - Timer address space
+- 0x80000000 : 0xBFFFFFFF - Uart address space
+- 0xC0000000 : 0xFFFFFFFF - nothing mapped here yet
 ```
 
-**3. How to work with timer**  
-    3.1. On reset timer is not started  
-    3.2. Any write to the timer address space sets the timer threshold to the
-    written value and starts the timer  
-    3.3. Writing 0 to the timer address space stops the timer   
-    3.4. Any read to the timer address space resets the current timer value  
-    **TODO: add test for working with timer and test CPU's IRQ**  
+### Timer details
 
-**4. Building toolchain for the project**  
-    4.2. git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_toolchain
-    4.3. cd riscv-gnu-toolchain  
-    4.4. ./configure --prefix=<install path> --with-arch=rv32i --with-abi=ilp32  
-    4.5. make newlib -j20  
-    4.6. Get your toolchain with support for memory tagging instructions in <install path>  
+- **mtime** is at `0x40000000`
+- **mtimecmp** is at `0x40000008`
+
+SOC-specific control for timer frequency:
+
+- **BEEHIVE_MTIMECTRL** is at `0x40000010`
+
+TODO: add details.
+
+### UART details
+
+- **UART_TX** is at `0x80000004`
+
+TODO: add details about configuration interface.
+
 
 # Used open source components
 
