@@ -40,7 +40,7 @@ MEMORY
 #endif
     RAM (rwx) : ORIGIN = CONFIG_RISCV_RAM_BASE_ADDR, LENGTH = RISCV_RAM_SIZE
     /* Used by and documented in include/linker/intlist.ld */
-    IDT_LIST  (wx)      : ORIGIN = 0x38000, LENGTH = 2K
+    IDT_LIST  (wx)      : ORIGIN = 0x18000, LENGTH = 1K
 }
 
 ENTRY(CONFIG_KERNEL_ENTRY)

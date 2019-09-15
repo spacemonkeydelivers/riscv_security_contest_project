@@ -1,6 +1,6 @@
 identifier: beehive_riscv32
 name: The operating system Paradise
-type: m
+type: mcu
 arch: riscv32
 toolchain:
   - zephyr
