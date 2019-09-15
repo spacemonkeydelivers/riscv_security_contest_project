@@ -20,18 +20,17 @@ SECTIONS
         *(.text)
         __text_end = . ;
     }
-    .rodata : {
-        . = ALIGN(16) ;
+    .rodata ALIGN(16): {
         *(.rodata)
+        *(.rodata.*)
     }
-    .bss : {
-        . = ALIGN(16) ;
+    .bss ALIGN(16) : {
         __bss_start = .;
         *(.bss)
         *(.sbss)
         __bss_end = .;
     }
-    .system_data : {
+    .system_data ALIGN(16): {
         *(.__system.data)
         *(.__system.secure_data)
         . = ALIGN(16) ;
@@ -40,7 +39,6 @@ SECTIONS
     .data : {
         *(.data)
     }
-
     .heap (NOLOAD) : {
         . = ALIGN(16) ;
         __heap_start = . ;
