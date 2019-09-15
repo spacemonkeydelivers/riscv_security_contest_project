@@ -11,6 +11,9 @@ This repository contains:
 custom SOC. The soc is called "beehive-riscv!".
 1. Our design introduces new extension to support **HW memory tagging**. The
    design of an extension is documented [here](doc/arch/memtag.md).
+1. To enhance the security even further, our soc provides HW generator of
+pseudo-random numbers (LFSR-based). SW routines may want to use this register
+to generate random memory tags.
 1. Testing infrastructure and libraries used to test the design. This includes
 scripts to enable simulation (verilator) and emulation (an fpga by xilinx).
 1. Design documents used for development.
