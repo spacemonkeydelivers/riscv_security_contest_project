@@ -9,8 +9,8 @@ This repository contains:
 
 1. HDL design (verilog) of an IMC-compliant RISC-V core integrated in a
 custom SOC. The soc is called "beehive-riscv!".
-1. Our design introduces new extention to support HW memory tagging. The design
-of an extention is documented [here](doc/arch/memtag.md).
+1. Our design introduces new extension to support HW memory tagging. The design
+of an extension is documented [here](doc/arch/memtag.md).
 1. Testing infrastructure and libraries used to test the design. This includes
 scripts to enable simulation (verilator) and emulation (an fpga by xilinx).
 1. Design documents used for development.
@@ -22,7 +22,7 @@ available from this
 
 A copy of our application is available [here](doc/application.md)
 
-**The contents of the repository is frozen**. Only cosmetic changes to the
+**The content of the repository is frozen**. Only cosmetic changes to the
 documention/readme files are expected
 (unless contest organizers allow us to do otherwise). Occasional fixes to the
 testing infrastructure are also expected.
@@ -36,7 +36,7 @@ testing infrastructure are also expected.
 - Sergey Matveev
 
 ## Special thanks:
-- Arnaud Samama from thalesgroup
+- Arnaud Samama from Thales Group
 - ARM corporation
 - Kurapov Petr
 - [maikmerten](https://github.com/maikmerten/spu32)
@@ -71,14 +71,14 @@ Build RTL simulator (verilator) and run tests:
 # Testing infrastructure
 
 Our testing infrastructure is rather sophisticated and allows a wide range of
-testing scenarious. The primary focus was to make simulation of an
-assembly-based or c-based programs as simple (for the user) as possible.
-**At the moment of our submission it was still at the stage of an active
+testing scenarios. The primary focus was to make the simulation of an
+assembly-based or c-based program as simple (for the user) as possible.
+**At the moment of our submission, it was still at the stage of active
 development**.
 
-We use cmake to create "test list files" and ctest to run our tests.  Execution
-of each test is driven by a python script. This python script contains an
-embedded debugger and facilities to dump .vcd and trace files.
+We use cmake to create "test list files" and ctest to run our tests. The
+execution of each test is driven by a python script. This python script
+contains an embedded debugger and facilities to dump .vcd and trace files.
 
 To know which commands are executed during test run one may pass `-V` option
 to **ctest** program.
@@ -99,7 +99,7 @@ If you want to run with **tracing** enable, use the following command:
 
 HDL files describing our design are located in [rtl](rtl/) folder.
 
-- Instruction set: **IMC** compliant + custom [memtag extention](doc/arch/memtag.md).
+- Instruction set: **IMC** compliant + custom [memtag extension](doc/arch/memtag.md).
 - Peripheral: riscv-compliant timer, uart (transmit part only).
 
 To speedup core development we used [cpu32 core](https://github.com/maikmerten/spu32)
@@ -131,7 +131,7 @@ TODO: add details.
 
 - **UART_TX** is at `0x80000004`
 
-TODO: add details about configuration interface.
+**TODO:** add details about the configuration interface.
 
 
 # Used open source components
