@@ -7,17 +7,17 @@ of SW engineers in an attempt to participate in
 
 This repository contains:
 
-1. HDL design (verilog) of an IMC-compliant RISC-V core integrated in a
+1. HDL design (verilog) of an  **rv32imc-compliant** RISC-V core integrated in a
 custom SOC. The soc is called "beehive-riscv!".
-1. Our design introduces new extension to support HW memory tagging. The design
-of an extension is documented [here](doc/arch/memtag.md).
+1. Our design introduces new extension to support **HW memory tagging**. The
+   design of an extension is documented [here](doc/arch/memtag.md).
 1. Testing infrastructure and libraries used to test the design. This includes
 scripts to enable simulation (verilator) and emulation (an fpga by xilinx).
 1. Design documents used for development.
 1. A copy of zephyr OS for RISV platform with a set of custom patches enhancing
 (at least we hope so) security.
-1. The project also requires GNU toolchain with a set of custom patches. It is
-available from this
+1. The project also requires **GNU toolchain with a set of custom patches**. It
+   is available from this
 [sattelite repository](https://github.com/spacemonkeydelivers/riscv_security_contest_toolchain).
 
 A copy of our application is available [here](doc/application.md)
@@ -99,7 +99,7 @@ If you want to run with **tracing** enable, use the following command:
 
 HDL files describing our design are located in [rtl](rtl/) folder.
 
-- Instruction set: **IMC** compliant + custom [memtag extension](doc/arch/memtag.md).
+- Instruction set: **rv32imc**-compliant + custom [memtag extension](doc/arch/memtag.md).
 - Peripheral: riscv-compliant timer, uart (transmit part only).
 
 To speedup core development we used [cpu32 core](https://github.com/maikmerten/spu32)
@@ -129,10 +129,8 @@ TODO: add details.
 
 ### UART details
 
+- **UART_BAUD_DIVIDER** is at `0x80000000`
 - **UART_TX** is at `0x80000004`
-
-**TODO:** add details about the configuration interface.
-
 
 # Used open source components
 
