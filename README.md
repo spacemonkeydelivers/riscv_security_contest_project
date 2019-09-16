@@ -22,6 +22,9 @@ scripts to enable simulation (verilator) and emulation (an fpga by xilinx).
 1. The project also requires **GNU toolchain with a set of custom patches**. It
    is available from this
 [sattelite repository](https://github.com/spacemonkeydelivers/riscv_security_contest_toolchain).
+Note, that
+**[the binary realease of the toolchain](https://github.com/spacemonkeydelivers/riscv_security_contest_toolchain/releases/tag/v1.0-rc1)**
+is also available.
 
 A copy of our application is available [here](doc/application.md)
 
