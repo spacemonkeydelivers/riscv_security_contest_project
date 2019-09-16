@@ -110,12 +110,25 @@ class CmdExamine:
                         print(fmts[out].format(a, d))
 
                     if out == 'i':
-                        d = self.debugger._disasm.display(a, self.soc)
-                        if d != None:
-                            print(fmts[out].format(a, d.split(':')[1]))
-                        d = self.debugger._disasm.display(a + 2, self.soc)
-                        if d != None:
-                            print(fmts[out].format(a + 2, d.split(':')[1]))
+                        err_count = 0
+                        msg1 = self.debugger._disasm.display(a, self.soc)
+                        if ("DISASSEMBLER ERROR" not in msg1) and ("CORRUPTION" not in msg1):
+                            m = ':'.join(msg1.split(':')[1:])
+                            print(fmts[out].format(a, m))
+                        else:
+                            err_count = err_count + 1
+
+                        msg2 = self.debugger._disasm.display(a + 2, self.soc)
+                        if ("DISASSEMBLER ERROR" not in msg2) and ("CORRUPTION" not in msg2):
+                            m = ':'.join(msg2.split(':')[1:])
+                            print(fmts[out].format(a + 2, m))
+                        else:
+                            err_count = err_count + 1
+
+                        if err_count == 2:
+                          print('{:#x}: {}'.format(a, msg1))
+                          print('{:#x}: {}'.format(a + 2, msg2))
+
                 print('_______________________')
 
                 if out == 't':
