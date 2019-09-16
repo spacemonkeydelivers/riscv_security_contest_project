@@ -112,14 +112,14 @@ class CmdExamine:
                     if out == 'i':
                         err_count = 0
                         msg1 = self.debugger._disasm.display(a, self.soc)
-                        if ("DISASSEMBLER ERROR" not in msg1) and ("CORRUPTION" not in msg1):
+                        if ("DISASSEMBLER ERROR" not in msg1) or ("CORRUPTION" in msg1):
                             m = ':'.join(msg1.split(':')[1:])
                             print(fmts[out].format(a, m))
                         else:
                             err_count = err_count + 1
 
                         msg2 = self.debugger._disasm.display(a + 2, self.soc)
-                        if ("DISASSEMBLER ERROR" not in msg2) and ("CORRUPTION" not in msg2):
+                        if ("DISASSEMBLER ERROR" not in msg2) or ("CORRUPTION" in msg2):
                             m = ':'.join(msg2.split(':')[1:])
                             print(fmts[out].format(a + 2, m))
                         else:
