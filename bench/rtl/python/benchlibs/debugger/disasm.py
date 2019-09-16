@@ -23,7 +23,7 @@ class Disassembler:
                 raw = int(split[0], 16)
             except ValueError:
                 continue
-            inst = '\t'.join(split[1:])
+            inst = ' '.join(split[1:])
 
             filter_tmp.append('{} {}::{}'.format(format(raw, '032b'),
                                                   hex(addr), inst))
@@ -68,7 +68,7 @@ class Disassembler:
                     "content={:#x}, expected=[{:#x}, {}]"
                     ).format(data, raw, disas)
                 else:
-                    return '{:#x}:{} || raw: {:#04x}'.format(address, disas, raw)
+                    return '{:#x}:{} || raw: {:#x}'.format(address, disas, raw)
             elif (address % 4) == 2:
                 data_low = (data >> 16) & 0xffff
                 if (data_low & 3) == 3: # we have an unaligned 4-byte instruction
@@ -86,4 +86,4 @@ class Disassembler:
             else:
                 return "DISASSEMBLER ERROR - unaligned address detected"
         else:
-          return '{:#x}: DISASSEMBLER ERROR: NO DISASSEMBLY INFORMATION AVAILABLE'.format(address)
+          return '{:#x}: DISASSEMBLER ERROR - NO DISASSEMBLY INFORMATION AVAILABLE'.format(address)
