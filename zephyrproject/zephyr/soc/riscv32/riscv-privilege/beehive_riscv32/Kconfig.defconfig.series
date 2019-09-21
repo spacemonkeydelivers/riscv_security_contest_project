@@ -32,7 +32,7 @@ config RISCV_HAS_PLIC
 
 config NUM_IRQS
 	int
-	default 16
+	default 17
 
 config XIP
 	bool
