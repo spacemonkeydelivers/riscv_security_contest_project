@@ -21,6 +21,8 @@
 #define RISCV_MTIMECMP_BASE          0x40000008
 #define BEEHIVE_MTIMECTRL_BASE       0x40000010
 
+#define RISCV_BEEHIVE_SECURE_MONITOR_PANIC_IRQ 16
+
 /* lib-c hooks required RAM defined variables */
 #define RISCV_RAM_BASE               CONFIG_RISCV_RAM_BASE_ADDR
 #define RISCV_RAM_SIZE               CONFIG_RISCV_RAM_SIZE
