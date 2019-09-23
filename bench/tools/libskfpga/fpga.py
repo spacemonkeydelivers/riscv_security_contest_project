@@ -78,18 +78,66 @@ class FPGA_SOC:
             print("0x{:08X} : 0x{:08X}".format(addr, data))
 
     def upload_image(self, path_to_image):
+        self._min_address = 0
+        addr_set = False
         data = map(lambda x: x.strip(), open(path_to_image, "r").readlines())
-        address = 0
+        offset = 0
+        addr = 0
         for line in data:
             if line[0] == '@':
-                address = int(line[1:], 16)
+                addr = int(line[1:], 16)
+                offset = addr / 4
+                if not addr_set:
+                    self._min_address = addr
+                    addr_set = True
+
+                print("Changing offset while loading to RAM to: 0x{0:08x}".format(offset))
+                if (addr < self._min_address):
+                    self._min_address = offset * 4
             else:
                 b = line.split()
-                for k in range(0, len(b), 4):
-                    word = int("".join(b[k:k+4][::-1]), 16)
-                    self.write_word(address, word)
-                    address += 4
-    
+                cur_addr = addr
+                cur_len = len(b)
+                cur_pos = 0
+                while cur_len:
+                    cur_align = cur_addr & 0b11
+                    bytes_to_write = 0
+                    addr_adjust = 0
+                    cur_data = 0
+                    addr_to_access = cur_addr / 4
+                    if cur_len >= (4 - cur_align):
+                        bytes_to_write = 4 - cur_align
+                        addr_adjust = 4 - cur_align
+                    else:
+                        bytes_to_write = cur_len
+                        addr_adjust = cur_len
+                    if (cur_align != 0):
+                        cur_data = self.read_word(addr_to_access)
+                    mask = 0
+                    if (bytes_to_write == 1):
+                        mask = 0xff << cur_align * 8
+                    elif (bytes_to_write == 2):
+                        mask = 0xffff << cur_align * 8
+                    elif (bytes_to_write == 3):
+                        mask = 0xffffff << cur_align * 8
+                    else:
+                        mask = 0xffffffff
+                    byte_data = b[cur_pos:cur_pos + bytes_to_write]
+                    for i in range(4 - bytes_to_write):
+                        if cur_align:
+                            byte_data.insert(0, "00")
+                        else:
+                            byte_data.append("00")
+                    data = int("".join(byte_data[::-1]), 16)
+
+                    data_to_write = (~mask & cur_data) | (data)
+                    self.write_word(addr_to_access, data_to_write)
+                    print("Writing 0x{0:08x} to address 0x{1:08x}".format(data_to_write, addr_to_access * 4))
+                    cur_len -= addr_adjust
+                    cur_addr += addr_adjust
+                    cur_pos += bytes_to_write
+                addr = cur_addr
+
     def fpga_init(self):
         self._soc.setReset(False)
         self._soc.setReset(1)
