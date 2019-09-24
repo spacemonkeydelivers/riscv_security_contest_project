@@ -1,29 +1,46 @@
+#!/usr/bin/python
 import sys
 import getopt
 import json
 import os
 import shutil
+import getpass
+import json
+
 try:
     import paramiko
 except Exception as e:
     print '[-] Unexpected problem with importing <paramiko> module'
     print '[!] Consider installing it with \'pip install --user paramiko\''
+    raise RuntimeError('coild not load required modules')
+
+try:
+    from scp import SCPClient
+except Exception as e:
+    print '[-] Unexpected problem with importing <scp> module'
+    print '[!] Consider installing it with \'pip install --user scp\''
+    raise RuntimeError('coild not load required modules')
+
 
 # Global variables used for instruction refinary.
 fpga_info_data = {}
 
+# SESURITY! Expected file format:
+#{ "user": "username", "password": "password", "host": "ip/hostname" }
+with open(os.path.expanduser('~/.fpga_cfg.json')) as json_file:
+   FPGA_REMOTE = json.load(json_file)
+
+FPGA_TOOLS_ROOT = os.getenv('RISCV_FPGA_TOOLS_ROOT', '/mnt/fpga_tools')
+WORKING_DIR_REMOTE = os.getenv('RISCV_REMOTE_ROOT', '/root')
+username = getpass.getuser()
+WORKING_DIR = os.path.join(WORKING_DIR_REMOTE, '.fpga_{}'.format(username))
+
 # Constants for correct run of script.
 TEST_STATUS = "test_status" # A110A110 ???? success
 TEST_EXIT = "test_exit" # BADDAD if finished, DEADBABE if still kicking
-BUILD_DIRECTORY = '/tank/work/notmytempo/riscv_core/build'
-TEST_DIRECTORY = BUILD_DIRECTORY + '/tests/' 
-TEST_NAME = 'asm_cext_addi'#'asm_simple' #
-MOUNT_DIRECTORY = '/tank/work/dev/nfs/at91/mnt/PUBLIC_ENEMY'
-
-# Constants for remote server
-REMOTE_DIRECTORY = '/mnt/PUBLIC_ENEMY/'
 
 # Reading fpga.info file, that should contain info on test results placement.
+# TODO: not implemented
 def read_fpga_info(test_directory):
     try:
         with open( TEST_DIRECTORY + TEST_NAME + '/fpga.info', 'r' ) as fpga_info:
@@ -35,21 +52,59 @@ def read_fpga_info(test_directory):
     print "[+] {} is located at {}".format(TEST_STATUS, fpga_info_data[TEST_STATUS])
     print "[+] {} is located at {}".format(TEST_EXIT, fpga_info_data[TEST_EXIT])
     return fpga_info_data
-    
-# Fucntion to run instruction on remote server via SSH.
-def connect_to_ssh(hostname, username, password, command):
+
+def ssh_connect():
     client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    hostname = FPGA_REMOTE['host']
+
     try:
-        client.connect(hostname = hostname, username = username, password = password)
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect(
+            hostname = FPGA_REMOTE['host'],
+            username = FPGA_REMOTE['user'],
+            password = FPGA_REMOTE['password'])
+
         print "[+] Successfuly connected to host \'{}\' via ssh.".format(hostname)
-        print "[+] Going to perform \'{}\' command".format(command)
+    except Exception as e:
+        print "[-] Could not connect to remote host {}".format(hostname)
+
+    return client
+
+# function to upload files over ssh/scp
+def remote_upload(src, dst):
+    client = ssh_connect()
+    print('scp {} -> remote: {}'.format(src, dst));
+    with SCPClient(client.get_transport()) as scp:
+        scp.put(src, remote_path = dst)
+
+# Fucntion to run instruction on remote server via SSH.
+def remote_run(command, ignore_failures = False):
+    client = ssh_connect()
+
+    print "[+] Going to perform \'{}\' command".format(command)
+    ret_code = -1
+    try:
         stdin, stdout, stderr = client.exec_command(command)
         for line in stdout:
             print(line.strip('\n'))
-            client.close()
+        ret_code = stdout.channel.recv_exit_status()
+
+        if ret_code == 0:
+          print('[+] Great Success')
+        else:
+          print('[-] Miserable Failure')
+        print('')
+
     except Exception as e:
-        print "[-] Could not connect to remote host {}".format(host)
+        print '[-] Could not execute remote command <{}>'.format(e)
+
+    client.close()
+
+    if (ignore_failures == False) and (ret_code != 0):
+        raise RuntimeError("remote run failed")
+
+    return ret_code == 0
+
 
 def copy_test_verilog(test_directory, mount_directory):
     if not os.path.exists(test_directory):
@@ -72,40 +127,63 @@ def run_ctest(build_directory, test_name):
     else:
         assert False, "What the hell is this"
 
-def main(argv):
-    # Populating build directory and test name.
-    build_dir = ''
-    test_name = ''
-    if not argv:
-        assert False, "empty argument list"
-    try:
-        opts, args = getopt.getopt(argv,"hb:e",["build_dir=","test_name="])
-    except getopt.GetoptError as e:
-        print 'remote_testing.py --build_dir=<directory where the wild things are> --test_name<the actuall test name from TestList.txt>'
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print 'remote_testing.py --build_dir=<directory where the wild things are> --test_name<the actuall test name from TestList.txt>'
-            sys.exit()
-        elif opt in ("-b", "--build_dir"):
-            build_dir = arg
-        elif opt in ("-t", "--test_name"):
-            test_name = arg
-        else:
-            assert False, "unhandled option"
+def run(libbench):
+    INPUT_FILE = sys.argv[2]
+    if not os.path.isfile(INPUT_FILE):
+        print 'could not detect input file <{}>'.format(INPUT_FILE)
+        raise RuntimeError('missing input file')
 
-    if build_dir =='' or test_name == '':
-        print '[!] Some required arguments are empty!!'
-        exit(2)
+    print 'Assessing environment...'
+    bin_tools = [
+        'fpga_loader',
+        'fpga_reader',
+        'fpga_reset',
+        'fpga_writer'
+    ]
+    paths = {}
+    tools_list = []
+    for item in bin_tools:
+        tool_path = os.path.join(FPGA_TOOLS_ROOT, 'bin', item)
+        paths[item] = tool_path
+        tools_list.append(tool_path)
+    test_cmd = 'test -f ' + ' -a -f '.join(["'{}'".format(i) for i in tools_list])
+    remote_run(test_cmd)
 
-    run_ctest(BUILD_DIRECTORY, TEST_NAME)
-    fpga_info_data = read_fpga_info(TEST_DIRECTORY + TEST_NAME)
-    copy_test_verilog(TEST_DIRECTORY + TEST_NAME, MOUNT_DIRECTORY)
-    executed_command = 'cd '
-    executed_command += REMOTE_DIRECTORY
-    executed_command += '; '
-    executed_command += './fpga.py --status={} --exit={}'.format(fpga_info_data['test_status'], fpga_info_data['test_exit'])
-    connect_to_ssh('192.168.230.19', 'root', 'root', executed_command)
-    
-if __name__ == '__main__':
-    main(sys.argv[1:])
+    REMOTE_LIB = os.path.join(FPGA_TOOLS_ROOT, 'lib', 'libbench.so')
+    libtest_cmd = 'test -f \'{}\''.format(REMOTE_LIB)
+    remote_run(libtest_cmd)
+
+    print 'Prepairing workspace'
+    workspace_probe = os.path.join(WORKING_DIR, '.fuck_me')
+    probe_cmd = 'test -f \'{}\''.format(workspace_probe)
+    status = remote_run(probe_cmd, ignore_failures = True)
+    if status == True:
+      # initiate cleanup activities
+      remote_run('rm -rf \'{}\''.format(WORKING_DIR))
+
+    create_commands = [
+      'mkdir \'{}\''.format(WORKING_DIR),
+      'touch \'{}/.fuck_me\''.format(WORKING_DIR),
+      'cp \'{}\' \'{}\''.format(REMOTE_LIB, WORKING_DIR)
+    ]
+    remote_run(' && '.join(create_commands))
+    fpga_py = os.path.join(os.environ['TOOLS_DIR'], 'libskfpga', 'fpga.py')
+    remote_upload(fpga_py, WORKING_DIR)
+
+
+    remote_upload(INPUT_FILE, os.path.join(WORKING_DIR, 'test.v'))
+
+    bitstream_path = os.path.join(os.environ['FPGA_FILES'], 'fpga.bit')
+    print 'copying bitstream...'
+    if not os.path.isfile(bitstream_path):
+        print 'could not detect bitstream! make sure that you have one'
+        raise RuntimeError("missing bitstream")
+    remote_upload(bitstream_path, WORKING_DIR)
+
+    print 'uploading bitstream on emulator'
+    remote_run('{} /dev/fpga \'{}\''.format(paths['fpga_loader'],
+                                  os.path.join(WORKING_DIR, 'fpga.bit')))
+    print "run!"
+    remote_run('{} {}'.format(os.path.join(WORKING_DIR, 'fpga.py'),
+                              os.path.join(WORKING_DIR, 'test.v')));
+
