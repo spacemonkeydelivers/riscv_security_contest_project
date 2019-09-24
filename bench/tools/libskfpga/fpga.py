@@ -1,3 +1,5 @@
+#!/usr/bin/python2
+
 import libbench
 import os
 import sys
@@ -91,7 +93,7 @@ class FPGA_SOC:
                     self._min_address = addr
                     addr_set = True
 
-                print("Changing offset while loading to RAM to: 0x{0:08x}".format(offset))
+                # print("Changing offset while loading to RAM to: 0x{0:08x}".format(offset))
                 if (addr < self._min_address):
                     self._min_address = offset * 4
             else:
@@ -132,7 +134,7 @@ class FPGA_SOC:
 
                     data_to_write = (~mask & cur_data) | (data)
                     self.write_word(addr_to_access, data_to_write)
-                    print("Writing 0x{0:08x} to address 0x{1:08x}".format(data_to_write, addr_to_access * 4))
+                    # print("Writing 0x{0:08x} to address 0x{1:08x}".format(data_to_write, addr_to_access * 4))
                     cur_len -= addr_adjust
                     cur_addr += addr_adjust
                     cur_pos += bytes_to_write
@@ -340,46 +342,56 @@ class FPGA_SOC:
         self.__set_control_bit(self.BIT_TRANSACTION_SIZE_LOW)
         self.__set_control_bit(self.BIT_TRANSACTION_SIZE_HIGH)
 
-soc = FPGA_SOC("/dev/fpga")
-#soc.upload_firmware("/mnt/smd/bitstream/fpga.bit")
-soc.fpga_init()
-soc.check_sanity()
-soc.halt_soc()
 
-soc.uart_set_baud_9600()
-soc.uart_print("Test")
+def main(filename):
+    if not os.path.isfile(filename):
+        print 'could not find input file <{}>'.format(filename)
+        raise RuntimeError('incorrect input file')
 
-#for i in range(32, 127):
-#    soc.write_word(0x80000004, i)
+    soc = FPGA_SOC("/dev/fpga")
 
-print("#######################")
+    print("...fpga_init")
+    soc.fpga_init()
+    print("...check_sanity")
+    soc.check_sanity()
+    print("...halt_soc")
+    soc.halt_soc()
 
-soc.upload_image("/mnt/smd/fpga_tests/asm_uart.v")
-#soc.upload_image("/mnt/smd/fpga_tests/libc_printk.v")
+    print("...set_baud")
+    soc.uart_set_baud_9600()
 
-#soc.write_word(0x0,  0x10000113)
-#soc.write_word(0x4,  0x12300513)
-#soc.write_word(0x8,  0x20000593)
-#soc.write_word(0xc,  0x00a12023)
-#soc.write_word(0x10, 0x00b50633)
-#soc.write_word(0x14, 0x00c12223)
-#soc.write_word(0x18, 0x0a11c0b7)
-#soc.write_word(0x1c, 0x00108093)
-#soc.write_word(0x20, 0x0000006f)
+    soc.uart_print("\nNew testing sequence initiated!\n")
+    soc.uart_print("Uploading memory image...\n")
+    soc.upload_image(filename)
+    soc.uart_print("Memory image uploaded, initiating test run\n")
+    soc.uart_print("----->\n")
 
-soc.print_ram(0, 40)
+    soc.run_soc()
+    time.sleep(3)
 
-soc.run_soc()
+    soc.print_cpu_pc()
+    soc.print_cpu_state()
 
-time.sleep(3)
+    soc.halt_soc()
 
-soc.print_cpu_pc()
-soc.print_cpu_state()
+    print(hex(soc.get_cpu_pc()))
+    print(soc.get_cpu_state())
 
-soc.halt_soc()
-#
-print("#######################")
-soc.print_ram(0x100, 2)
+    print("#######################")
+    #soc.upload_image("/mnt/smd/fpga_tests/libc_printk.v")
 
-print(hex(soc.get_cpu_pc()))
-print(soc.get_cpu_state())
+    #soc.write_word(0x0,  0x10000113)
+    #soc.write_word(0x4,  0x12300513)
+    #soc.write_word(0x8,  0x20000593)
+    #soc.write_word(0xc,  0x00a12023)
+    #soc.write_word(0x10, 0x00b50633)
+    #soc.write_word(0x14, 0x00c12223)
+    #soc.write_word(0x18, 0x0a11c0b7)
+    #soc.write_word(0x1c, 0x00108093)
+    #soc.write_word(0x20, 0x0000006f)
+    #soc.print_ram(0, 40)
+    # soc.print_ram(0x100, 2)
+
+
+if __name__ == '__main__':
+    main(sys.argv[1])
