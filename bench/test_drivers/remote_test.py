@@ -85,8 +85,13 @@ def remote_run(command, ignore_failures = False):
     ret_code = -1
     try:
         stdin, stdout, stderr = client.exec_command(command)
+
         for line in stdout:
             print(line.strip('\n'))
+
+        for line in stderr:
+            print(line.strip('\n'))
+
         ret_code = stdout.channel.recv_exit_status()
 
         if ret_code == 0:
