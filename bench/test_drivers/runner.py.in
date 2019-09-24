@@ -22,6 +22,8 @@ sys.path.append("@CMAKE_SOURCE_DIR@/bench/rtl/python")
 
 if sys.argv[1].endswith(".py"):
   TEST_DRIVER = os.path.join(TESTS_DIR, sys.argv[1])
+elif sys.argv[1] == "--remote":
+  TEST_DRIVER = "@CMAKE_SOURCE_DIR@/bench/test_drivers/remote_test.py"
 else:
   TEST_DRIVER = "@CMAKE_SOURCE_DIR@/bench/test_drivers/default.py"
 
