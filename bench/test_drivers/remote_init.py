@@ -71,11 +71,14 @@ def ssh_connect():
     return client
 
 # function to upload files over ssh/scp
-def remote_upload(src, dst):
+def remote_upload(src, dst, directory = False):
     client = ssh_connect()
     print('scp {} -> remote: {}'.format(src, dst));
     with SCPClient(client.get_transport()) as scp:
-        scp.put(src, remote_path = dst)
+        if directory:
+            scp.put(src, recursive= True, remote_path = dst)
+        else:
+            scp.put(src, remote_path = dst)
 
 # Fucntion to run instruction on remote server via SSH.
 def remote_run(command, ignore_failures = False):
@@ -172,10 +175,14 @@ def run(libbench):
       'cp \'{}\' \'{}\''.format(REMOTE_LIB, WORKING_DIR)
     ]
     remote_run(' && '.join(create_commands))
-    fpga_py = os.path.join(os.environ['TOOLS_DIR'],
-                           '../emulation/dut_wrapper', 'fpga.py')
-    remote_upload(fpga_py, WORKING_DIR)
 
+    DIR_TESTBENCH = os.environ['TESTBENCH_DIR']
+    WRAPPER = os.path.join(DIR_TESTBENCH, 'emulation/dut_wrapper')
+    LIBS = os.path.join(DIR_TESTBENCH, 'test_drivers/benchlibs')
+    DRIVER = os.path.join(DIR_TESTBENCH, 'test_drivers/default_fpga.py')
+    remote_upload(WRAPPER, WORKING_DIR, directory = True)
+    remote_upload(LIBS, WORKING_DIR, directory = True)
+    remote_upload(DRIVER, WORKING_DIR)
 
     remote_upload(INPUT_FILE, os.path.join(WORKING_DIR, 'test.v'))
 
@@ -190,6 +197,7 @@ def run(libbench):
     remote_run('{} /dev/fpga \'{}\''.format(paths['fpga_loader'],
                                   os.path.join(WORKING_DIR, 'fpga.bit')))
     print "run!"
-    remote_run('{} {}'.format(os.path.join(WORKING_DIR, 'fpga.py'),
-                              os.path.join(WORKING_DIR, 'test.v')));
+    remote_run('/usr/bin/python2 {} {}'.format(
+          os.path.join(WORKING_DIR, 'default_fpga.py'),
+          os.path.join(WORKING_DIR, 'test.v')));
 

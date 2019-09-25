@@ -13,6 +13,7 @@ TESTS_DIR = "@CMAKE_SOURCE_DIR@/tests"
 # THE_TEST = os.path.join(TESTS_DIR, sys.argv[1])
 
 os.environ['FPGA_FILES'] = '@CMAKE_SOURCE_DIR@/fpga/build'
+os.environ['TESTBENCH_DIR'] = '@CMAKE_SOURCE_DIR@/bench'
 os.environ['TOOLS_DIR'] = '@CMAKE_SOURCE_DIR@/bench/tools'
 os.environ['ZEPHYR_BUILDS'] = '@CMAKE_BINARY_DIR@/zephyr_build'
 os.environ['TOOLS_DISTRIB'] = '@CMAKE_BINARY_DIR@/distrib/tools'
@@ -23,9 +24,9 @@ sys.path.append("@CMAKE_SOURCE_DIR@/bench/rtl")
 if sys.argv[1].endswith(".py"):
   TEST_DRIVER = os.path.join(TESTS_DIR, sys.argv[1])
 elif sys.argv[1] == "--remote":
-  TEST_DRIVER = "@CMAKE_SOURCE_DIR@/bench/test_drivers/remote_test.py"
+  TEST_DRIVER = "@CMAKE_SOURCE_DIR@/bench/test_drivers/remote_init.py"
 else:
-  TEST_DRIVER = "@CMAKE_SOURCE_DIR@/bench/test_drivers/default.py"
+  TEST_DRIVER = "@CMAKE_SOURCE_DIR@/bench/test_drivers/default_rtl.py"
 
 print('loading <{}> for {}'.format(TEST_DRIVER, sys.argv[1]))
 import imp
