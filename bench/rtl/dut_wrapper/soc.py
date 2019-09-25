@@ -152,7 +152,7 @@ class RiscVSoc:
         self._soc.setPC(self._min_address)
 
     def get_soc_ram_size(self):
-        return self._soc.ramSize() * 4
+        return self._soc.ramSize()
 
     def enable_vcd_trace(self):
         self._soc.enableVcdTrace()
@@ -240,27 +240,27 @@ class RiscVSoc:
             self._soc.switchBusMasterToExternal(False)
 
 
-    def print_ram(self, start_word_index = 0, num_words = 8, external = False):
+    def print_ram(self, start_address = 0, num_words = 8, external = False):
         if external:
             self._soc.toggleCpuReset(True)
             self._soc.switchBusMasterToExternal(True)
-        for w_idx in xrange(start_word_index, start_word_index + num_words):
+        for w_idx in xrange(start_address, start_word_index + num_words * self._word_size):
             if external:
-                print("0x{0:08x} : 0x{1:08x}".format(w_idx * self._word_size, self._soc.readWordExt(w_idx)))
+                print("0x{0:08x} : 0x{1:08x}".format(w_idx, self._soc.readWordExt(w_idx)))
             else:
-                print("0x{0:08x} : 0x{1:08x}".format(w_idx * self._word_size, self._soc.readWord(w_idx)))
+                print("0x{0:08x} : 0x{1:08x}".format(w_idx, self._soc.readWord(w_idx)))
         if external:
             self._soc.toggleCpuReset(False)
             self._soc.switchBusMasterToExternal(False)
 
-    def read_word_ram(self, word_index = None):
-        if (word_index == None):
-            raise ValueError("word_index argument must be specified")
+    def read_word_ram(self, address = None):
+        if (address == None):
+            raise ValueError("address argument must be specified")
         if self._debug:
-            print("Reading 0x{0:08x} from 0x{1:08x}".format(self._soc.readWord(word_index), word_index * self._word_size))
+            print("Reading 0x{0:08x} from 0x{1:08x}".format(self._soc.readWord(address), address))
 
         try:
-          result =  self._soc.readWord(word_index)
+          result =  self._soc.readWord(address)
           return result
         except IndexError, e:
           print '#error during memory read detected <{}>'.format(e)
@@ -270,7 +270,7 @@ class RiscVSoc:
 
     def write_word_ram(self, address, value):
         if self._debug:
-            print("Writing 0x{0:08x} to 0x{1:08x}".format(value, address * self._word_size))
+            print("Writing 0x{0:08x} to 0x{1:08x}".format(value, address))
         self._soc.writeWord(address, value)
 
     def pc(self):
