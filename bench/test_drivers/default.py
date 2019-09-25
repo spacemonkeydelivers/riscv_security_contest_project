@@ -5,7 +5,7 @@ import glob
 import imp
 import re
 
-import benchlibs.soc as soc_lib
+import dut_wrapper.soc as soc_lib
 import benchlibs.debug as debug
 
 from builders.builder_asm import BuilderAsm

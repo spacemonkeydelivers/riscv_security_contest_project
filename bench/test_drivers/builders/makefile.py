@@ -24,7 +24,7 @@ def extract_uart_checker(filename):
         checker_data.append(line)
 
   if len(checker_data) > 0:
-    print('detacted data to build uart checker')
+    print('detected data to build uart checker')
     with open('uart.expected', 'w') as f:
       for item in checker_data:
         f.write(item)
