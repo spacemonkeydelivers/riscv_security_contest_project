@@ -12,7 +12,6 @@ REG_NAMES = {
   28: 't3', 29: 't4', 30: 't5',  31: 't6'
 }
 
-#(NOTE) Hvatit li Toly kondratiy?
 REG_INDEXES = dict([(value, key) for key, value in REG_NAMES.items()])
 class CmdWatchpoint:
     def __init__(self, benchlib, soc, debugger):
@@ -69,8 +68,12 @@ class CmdWatchpoint:
                 address = int(args[2][2:],16) #Cutting 0x off
             else:
                 address = int(args[2])
+
             if address % 4:
-                address = address / 4 * 4
+              print (
+                  ("[-] WARNING: unaligned addresses ({:010x}) are not supported a the moment"
+                   ", re-alignment enforced").format(address))
+              address = address / 4 * 4
         except Exception as e:
             print '[-] Provided value is not integer'
             return None

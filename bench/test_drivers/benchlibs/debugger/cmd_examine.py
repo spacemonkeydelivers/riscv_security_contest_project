@@ -39,12 +39,21 @@ class CmdExamine:
         result = []
         start_a = addr
         end_a = addr + num * el_sz
+
+        warning_printed = False
         for i in range(0, total_words):
           s_addr = addr + i * 4
           if s_addr < 0:
               continue
+
           if s_addr % 4:
+            if not warning_printed:
+                print (
+                    ("WARNING: unaligned addresses ({:010x}) are not supported at the moment, "
+                    " re-alignent enforced").format(s_addr))
+                warning_printed = True
             s_addr = s_addr / 4 * 4
+
           word = self.soc.read_word_ram(s_addr)
           if word == None:
               return None

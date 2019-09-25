@@ -57,10 +57,7 @@ class Disassembler:
             raw   = info["raw"]
             disas = info["disas"]
 
-            if address % 4:
-                aligned_addr = address / 4 * 4
-            else:
-                aligned_addr = address
+            aligned_addr = address / 4 * 4
             data = soc.read_word_ram(aligned_addr)
             if (address % 4) == 0:
                 if (data & 3) != 3: # short instruction
