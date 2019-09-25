@@ -1,4 +1,4 @@
-import benchlibs.soc as soc_lib
+import dut_wrapper.soc as soc_lib
 
 def run(libbench):
   soc = soc_lib.RiscVSoc(libbench, 'memtest_trace.vcd', True)
