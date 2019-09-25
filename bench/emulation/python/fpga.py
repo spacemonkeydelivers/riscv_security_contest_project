@@ -106,7 +106,7 @@ class FPGA_SOC:
                     bytes_to_write = 0
                     addr_adjust = 0
                     cur_data = 0
-                    addr_to_access = cur_addr / 4
+                    addr_to_access = cur_addr / 4 * 4
                     if cur_len >= (4 - cur_align):
                         bytes_to_write = 4 - cur_align
                         addr_adjust = 4 - cur_align
