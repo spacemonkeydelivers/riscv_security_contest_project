@@ -259,7 +259,7 @@ uint32_t RV_SOC::getRegFileSize() const
 
 void RV_SOC::clearRam()
 {
-    for (unsigned i = 0; i < m_ramSize; i++)
+    for (unsigned i = 0; i < m_ramSize; i += wordSize)
     {
         writeWord(i, 0);
     }
