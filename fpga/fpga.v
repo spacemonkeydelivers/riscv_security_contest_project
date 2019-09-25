@@ -24,7 +24,9 @@ module fpga(
                     CONTROL_TRAN_READY     = 4'd6,
                     CONTROL_TRAN_SIZE_LOW  = 4'd7,
                     CONTROL_TRAN_SIZE_HIGH = 4'd8,
-                    CONTROL_CPU_HALT       = 4'd9;
+                    CONTROL_CPU_HALT       = 4'd9,
+                    CONTROL_CPU_SINGLESTEP = 4'd10,
+                    CONTROL_CPU_DO_STEP    = 4'd11;
    assign irq_o = 0;
 
    // latches to avoid metastability
@@ -119,6 +121,8 @@ module fpga(
    wire [31:0] cpu_pc;
    wire [4:0]  cpu_state;
    wire        cpu_halt = regs_internal[REG_CONTROL][CONTROL_CPU_HALT];
+   wire        cpu_singlestep = regs_internal[REG_CONTROL][CONTROL_CPU_SINGLESTEP];
+   wire        cpu_do_step = regs_internal[REG_CONTROL][CONTROL_CPU_DO_STEP];
 
    reg [31:0] ram_size;
 
@@ -144,6 +148,8 @@ module fpga(
       .ext_tran_data_o ({data_from_soc_high, data_from_soc_low}),
       .ext_tran_ready_o (tran_ready),
       .ext_cpu_halt_i (cpu_halt),
+      .ext_cpu_singlestep_i (cpu_singlestep),
+      .ext_cpu_do_step_i (cpu_do_step),
       .pc_o (cpu_pc),
       .state_o (cpu_state)
    );

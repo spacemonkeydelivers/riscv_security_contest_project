@@ -27,6 +27,8 @@ module cpu
    output clear_tag_mismatch_o,
    input wire clear_mip_timer_i,
    input wire external_halt_i,
+   input wire external_singlestep_i,
+   input wire external_do_step_i,
    output wire [31:0] pc_o,
    output wire [4:0]  state_o
 );
@@ -447,7 +449,9 @@ module cpu
    assign pc_o = pc;
 
    reg [31:0] pc;
+   /* verilator lint_off UNOPT */
    reg [31:0] next_pc;
+   /* verilator lint_on UNOPT */
 
    reg update_pc;
 

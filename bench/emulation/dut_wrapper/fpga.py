@@ -26,6 +26,8 @@ class FPGA_SOC:
     BIT_TRANSACTION_SIZE_LOW  = 7
     BIT_TRANSACTION_SIZE_HIGH = 8
     BIT_CPU_HALT              = 9
+    BIT_CPU_SINGLESTEP        = 10
+    BIT_CPU_DO_STEP           = 11
     UART_BAUDE_DIVIDER_ADDR   = 0x80000000
     UART_TRANSMIT_BYTE_ADDR   = 0x80000004
     UART_9600_DIVIDER         = 13889
@@ -307,6 +309,18 @@ class FPGA_SOC:
         low_data_out = self._soc.readShort(self.REGISTER_DATA_OUT_LOW) & 0xFFFF
         high_data_out = self._soc.readShort(self.REGISTER_DATA_OUT_HIGH) & 0xFFFF
         return ((high_data_out << 16) | low_data_out)
+
+    def __set_cpu_singlestep(self):
+        self.__set_control_bit(self.BIT_CPU_SINGLESTEP)
+
+    def __clear_cpu_singlestep(self):
+        self.__clear_control_bit(self.BIT_CPU_SINGLESTEP)
+
+    def __set_cpu_do_step(self):
+        self.__set_control_bit(self.BIT_CPU_DO_STEP)
+
+    def __clear_cpu_do_step(self):
+        self.__clear_control_bit(self.BIT_CPU_DO_STEP)
 
     def __set_cpu_halt(self):
         self.__set_control_bit(self.BIT_CPU_HALT)

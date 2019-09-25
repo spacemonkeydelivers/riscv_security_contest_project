@@ -28,6 +28,8 @@ module soc
    output wire                       ext_tran_ready_o,
 
    input wire                        ext_cpu_halt_i,
+   input wire                        ext_cpu_singlestep_i,
+   input wire                        ext_cpu_do_step_i,
    output wire [31:0]                pc_o,
    output wire [4:0]                 state_o
 );
@@ -257,6 +259,8 @@ module soc
       .clear_tag_mismatch_o (clear_tags_mismatch),
       .clear_mip_timer_i (timer_mtimecmp_accessed),
       .external_halt_i (ext_cpu_halt_i),
+      .external_singlestep_i (ext_cpu_singlestep_i),
+      .external_do_step_i (ext_cpu_do_step_i),
       .pc_o (pc_o),
       .state_o (state_o)
    );
