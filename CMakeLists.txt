@@ -31,14 +31,14 @@ endif()
 
 find_package(Boost COMPONENTS python)
 
-if (NOT DEFINED ENV{RISCV_TOOLCHAIN})
+if (NOT DEFINED ENV{RISCV_TOOLCHAIN_PATH})
     set(RISCV_TOOLCHAIN_PATH /mnt/neptune/the-toolchain)
     message("RISCV_TOOLCHAIN_PATH is NOT set, using the default value: ${RISCV_TOOLCHAIN_PATH}")
     if (NOT EXISTS "${RISCV_TOOLCHAIN_PATH}")
         message(FATAL_ERROR "No toolchain was detected at the default path, please set RISCV_TOOLCHAIN_PATH")
     endif()
 else()
-    set(RISCV_TOOLCHAIN_PATH $ENV{RISCV_TOOLCHAIN})
+    set(RISCV_TOOLCHAIN_PATH $ENV{RISCV_TOOLCHAIN_PATH})
 endif()
 
 if (NOT EXISTS "${RISCV_TOOLCHAIN_PATH}/bin/riscv32-unknown-elf-gcc")
