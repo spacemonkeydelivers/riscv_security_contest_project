@@ -57,7 +57,11 @@ class Disassembler:
             raw   = info["raw"]
             disas = info["disas"]
 
-            data = soc.read_word_ram(word_index = address / 4)
+            if address % 4:
+                aligned_addr = address / 4 * 4
+            else:
+                aligned_addr = address
+            data = soc.read_word_ram(aligned_addr)
             if (address % 4) == 0:
                 if (data & 3) != 3: # short instruction
                     data = data & 0xffff
@@ -72,7 +76,7 @@ class Disassembler:
             elif (address % 4) == 2:
                 data_low = (data >> 16) & 0xffff
                 if (data_low & 3) == 3: # we have an unaligned 4-byte instruction
-                   data_high = soc.read_word_ram(word_index = address / 4 + 1) & 0xffff
+                   data_high = soc.read_word_ram(aligned_addr + 4) & 0xffff
                    data = data_low | (data_high << 16)
                 else:
                    data = data_low

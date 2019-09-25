@@ -18,8 +18,8 @@ RV_SOC::RV_SOC(const char* trace)
 {
     m_soc = new Vsoc;
     m_tracePath = trace;
-    m_ramSize = sizeof(m_soc->soc->ram0->ram0->mem) / wordSize;
-    m_regFileSize = sizeof(m_soc->soc->cpu0->reg_inst->regfile) / wordSize;
+    m_ramSize = sizeof(m_soc->soc->ram0->ram0->mem);
+    m_regFileSize = sizeof(m_soc->soc->cpu0->reg_inst->regfile);
     clearRam();
     reset();
 }
@@ -112,8 +112,9 @@ void RV_SOC::writeWordExt(unsigned address, uint32_t val)
             "[RamSize = " << std::dec << m_ramSize * 4 << " bytes]" << std::endl;
         throw std::out_of_range("write: the specified address is out of range");
     }
+    assert(!(address & 0x3) && "Address misaligned");
     unsigned wait = 20;
-    m_soc->ext_tran_addr_i = address << 2;
+    m_soc->ext_tran_addr_i = address;
     m_soc->ext_tran_data_i = val;
     m_soc->ext_tran_size_i = RV_SOC::extAccessSize::EXT_ACCESS_WORD;
     m_soc->ext_tran_write_i = 1;
@@ -149,8 +150,9 @@ uint32_t RV_SOC::readWordExt(unsigned address)
             "[RamSize = " << std::dec << m_ramSize * 4 << " bytes]" << std::endl;
         throw std::out_of_range("read: the specified address is out of range");
     }
+    assert(!(address & 0x3) && "Address misaligned");
     unsigned wait = 20;
-    m_soc->ext_tran_addr_i = address << 2;
+    m_soc->ext_tran_addr_i = address;
     m_soc->ext_tran_write_i = 0;
     m_soc->ext_tran_data_i = 0;
     m_soc->ext_tran_size_i = RV_SOC::extAccessSize::EXT_ACCESS_WORD;
@@ -188,7 +190,9 @@ void RV_SOC::writeWord(unsigned address, uint32_t val)
             "[RamSize = " << std::dec << m_ramSize * 4 << " bytes]" << std::endl;
         throw std::out_of_range("write: the specified address is out of range");
     }
-    m_soc->soc->ram0->ram0->mem[address] = val;
+    assert(!(address & 0x3) && "Address misaligned");
+    unsigned wordIdx = address / wordSize;
+    m_soc->soc->ram0->ram0->mem[wordIdx] = val;
 }
 
 uint32_t RV_SOC::readWord(unsigned address)
@@ -199,7 +203,9 @@ uint32_t RV_SOC::readWord(unsigned address)
             "[RamSize = " << std::dec << m_ramSize * 4 << " bytes]" << std::endl;
         throw std::out_of_range("read: the specified address is out of range");
     }
-    return m_soc->soc->ram0->ram0->mem[address];
+    assert(!(address & 0x3) && "Address misaligned");
+    unsigned wordIdx = address / wordSize;
+    return m_soc->soc->ram0->ram0->mem[wordIdx];
 }
 
 void RV_SOC::reset()
@@ -253,7 +259,7 @@ uint32_t RV_SOC::getRegFileSize() const
 
 void RV_SOC::clearRam()
 {
-    for (unsigned i = 0; i < m_ramSize; i++)
+    for (unsigned i = 0; i < m_ramSize; i += wordSize)
     {
         writeWord(i, 0);
     }

@@ -17,26 +17,26 @@ public:
         uint8_t  cs;    // cs
     };
 
-	skFpga() = delete;
-	skFpga(const char* path);
+    skFpga() = delete;
+    skFpga(const char* path);
 
-	~skFpga();
+    ~skFpga();
 
-	bool UploadBitstream(const char* bs);
+    bool UploadBitstream(const char* bs);
 
-	void WriteShort(uint32_t addr, uint16_t data);
-	uint16_t ReadShort(uint32_t addr);
+    void WriteShort(uint32_t addr, uint16_t data);
+    uint16_t ReadShort(uint32_t addr);
 
-	void SetResetPin(bool state);
-	bool GetResetPin();
+    void SetResetPin(bool state);
+    bool GetResetPin();
 
-	void SetIRQPin(bool state);
-	bool GetIRQPin();
+    void SetIRQPin(bool state);
+    bool GetIRQPin();
 
     bool IsOpened() const;
 
-	void SetupSMCTimings(sk_fpga_smc_timings t);
-	void ReadSMCTimings(sk_fpga_smc_timings* t);
+    void SetupSMCTimings(sk_fpga_smc_timings t);
+    void ReadSMCTimings(sk_fpga_smc_timings* t);
 private:
 
     enum fpga_addr_selector

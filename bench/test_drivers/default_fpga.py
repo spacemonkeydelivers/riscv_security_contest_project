@@ -35,7 +35,6 @@ def main(filename):
     soc.uart_print("\nNew testing sequence initiated!\n")
     soc.uart_print("Uploading memory image...\n")
     ImageLoader.load_image(filename, soc)
-    soc.upload_image(filename)
     soc.uart_print("Memory image uploaded, initiating test run\n")
     soc.uart_print("----->\n")
 

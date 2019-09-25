@@ -13,6 +13,8 @@ class FPGA_SOC:
     REGISTER_CPU_PC_LOW     = 0x10
     REGISTER_CPU_PC_HIGH    = 0x12
     REGISTER_CPU_STATE      = 0x14
+    REGISTER_SOC_MEM_SIZE_LOW = 0x16
+    REGISTER_SOC_MEM_SIZE_HIGH = 0x18
     SANE_CONSTANT           = 0x50FE
     BIT_CPU_RESET             = 0
     BIT_SOC_RESET             = 1
@@ -27,6 +29,7 @@ class FPGA_SOC:
     UART_BAUDE_DIVIDER_ADDR   = 0x80000000
     UART_TRANSMIT_BYTE_ADDR   = 0x80000004
     UART_9600_DIVIDER         = 13889
+    WORD_SIZE                 = 4
 
     def  __init__(self, libbench, fpga_dev):
         # TODO: rename to libdut
@@ -72,9 +75,21 @@ class FPGA_SOC:
     def print_ram(self, start_address, num_words):
         print("{:10} : {:10}".format("address", "data"))
         for w in range(num_words):
-            addr = start_address + w * 4
-            data = self.read_word(addr)
+            addr = start_address + w * WORD_SIZE
+            data = self.read_word_ram(addr)
             print("0x{:08X} : 0x{:08X}".format(addr, data))
+
+    def get_soc_ram_size(self):
+        # halt cpu
+        self.__set_cpu_halt()
+        self.__update_control_register()
+        # get ram size
+        ram_size_low = self._soc.readShort(self.REGISTER_SOC_MEM_SIZE_LOW) & 0xFFFF
+        ram_size_high = self._soc.readShort(self.REGISTER_SOC_MEM_SIZE_HIGH) & 0xFFFF
+        # run cpu
+        self.__clear_cpu_halt()
+        self.__update_control_register()
+        return ((ram_size_high << 16) | ram_size_low)
 
     def upload_image(self, path_to_image):
         self._min_address = 0
@@ -130,7 +145,7 @@ class FPGA_SOC:
                     data = int("".join(byte_data[::-1]), 16)
 
                     data_to_write = (~mask & cur_data) | (data)
-                    self.write_word(addr_to_access, data_to_write)
+                    self.write_word_ram(addr_to_access, data_to_write)
                     # print("Writing 0x{0:08x} to address 0x{1:08x}".format(data_to_write, addr_to_access * 4))
                     cur_len -= addr_adjust
                     cur_addr += addr_adjust
@@ -173,14 +188,14 @@ class FPGA_SOC:
         self.__update_control_register()
 
     def uart_set_baud_9600(self):
-        self.write_word(self.UART_BAUDE_DIVIDER_ADDR, self.UART_9600_DIVIDER)
+        self.write_word_ram(self.UART_BAUDE_DIVIDER_ADDR, self.UART_9600_DIVIDER)
 
     def uart_print(self, data):
         string = str(data)
         for ch in string:
-            self.write_word(self.UART_TRANSMIT_BYTE_ADDR, ord(ch))
+            self.write_word_ram(self.UART_TRANSMIT_BYTE_ADDR, ord(ch))
 
-    def read_word(self, address):
+    def read_word_ram(self, address):
         # set address
         self.__set_address(address)
         # prepare for read transaction
@@ -201,7 +216,7 @@ class FPGA_SOC:
             self.__clear_transaction_finished()
         return self.__get_data_out()
 
-    def write_word(self, address, data):
+    def write_word_ram(self, address, data):
         # set address
         self.__set_address(address)
         # set data
