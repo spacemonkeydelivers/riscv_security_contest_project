@@ -7,7 +7,7 @@ import os
 sys.path.append('@CMAKE_BINARY_DIR@/distrib/platform/lib')
 sys.path.append('@CMAKE_SOURCE_DIR@/bench/test_drivers')
 
-import libbench
+import libdut
 TESTS_DIR = "@CMAKE_SOURCE_DIR@/tests"
 
 # THE_TEST = os.path.join(TESTS_DIR, sys.argv[1])
@@ -18,7 +18,7 @@ os.environ['ZEPHYR_BUILDS'] = '@CMAKE_BINARY_DIR@/zephyr_build'
 os.environ['TOOLS_DISTRIB'] = '@CMAKE_BINARY_DIR@/distrib/tools'
 os.environ['TESTS_DIR'] = TESTS_DIR
 os.environ['TOOLCHAIN_DIR'] = '@RISCV_TOOLCHAIN_PATH@'
-sys.path.append("@CMAKE_SOURCE_DIR@/bench/rtl/python")
+sys.path.append("@CMAKE_SOURCE_DIR@/bench/rtl")
 
 if sys.argv[1].endswith(".py"):
   TEST_DRIVER = os.path.join(TESTS_DIR, sys.argv[1])
@@ -32,4 +32,4 @@ import imp
 
 PYTHONDONTWRITEBYTECODE=True
 test = imp.load_source("the_test", TEST_DRIVER)
-test.run(libbench)
+test.run(libdut)

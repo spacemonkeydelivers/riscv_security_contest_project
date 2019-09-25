@@ -172,7 +172,8 @@ def run(libbench):
       'cp \'{}\' \'{}\''.format(REMOTE_LIB, WORKING_DIR)
     ]
     remote_run(' && '.join(create_commands))
-    fpga_py = os.path.join(os.environ['TOOLS_DIR'], '../emulation/python', 'fpga.py')
+    fpga_py = os.path.join(os.environ['TOOLS_DIR'],
+                           '../emulation/dut_wrapper', 'fpga.py')
     remote_upload(fpga_py, WORKING_DIR)
 
 

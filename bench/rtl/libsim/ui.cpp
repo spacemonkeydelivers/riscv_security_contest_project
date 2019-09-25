@@ -8,7 +8,7 @@
 
 #include "soc.h"
 
-BOOST_PYTHON_MODULE(libbench)
+BOOST_PYTHON_MODULE(libdut)
 {
     using namespace boost::python;
 

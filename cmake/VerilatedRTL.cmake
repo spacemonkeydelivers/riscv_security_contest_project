@@ -98,12 +98,12 @@ add_custom_target(
 )
 
 # Set a list of sources
-set(TESTBENCH_SRC bench/rtl/soc.cpp bench/rtl/ui.cpp)
+set(TESTBENCH_SRC bench/rtl/libsim/soc.cpp bench/rtl/libsim/ui.cpp)
 
-add_library(bench SHARED ${TESTBENCH_SRC})
-target_compile_options(bench PUBLIC "-DD_SOC_RAM_SIZE=${SOC_RAM_SIZE}")
-add_dependencies(bench Vmodel platform_headers generate_vsoc_enums)
-target_include_directories(bench PUBLIC
+add_library(dut SHARED ${TESTBENCH_SRC})
+target_compile_options(dut PUBLIC "-DD_SOC_RAM_SIZE=${SOC_RAM_SIZE}")
+add_dependencies(dut Vmodel platform_headers generate_vsoc_enums)
+target_include_directories(dut PUBLIC
     ${VERILATOR_INCLUDE}
     ${VERILATOR_INCLUDE}/vltstd
     ${RTL_MODEL_BUILD_ROOT}
@@ -112,11 +112,11 @@ target_include_directories(bench PUBLIC
     ${Boost_INCLUDE_DIRS}
 )
 
-target_link_libraries(bench
+target_link_libraries(dut
     ${Boost_LIBRARIES}
     ${Python2_LIBRARIES}
     ${VERILOG_OUTPUT_LIB}
     ${VERILATOR_LIBRARY}
 )
-install(TARGETS bench LIBRARY DESTINATION lib)
+install(TARGETS dut LIBRARY DESTINATION lib)
 
