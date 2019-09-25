@@ -43,7 +43,9 @@ class CmdExamine:
           s_addr = addr + i * 4
           if s_addr < 0:
               continue
-          word = self.soc.read_word_ram(word_index = s_addr)
+          if s_addr % 4:
+            s_addr = s_addr / 4 * 4
+          word = self.soc.read_word_ram(s_addr)
           if word == None:
               return None
           if fmt == 'b':

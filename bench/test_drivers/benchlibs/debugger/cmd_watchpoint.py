@@ -69,6 +69,8 @@ class CmdWatchpoint:
                 address = int(args[2][2:],16) #Cutting 0x off
             else:
                 address = int(args[2])
+            if address % 4:
+                address = address / 4 * 4
         except Exception as e:
             print '[-] Provided value is not integer'
             return None
@@ -80,10 +82,10 @@ class CmdWatchpoint:
             'memory',
             ]
         self.watchpoint_table_size += 1
-        print '[+] Watchpoint {} is set. Watching memory address: {}, index: {}, current value: {}'.format(
+        print '[+] Watchpoint {} is set. Watching memory address: {}, address: {}, current value: {}'.format(
             self.watchpoint_table_size - 1,
             self.watchpoints[self.watchpoint_table_size - 1][0],
-            word_index,
+            address,
             self.watchpoints[self.watchpoint_table_size - 1][1],
             )
 
