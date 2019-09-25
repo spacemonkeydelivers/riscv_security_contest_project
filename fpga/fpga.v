@@ -13,6 +13,7 @@ module fpga(
    output wire [6:0] data_o               // leds out
 );
    localparam DATA_WIDTH = 16;
+   localparam SOC_RAM_SIZE_BYTES = 65536;
 
    localparam [3:0] CONTROL_CPU_RESET      = 4'd0,
                     CONTROL_SOC_RESET      = 4'd1,
@@ -81,9 +82,10 @@ module fpga(
                     REG_HIGH_DATA_OUT = 4'd7,
                     REG_LOW_CPU_PC    = 4'd8,
                     REG_HIGH_CPU_PC   = 4'd9,
-                    REG_CPU_STATE     = 4'd10;
+                    REG_CPU_STATE     = 4'd10,
+                    REG_SOC_MEM_SIZE  = 4'd11;
 
-   reg [15:0] regs_internal [0:7];
+   reg [15:0] regs_internal [0:8];
 
 
    wire [15:0] data_from_soc_low;
@@ -94,6 +96,7 @@ module fpga(
                         (addr == REG_LOW_CPU_PC)    ? cpu_pc[15:0] :
                         (addr == REG_HIGH_CPU_PC)   ? cpu_pc[31:16] :
                         (addr == REG_CPU_STATE)     ? cpu_state : 
+                        (addr == REG_SOC_MEM_SIZE)  ? SOC_RAM_SIZE_BYTES : 
                                                       regs_internal[addr];
    
    wire [31:0] addr_to_soc = {regs_internal[REG_HIGH_ADDR], regs_internal[REG_LOW_ADDR]};
@@ -117,6 +120,9 @@ module fpga(
 
    wire tran_ready;
    soc
+   #(
+      .SOC_RAM_SIZE (SOC_RAM_SIZE_BYTES)
+   )
    soc0
    (
       .clk_i (clk_i),
