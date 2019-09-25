@@ -83,21 +83,23 @@ module fpga(
                     REG_LOW_CPU_PC    = 4'd8,
                     REG_HIGH_CPU_PC   = 4'd9,
                     REG_CPU_STATE     = 4'd10,
-                    REG_SOC_MEM_SIZE  = 4'd11;
+                    REG_LOW_SOC_MEM_SIZE  = 4'd11,
+                    REG_HIGH_SOC_MEM_SIZE  = 4'd12;
 
    reg [15:0] regs_internal [0:8];
 
 
    wire [15:0] data_from_soc_low;
    wire [15:0] data_from_soc_high;
-   wire [15:0] to_cpu = (addr == REG_LOW_DATA_OUT)  ? data_from_soc_low :
-                        (addr == REG_HIGH_DATA_OUT) ? data_from_soc_high :
-                        (addr == REG_CONTROL)       ? {regs_internal[addr][15:7], tran_ready, regs_internal[addr][5:0]} :
-                        (addr == REG_LOW_CPU_PC)    ? cpu_pc[15:0] :
-                        (addr == REG_HIGH_CPU_PC)   ? cpu_pc[31:16] :
-                        (addr == REG_CPU_STATE)     ? cpu_state : 
-                        (addr == REG_SOC_MEM_SIZE)  ? SOC_RAM_SIZE_BYTES : 
-                                                      regs_internal[addr];
+   wire [15:0] to_cpu = (addr == REG_LOW_DATA_OUT)      ? data_from_soc_low :
+                        (addr == REG_HIGH_DATA_OUT)     ? data_from_soc_high :
+                        (addr == REG_CONTROL)           ? {regs_internal[addr][15:7], tran_ready, regs_internal[addr][5:0]} :
+                        (addr == REG_LOW_CPU_PC)        ? cpu_pc[15:0] :
+                        (addr == REG_HIGH_CPU_PC)       ? cpu_pc[31:16] :
+                        (addr == REG_CPU_STATE)         ? cpu_state : 
+                        (addr == REG_LOW_SOC_MEM_SIZE)  ? ram_size[15:0] : 
+                        (addr == REG_HIGH_SOC_MEM_SIZE) ? ram_size[31:16] : 
+                                                          regs_internal[addr];
    
    wire [31:0] addr_to_soc = {regs_internal[REG_HIGH_ADDR], regs_internal[REG_LOW_ADDR]};
    wire [31:0] data_to_soc = {regs_internal[REG_HIGH_DATA_IN], regs_internal[REG_LOW_DATA_IN]};
@@ -117,6 +119,8 @@ module fpga(
    wire [31:0] cpu_pc;
    wire [4:0]  cpu_state;
    wire        cpu_halt = regs_internal[REG_CONTROL][CONTROL_CPU_HALT];
+
+   reg [31:0] ram_size;
 
    wire tran_ready;
    soc
@@ -147,6 +151,7 @@ module fpga(
    // always loop to deal with fpga-to-arm iface data
    always @ (posedge clk_i)
    begin
+      ram_size <= SOC_RAM_SIZE_BYTES;
       if (!reset_i) begin
          data_to_cpu <= 0;
          regs_internal[REG_SANITY] <= 16'h50FE;
