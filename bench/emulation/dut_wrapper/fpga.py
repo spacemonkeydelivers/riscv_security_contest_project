@@ -13,6 +13,7 @@ class FPGA_SOC:
     REGISTER_CPU_PC_LOW     = 0x10
     REGISTER_CPU_PC_HIGH    = 0x12
     REGISTER_CPU_STATE      = 0x14
+    REGISTER_SOC_MEM_SIZE   = 0x16
     SANE_CONSTANT           = 0x50FE
     BIT_CPU_RESET             = 0
     BIT_SOC_RESET             = 1
@@ -27,6 +28,7 @@ class FPGA_SOC:
     UART_BAUDE_DIVIDER_ADDR   = 0x80000000
     UART_TRANSMIT_BYTE_ADDR   = 0x80000004
     UART_9600_DIVIDER         = 13889
+    WORD_SIZE                 = 4
 
     def  __init__(self, libbench, fpga_dev):
         # TODO: rename to libdut
@@ -72,9 +74,20 @@ class FPGA_SOC:
     def print_ram(self, start_address, num_words):
         print("{:10} : {:10}".format("address", "data"))
         for w in range(num_words):
-            addr = start_address + w * 4
+            addr = start_address + w * WORD_SIZE
             data = self.read_word(addr)
             print("0x{:08X} : 0x{:08X}".format(addr, data))
+
+    def get_soc_ram_size(self):
+        # halt cpu
+        self.__set_cpu_halt()
+        self.__update_control_register()
+        # get ram size
+        ram_size = self._soc.readShort(self.REGISTER_SOC_RAM_SIZE)
+        # run cpu
+        self.__clear_cpu_halt()
+        self.__update_control_register()
+        return ram_size
 
     def upload_image(self, path_to_image):
         self._min_address = 0
@@ -180,7 +193,7 @@ class FPGA_SOC:
         for ch in string:
             self.write_word(self.UART_TRANSMIT_BYTE_ADDR, ord(ch))
 
-    def read_word(self, address):
+    def read_word_ram(self, address):
         # set address
         self.__set_address(address)
         # prepare for read transaction
@@ -201,7 +214,7 @@ class FPGA_SOC:
             self.__clear_transaction_finished()
         return self.__get_data_out()
 
-    def write_word(self, address, data):
+    def write_word_ram(self, address, data):
         # set address
         self.__set_address(address)
         # set data

@@ -72,8 +72,7 @@ class CmdWatchpoint:
         except Exception as e:
             print '[-] Provided value is not integer'
             return None
-        word_index = address / self._word_size
-        memory_value = self.soc.read_word_ram(word_index)
+        memory_value = self.soc.read_word_ram(address)
 
         self.watchpoints[self.watchpoint_table_size] = [
             hex(address),
@@ -112,8 +111,7 @@ class CmdWatchpoint:
                 if ( location == 'memory'):
                     #print 'Testing register memory'
                     address = int(trigger[2:],16) #Cutting 0x off
-                    word_index = address / self._word_size
-                    current_value = self.soc.read_word_ram(word_index)
+                    current_value = self.soc.read_word_ram(address)
                     if ( int(saved_value[2:], 16) != current_value):
                         print '    [*] Watchpoint {} hit. Value at address {} changed its value from {} to {}'.format(
                             key,
