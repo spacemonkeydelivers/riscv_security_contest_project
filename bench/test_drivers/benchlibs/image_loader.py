@@ -5,6 +5,7 @@ class ImageLoader:
     min_address = 0
     min_addr_init = False
     soc_ram_size_in_bytes = soc.get_soc_ram_size()
+    print("SoC ram size is claimed to be {} bytes".format(soc_ram_size_in_bytes))
     # allocate array of zeroes
     bytes_to_write = ["00"] * soc_ram_size_in_bytes
     words_to_write = []
