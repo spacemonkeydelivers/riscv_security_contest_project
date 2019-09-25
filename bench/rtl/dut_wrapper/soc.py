@@ -244,7 +244,7 @@ class RiscVSoc:
         if external:
             self._soc.toggleCpuReset(True)
             self._soc.switchBusMasterToExternal(True)
-        for w_idx in xrange(start_address, start_word_index + num_words * self._word_size):
+        for w_idx in xrange(start_address, start_address + num_words * self._word_size, 4):
             if external:
                 print("0x{0:08x} : 0x{1:08x}".format(w_idx, self._soc.readWordExt(w_idx)))
             else:
