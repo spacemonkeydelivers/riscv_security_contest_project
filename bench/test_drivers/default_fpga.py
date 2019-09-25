@@ -8,17 +8,19 @@ import imp
 import re
 import time
 
-from dut_wrapper.fpga import FPGA_SOC
-#TODO: rename to libdut
+#TODO: rename libbench to libdut
 import libbench
+import dut_wrapper.fpga as soc_lib
+
+from benchlibs.image_loader import ImageLoader
 
 def main(filename):
     if not os.path.isfile(filename):
         print 'could not find input file <{}>'.format(filename)
         raise RuntimeError('incorrect input file')
 
-    #TODO: rename to libdut
-    soc = FPGA_SOC(libbench, "/dev/fpga")
+    #TODO: rename libbench to libdut
+    soc = soc_lib.FPGA_SOC(libbench, "/dev/fpga")
 
     print("...fpga_init")
     soc.fpga_init()
@@ -32,6 +34,7 @@ def main(filename):
 
     soc.uart_print("\nNew testing sequence initiated!\n")
     soc.uart_print("Uploading memory image...\n")
+    ImageLoader.load_image(filename, soc)
     soc.upload_image(filename)
     soc.uart_print("Memory image uploaded, initiating test run\n")
     soc.uart_print("----->\n")

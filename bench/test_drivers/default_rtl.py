@@ -8,6 +8,8 @@ import re
 import dut_wrapper.soc as soc_lib
 import benchlibs.debug as debug
 
+from benchlibs.image_loader import ImageLoader
+
 from builders.builder_asm import BuilderAsm
 from builders.builder_c import BuilderC
 from builders.builder_compliance import BuilderCompliance
@@ -40,6 +42,7 @@ def run(libbench):
   driver = build_test_image(soc)
 
   soc.setDebug(False)
+  ImageLoader.load_image("test.v", soc)
   soc.load_data_to_ram("test.v", external = False)
 
   if driver == None:
