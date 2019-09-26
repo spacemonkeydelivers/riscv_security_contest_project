@@ -30,6 +30,8 @@ module soc
    input wire                        ext_cpu_halt_i,
    input wire                        ext_cpu_singlestep_i,
    input wire                        ext_cpu_do_step_i,
+   output wire                       soc_interrupt_timer_o,
+   output wire                       soc_interrupt_tags_o,
    output wire [31:0]                pc_o,
    output wire [4:0]                 state_o
 );
@@ -74,7 +76,10 @@ module soc
    wire timer_irq;
    wire timer_mtimecmp_accessed;
    wire tags_mismatch_irq;
-   
+
+   assign soc_interrupt_timer_o = timer_irq;
+   assign soc_interrupt_tags_o = tags_mismatch_irq;
+
    // uart interface
    wire [WB_ADDR_WIDTH - 1:0] wb_uart_addr;
    wire [WB_DATA_WIDTH - 1:0] wb_uart_data_in;

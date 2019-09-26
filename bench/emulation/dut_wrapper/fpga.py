@@ -35,6 +35,9 @@ class FPGA_SOC:
     UART_9600_DIVIDER         = 13889
     WORD_SIZE                 = 4
     STATE_CPU_IDLE            = 24
+    STATE_CPU_MASK            = 0x1f
+    STATE_CPU_TAGS_IRQ_MASK   = 0x80
+    STATE_CPU_TIMER_IRQ_MASK  = 0x40
 
     def  __init__(self, libbench, fpga_dev):
         # TODO: rename to libdut
@@ -48,12 +51,15 @@ class FPGA_SOC:
 
     def get_cpu_state(self):
         # get pc
-        state = self._soc.readShort(self.REGISTER_CPU_STATE) & 0xFFFF
-        return state
+        data = self._soc.readShort(self.REGISTER_CPU_STATE) & 0xFFFF
+        state = data & self.STATE_CPU_MASK
+        tags_irq = data & self.STATE_CPU_TAGS_IRQ_MASK
+        timer_irq = data & self.STATE_CPU_TIMER_IRQ_MASK
+        return (state, tags_irq, timer_irq)
 
     def print_cpu_state(self):
-        state = self.get_cpu_state()
-        print("CPU state: {0}".format(state))
+        state, tags, timer = self.get_cpu_state()
+        print("CPU state: {0}, tags irq: {1}, timer irq: {2}".format(state, tags, timer))
 
     def get_cpu_pc(self):
         # get pc
@@ -67,17 +73,17 @@ class FPGA_SOC:
             self.__set_cpu_halt()
             self.__update_control_register()
         # get pc
-        state = self.get_cpu_state()
+        state, tags, timer = self.get_cpu_state()
         pc = self.get_cpu_pc()
         if halt:
             # run cpu
             self.__clear_cpu_halt()
             self.__update_control_register()
-        return (pc, state)
+        return (pc, state, tags, timer)
 
     def print_cpu_status(self, halt):
-        pc, state = self.get_cpu_status(halt)
-        print("PC 0x{:08X}, status {}".format(pc, state))
+        pc, state, tags, timer = self.get_cpu_status(halt)
+        print("PC 0x{:08X} state: {} tags irq: {} timer irq: {}".format(pc, state, tags, timer))
 
     def print_cpu_pc(self):
         pc = self.get_cpu_pc()
@@ -141,7 +147,7 @@ class FPGA_SOC:
         self.__update_control_register()
 
     def __cpu_is_idle(self):
-        pc, state = self.get_cpu_status(halt = False)
+        pc, state, tags, timer = self.get_cpu_status(halt = False)
         return (state == self.STATE_CPU_IDLE)
 
     def do_step(self):
@@ -171,10 +177,10 @@ class FPGA_SOC:
         executed_pc = []
         while max_instructions > counter:
             self.do_step()
-            pc, state = self.get_cpu_status(halt = False)
+            pc, state, tags, timer = self.get_cpu_status(halt = False)
             executed_pc.append(pc)
             if debug:
-                print("{:08}: pc 0x{:08X}, state {}".format(counter, pc, state))
+                print("{:08}: pc 0x{:08X}, state: {} tags irq {} timer irq: {}".format(counter, pc, state, tags, timer))
             counter += 1
             pcs_to_check = executed_pc[-idle_counter:]
             d = defaultdict(int)

@@ -98,7 +98,7 @@ module fpga(
                         (addr == REG_CONTROL)           ? {regs_internal[addr][15:7], tran_ready, regs_internal[addr][5:0]} :
                         (addr == REG_LOW_CPU_PC)        ? cpu_pc[15:0] :
                         (addr == REG_HIGH_CPU_PC)       ? cpu_pc[31:16] :
-                        (addr == REG_CPU_STATE)         ? cpu_state : 
+                        (addr == REG_CPU_STATE)         ? {8'b0, irq_tags, irq_timer, 1'b0, cpu_state} : 
                         (addr == REG_LOW_SOC_MEM_SIZE)  ? ram_size[15:0] : 
                         (addr == REG_HIGH_SOC_MEM_SIZE) ? ram_size[31:16] : 
                                                           regs_internal[addr];
@@ -126,6 +126,9 @@ module fpga(
 
    reg [31:0] ram_size;
 
+   wire irq_timer;
+   wire irq_tags;
+
    wire tran_ready;
    soc
    #(
@@ -150,6 +153,8 @@ module fpga(
       .ext_cpu_halt_i (cpu_halt),
       .ext_cpu_singlestep_i (cpu_singlestep),
       .ext_cpu_do_step_i (cpu_do_step),
+      .soc_interrupt_timer_o (irq_timer),
+      .soc_interrupt_tags_o (irq_tags),
       .pc_o (cpu_pc),
       .state_o (cpu_state)
    );
