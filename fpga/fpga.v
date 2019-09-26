@@ -185,10 +185,16 @@ module fpga(
                if (regs_internal[REG_CONTROL][CONTROL_TRAN_START]) begin
                   regs_internal[REG_CONTROL][CONTROL_TRAN_START] <= 0;
                end
+               if (regs_internal[REG_CONTROL][CONTROL_CPU_DO_STEP]) begin
+                  regs_internal[REG_CONTROL][CONTROL_CPU_DO_STEP] <= 1'b0;
+               end
             end
          end
          if (regs_internal[REG_CONTROL][CONTROL_TRAN_START]) begin
             regs_internal[REG_CONTROL][CONTROL_TRAN_START] <= 1'b0;
+         end
+         if (regs_internal[REG_CONTROL][CONTROL_CPU_DO_STEP]) begin
+            regs_internal[REG_CONTROL][CONTROL_CPU_DO_STEP] <= 1'b0;
          end
       end
    end

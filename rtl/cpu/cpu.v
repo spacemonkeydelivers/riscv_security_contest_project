@@ -290,7 +290,7 @@ module cpu
     localparam STATE_MRET                    = 5'd21;
     localparam STATE_FETCH_MORE              = 5'd22;
     localparam STATE_PREPAIR_UNALIGNED_FETCH = 5'd23;
-    localparam STATE_DECODE16                = 5'd24; // NOT used for now... Maybe we don't need it
+    localparam STATE_CPU_IDLE                = 5'd24;
 
 
    reg [1:0] csr_op_type;
@@ -567,7 +567,9 @@ module cpu
          end
          STATE_UPDATE_PC: begin
             update_pc = 1;
-            next_state = addr_misaligned ? STATE_TRAP : STATE_PRE_FETCH;
+            next_state = external_singlestep_i ? STATE_CPU_IDLE : 
+                         addr_misaligned       ? STATE_TRAP     :
+                                                 STATE_PRE_FETCH;
             next_pc = (next_pc_from_csr || next_addr_from_csr)      ? csr_data_out & ~32'h1 :
                       (exec_next_pc_from_alu || branch_pc_from_alu) ? alu_dataout & ~32'h1 :
                                                                       pcnext & ~32'h1;
@@ -861,8 +863,8 @@ module cpu
             csr_op_type = 0;
             next_pc_from_csr = 1;
          end
-         STATE_DECODE16: begin
-            next_state = STATE_DEAD;
+         STATE_CPU_IDLE: begin
+            next_state = external_do_step_i ? STATE_PRE_FETCH : STATE_CPU_IDLE;
          end
          default: begin
             next_state = STATE_DEAD;

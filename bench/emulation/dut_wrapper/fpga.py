@@ -32,6 +32,7 @@ class FPGA_SOC:
     UART_TRANSMIT_BYTE_ADDR   = 0x80000004
     UART_9600_DIVIDER         = 13889
     WORD_SIZE                 = 4
+    STATE_CPU_IDLE            = 24
 
     def  __init__(self, libbench, fpga_dev):
         # TODO: rename to libdut
@@ -44,14 +45,8 @@ class FPGA_SOC:
 #        self._soc.uploadBitstream(firmware_path)
 
     def get_cpu_state(self):
-        # halt cpu
-        self.__set_cpu_halt()
-        self.__update_control_register()
         # get pc
         state = self._soc.readShort(self.REGISTER_CPU_STATE) & 0xFFFF
-        # run cpu
-        self.__clear_cpu_halt()
-        self.__update_control_register()
         return state
 
     def print_cpu_state(self):
@@ -59,16 +54,28 @@ class FPGA_SOC:
         print("CPU state: {0}".format(state))
 
     def get_cpu_pc(self):
-        # halt cpu
-        self.__set_cpu_halt()
-        self.__update_control_register()
         # get pc
         low_pc = self._soc.readShort(self.REGISTER_CPU_PC_LOW) & 0xFFFF
         high_pc = self._soc.readShort(self.REGISTER_CPU_PC_HIGH) & 0xFFFF
-        # run cpu
-        self.__clear_cpu_halt()
-        self.__update_control_register()
         return ((high_pc << 16) | low_pc)
+    
+    def get_cpu_status(self, halt):
+        if halt:
+            # halt cpu
+            self.__set_cpu_halt()
+            self.__update_control_register()
+        # get pc
+        state = self.get_cpu_state(halt = False)
+        pc = self.get_cpu_pc(halt = False)
+        if halt:
+            # run cpu
+            self.__clear_cpu_halt()
+            self.__update_control_register()
+        return (pc, state)
+
+    def print_cpu_status(self, halt):
+        pc, state = self.get_cpu_status(halt)
+        print("PC 0x{:08X}, status {}".format(pc, status))
 
     def print_cpu_pc(self):
         pc = self.get_cpu_pc()
@@ -93,67 +100,6 @@ class FPGA_SOC:
         self.__update_control_register()
         return ((ram_size_high << 16) | ram_size_low)
 
-    def upload_image(self, path_to_image):
-        self._min_address = 0
-        addr_set = False
-        data = map(lambda x: x.strip(), open(path_to_image, "r").readlines())
-        offset = 0
-        addr = 0
-        for line in data:
-            if line[0] == '@':
-                addr = int(line[1:], 16)
-                offset = addr / 4
-                if not addr_set:
-                    self._min_address = addr
-                    addr_set = True
-
-                # print("Changing offset while loading to RAM to: 0x{0:08x}".format(offset))
-                if (addr < self._min_address):
-                    self._min_address = offset * 4
-            else:
-                b = line.split()
-                cur_addr = addr
-                cur_len = len(b)
-                cur_pos = 0
-                while cur_len:
-                    cur_align = cur_addr & 0b11
-                    bytes_to_write = 0
-                    addr_adjust = 0
-                    cur_data = 0
-                    addr_to_access = cur_addr / 4 * 4
-                    if cur_len >= (4 - cur_align):
-                        bytes_to_write = 4 - cur_align
-                        addr_adjust = 4 - cur_align
-                    else:
-                        bytes_to_write = cur_len
-                        addr_adjust = cur_len
-                    if (cur_align != 0):
-                        cur_data = self.read_word(addr_to_access)
-                    mask = 0
-                    if (bytes_to_write == 1):
-                        mask = 0xff << cur_align * 8
-                    elif (bytes_to_write == 2):
-                        mask = 0xffff << cur_align * 8
-                    elif (bytes_to_write == 3):
-                        mask = 0xffffff << cur_align * 8
-                    else:
-                        mask = 0xffffffff
-                    byte_data = b[cur_pos:cur_pos + bytes_to_write]
-                    for i in range(4 - bytes_to_write):
-                        if cur_align:
-                            byte_data.insert(0, "00")
-                        else:
-                            byte_data.append("00")
-                    data = int("".join(byte_data[::-1]), 16)
-
-                    data_to_write = (~mask & cur_data) | (data)
-                    self.write_word_ram(addr_to_access, data_to_write)
-                    # print("Writing 0x{0:08x} to address 0x{1:08x}".format(data_to_write, addr_to_access * 4))
-                    cur_len -= addr_adjust
-                    cur_addr += addr_adjust
-                    cur_pos += bytes_to_write
-                addr = cur_addr
-
     def fpga_init(self):
         self._soc.setReset(False)
         self._soc.setReset(1)
@@ -175,7 +121,7 @@ class FPGA_SOC:
         self.__set_transaction_size_to_word()
         self.__update_control_register()
 
-    def run_soc(self):
+    def run_soc(self, single_step = False):
         self.__clear_cpu_halt()
         self.__set_cpu_reset()
         # set soc to reset
@@ -187,6 +133,25 @@ class FPGA_SOC:
         self.__clear_cpu_reset()
         # set soc to run
         self.__clear_soc_reset()
+        # set singlestep mode
+        if single_step:
+            self.__set_cpu_singlestep()
+        self.__update_control_register()
+
+    def __cpu_is_idle(self):
+        pc, state = self.get_cpu_status(halt = False)
+        return (state == STATE_CPU_IDLE)
+
+    def do_step(self, debug = False):
+        # check if singlestep mode is enabled
+        assert(self.__check_cpu_singlestep())
+        # check cpu state if its idle
+        assert(self.__cpu_is_idle())
+        # set do step flag
+        self.__set_cpu_do_step()
+        if debug:
+            self.print_cpu_status(halt = False)
+        # update control register
         self.__update_control_register()
 
     def uart_set_baud_9600(self):
@@ -315,6 +280,9 @@ class FPGA_SOC:
 
     def __clear_cpu_singlestep(self):
         self.__clear_control_bit(self.BIT_CPU_SINGLESTEP)
+    
+    def __check_cpu_singlestep(self):
+        return self.__check_control_bit(self.BIT_CPU_SINGLESTEP)
 
     def __set_cpu_do_step(self):
         self.__set_control_bit(self.BIT_CPU_DO_STEP)
