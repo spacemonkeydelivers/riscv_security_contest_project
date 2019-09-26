@@ -95,7 +95,7 @@ class FPGA_SOC:
     def print_ram(self, start_address, num_words):
         print("{:10} : {:10}".format("address", "data"))
         for w in range(num_words):
-            addr = start_address + w * WORD_SIZE
+            addr = start_address + w * self.WORD_SIZE
             data = self.read_word_ram(addr)
             print("0x{:08X} : 0x{:08X}".format(addr, data))
 
