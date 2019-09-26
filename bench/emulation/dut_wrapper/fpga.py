@@ -65,8 +65,8 @@ class FPGA_SOC:
             self.__set_cpu_halt()
             self.__update_control_register()
         # get pc
-        state = self.get_cpu_state(halt = False)
-        pc = self.get_cpu_pc(halt = False)
+        state = self.get_cpu_state()
+        pc = self.get_cpu_pc()
         if halt:
             # run cpu
             self.__clear_cpu_halt()
@@ -75,7 +75,7 @@ class FPGA_SOC:
 
     def print_cpu_status(self, halt):
         pc, state = self.get_cpu_status(halt)
-        print("PC 0x{:08X}, status {}".format(pc, status))
+        print("PC 0x{:08X}, status {}".format(pc, state))
 
     def print_cpu_pc(self):
         pc = self.get_cpu_pc()
@@ -140,7 +140,7 @@ class FPGA_SOC:
 
     def __cpu_is_idle(self):
         pc, state = self.get_cpu_status(halt = False)
-        return (state == STATE_CPU_IDLE)
+        return (state == self.STATE_CPU_IDLE)
 
     def do_step(self, debug = False):
         # check if singlestep mode is enabled
