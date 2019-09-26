@@ -68,9 +68,9 @@ def is_attack_possible(technique, code_ptr, function, location, inject_param):
         if (internal_location == 'HEAP' and internal_technique == 'INDIRECT'):
             #print("Error: Impossible to indirect attack the heap flag.")
             return False
-        elif (internal_code_ptr == 'VAR_BOF' or internal_code_ptr == 'VAR_IOF' or internal_code_ptr == 'VAR_LEAK'):
-            #print("Error: Must use \"dataonly\" injection parameter for DOP attacks.")
-            return False
+    elif (internal_code_ptr == 'VAR_BOF' or internal_code_ptr == 'VAR_IOF' or internal_code_ptr == 'VAR_LEAK'):
+        #print("Error: Must use \"dataonly\" injection parameter for DOP attacks.")
+        return False
 
     # JM: attacks targeting another memory location must be indirect
     if (internal_location == 'STACK'):
