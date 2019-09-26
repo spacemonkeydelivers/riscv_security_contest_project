@@ -1,5 +1,7 @@
 import os
 import sys
+from time import sleep
+from collections import defaultdict
 
 class FPGA_SOC:
     REGISTER_SANITY         = 0x0
@@ -142,17 +144,47 @@ class FPGA_SOC:
         pc, state = self.get_cpu_status(halt = False)
         return (state == self.STATE_CPU_IDLE)
 
-    def do_step(self, debug = False):
+    def do_step(self):
         # check if singlestep mode is enabled
         assert(self.__check_cpu_singlestep())
         # check cpu state if its idle
-        assert(self.__cpu_is_idle())
+        attempts = 10
+        idle = False
+        while attempts:
+            test_idle = self.__cpu_is_idle()
+            if not test_idle:
+                attempts -= 1
+                sleep(0.05)
+            else:
+                idle = True
+                break
+        assert(idle)
         # set do step flag
         self.__set_cpu_do_step()
-        if debug:
-            self.print_cpu_status(halt = False)
         # update control register
         self.__update_control_register()
+
+    def run_in_singlestep(self, debug = False):
+        max_instructions = 1000000
+        counter = 0
+        idle_counter = 32
+        executed_pc = []
+        while max_instructions > counter:
+            self.do_step()
+            pc, state = self.get_cpu_status(halt = False)
+            executed_pc.append(pc)
+            if debug:
+                print("{:08}: pc 0x{:08X}, state {}".format(counter, pc, state))
+            counter += 1
+            pcs_to_check = executed_pc[-idle_counter:]
+            d = defaultdict(int)
+            for i in pcs_to_check:
+                d[i] += 1
+            result = max(d.iteritems(), key=lambda x: x[1])
+            if result[1] == idle_counter:
+                print("PC 0x{:08X} has been executed {} times. Looks like idling".format(result[0], result[1]))
+                break
+        return executed_pc
 
     def uart_set_baud_9600(self):
         self.write_word_ram(self.UART_BAUDE_DIVIDER_ADDR, self.UART_9600_DIVIDER)

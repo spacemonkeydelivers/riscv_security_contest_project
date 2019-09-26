@@ -38,17 +38,17 @@ def main(filename):
     soc.uart_print("Memory image uploaded, initiating test run\n")
     soc.uart_print("----->\n")
 
-    soc.run_soc()
-    time.sleep(3)
+    soc.print_cpu_status(halt = False)
+    soc.run_soc(single_step = True)
+    soc.print_cpu_status(halt = False)
+#    time.sleep(1)
+#    soc.print_cpu_status(halt = False)
 
-    soc.print_cpu_pc()
-    soc.print_cpu_state()
-
+    soc.run_in_singlestep(debug = True)
+#    for i in range(1000000):
+#        soc.do_step(debug = True
     soc.halt_soc()
-
-    print(hex(soc.get_cpu_pc()))
-    print(soc.get_cpu_state())
-
+    soc.print_cpu_status(halt = False)
     print("#######################")
     #soc.upload_image("/mnt/smd/fpga_tests/libc_printk.v")
 
