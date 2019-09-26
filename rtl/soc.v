@@ -33,7 +33,8 @@ module soc
    output wire                       soc_interrupt_timer_o,
    output wire                       soc_interrupt_tags_o,
    output wire [31:0]                pc_o,
-   output wire [4:0]                 state_o
+   output wire [4:0]                 state_o,
+   output wire [31:0]                insn_bytes_o
 );
    /*verilator no_inline_module*/
 
@@ -267,7 +268,8 @@ module soc
       .external_singlestep_i (ext_cpu_singlestep_i),
       .external_do_step_i (ext_cpu_do_step_i),
       .pc_o (pc_o),
-      .state_o (state_o)
+      .state_o (state_o),
+      .insn_bytes_o (insn_bytes_o)
    );
 
    wb_uart

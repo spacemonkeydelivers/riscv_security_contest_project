@@ -30,7 +30,8 @@ module cpu
    input wire external_singlestep_i,
    input wire external_do_step_i,
    output wire [31:0] pc_o,
-   output wire [4:0]  state_o
+   output wire [4:0]  state_o,
+   output wire [31:0] insn_bytes_o
 );
    
     /*verilator public_module*/
@@ -131,6 +132,7 @@ module cpu
     reg [15:0] parcel_low;
     reg [15:0] parcel_high;
     wire [31:0] parcels = {parcel_high, parcel_low};
+    assign insn_bytes_o = parcels;
    
 
     decoder dec_inst(

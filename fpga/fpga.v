@@ -86,9 +86,12 @@ module fpga(
                     REG_HIGH_CPU_PC   = 4'd9,
                     REG_CPU_STATE     = 4'd10,
                     REG_LOW_SOC_MEM_SIZE  = 4'd11,
-                    REG_HIGH_SOC_MEM_SIZE  = 4'd12;
+                    REG_HIGH_SOC_MEM_SIZE  = 4'd12,
+                    REG_LOW_INSN_BYTES     = 4'd13,
+                    REG_HIGH_INSN_BYTES    = 4'd14;
 
    reg [15:0] regs_internal [0:8];
+   wire [31:0] instruction_bytes;
 
 
    wire [15:0] data_from_soc_low;
@@ -96,6 +99,8 @@ module fpga(
    wire [15:0] to_cpu = (addr == REG_LOW_DATA_OUT)      ? data_from_soc_low :
                         (addr == REG_HIGH_DATA_OUT)     ? data_from_soc_high :
                         (addr == REG_CONTROL)           ? {regs_internal[addr][15:7], tran_ready, regs_internal[addr][5:0]} :
+                        (addr == REG_LOW_INSN_BYTES)    ? instruction_bytes[15:0] :
+                        (addr == REG_HIGH_INSN_BYTES)   ? instruction_bytes[31:16] :
                         (addr == REG_LOW_CPU_PC)        ? cpu_pc[15:0] :
                         (addr == REG_HIGH_CPU_PC)       ? cpu_pc[31:16] :
                         (addr == REG_CPU_STATE)         ? {8'b0, irq_tags, irq_timer, 1'b0, cpu_state} : 
@@ -156,7 +161,8 @@ module fpga(
       .soc_interrupt_timer_o (irq_timer),
       .soc_interrupt_tags_o (irq_tags),
       .pc_o (cpu_pc),
-      .state_o (cpu_state)
+      .state_o (cpu_state),
+      .insn_bytes_o (instruction_bytes)
    );
 
    // always loop to deal with fpga-to-arm iface data

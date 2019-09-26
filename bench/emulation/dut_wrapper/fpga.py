@@ -17,6 +17,8 @@ class FPGA_SOC:
     REGISTER_CPU_STATE      = 0x14
     REGISTER_SOC_MEM_SIZE_LOW = 0x16
     REGISTER_SOC_MEM_SIZE_HIGH = 0x18
+    REGISTER_INSN_BYTES_LOW = 0x1a
+    REGISTER_INSN_BYTES_HIGH = 0x1c
     SANE_CONSTANT           = 0x50FE
     BIT_CPU_RESET             = 0
     BIT_SOC_RESET             = 1
@@ -75,15 +77,16 @@ class FPGA_SOC:
         # get pc
         state, tags, timer = self.get_cpu_state()
         pc = self.get_cpu_pc()
+        prev_insn_bytes = self.get_prev_insn_bytes()
         if halt:
             # run cpu
             self.__clear_cpu_halt()
             self.__update_control_register()
-        return (pc, state, tags, timer)
+        return (pc, state, tags, timer, prev_insn_bytes)
 
     def print_cpu_status(self, halt):
-        pc, state, tags, timer = self.get_cpu_status(halt)
-        print("PC 0x{:08X} state: {} tags irq: {} timer irq: {}".format(pc, state, tags, timer))
+        pc, state, tags, timer, prev_bytes = self.get_cpu_status(halt)
+        print("PC 0x{:08X} state: {} tags irq: {} timer irq: {} prev instruction bytes {:08X}".format(pc, state, tags, timer, prev_bytes))
 
     def print_cpu_pc(self):
         pc = self.get_cpu_pc()
@@ -97,16 +100,16 @@ class FPGA_SOC:
             print("0x{:08X} : 0x{:08X}".format(addr, data))
 
     def get_soc_ram_size(self):
-        # halt cpu
-        self.__set_cpu_halt()
-        self.__update_control_register()
         # get ram size
         ram_size_low = self._soc.readShort(self.REGISTER_SOC_MEM_SIZE_LOW) & 0xFFFF
         ram_size_high = self._soc.readShort(self.REGISTER_SOC_MEM_SIZE_HIGH) & 0xFFFF
-        # run cpu
-        self.__clear_cpu_halt()
-        self.__update_control_register()
         return ((ram_size_high << 16) | ram_size_low)
+    
+    def get_prev_insn_bytes(self):
+        # get insn bytes
+        insn_bytes_low = self._soc.readShort(self.REGISTER_INSN_BYTES_LOW) & 0xFFFF
+        insn_bytes_high = self._soc.readShort(self.REGISTER_INSN_BYTES_HIGH) & 0xFFFF
+        return ((insn_bytes_high << 16) | insn_bytes_low)
 
     def fpga_init(self):
         self._soc.setReset(False)
@@ -147,7 +150,7 @@ class FPGA_SOC:
         self.__update_control_register()
 
     def __cpu_is_idle(self):
-        pc, state, tags, timer = self.get_cpu_status(halt = False)
+        pc, state, tags, timer, prev_bytes = self.get_cpu_status(halt = False)
         return (state == self.STATE_CPU_IDLE)
 
     def do_step(self):
@@ -177,10 +180,10 @@ class FPGA_SOC:
         executed_pc = []
         while max_instructions > counter:
             self.do_step()
-            pc, state, tags, timer = self.get_cpu_status(halt = False)
+            pc, state, tags, timer, prev_bytes = self.get_cpu_status(halt = False)
             executed_pc.append(pc)
             if debug:
-                print("{:08}: pc 0x{:08X}, state: {} tags irq {} timer irq: {}".format(counter, pc, state, tags, timer))
+                print("{:08}: pc 0x{:08X}, state: {} tags irq {} timer irq: {} prev instruction bytes {:08X}".format(counter, pc, state, tags, timer, prev_bytes))
             counter += 1
             pcs_to_check = executed_pc[-idle_counter:]
             d = defaultdict(int)
