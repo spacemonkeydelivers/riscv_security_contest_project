@@ -154,7 +154,7 @@ HDL files describing our design are located in [rtl](rtl/) folder.
 - Instruction set: **rv32imc**-compliant + custom [memtag extension](doc/arch/memtag.md).
 - Peripheral: riscv-compliant timer, uart (transmit part only).
 
-To speedup core development we used [cpu32 core](https://github.com/maikmerten/spu32)
+To speedup core development we used [spu32 core](https://github.com/maikmerten/spu32)
 and extended it to be IMC compatible.
 
 ## SOC memory map
