@@ -57,7 +57,7 @@ Unless some used open-source component prevents that. We are not lawyers.
 # Bulding the project
 
 Build the GCC toolchain:
-1. `git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_toolchain`
+1. `git clone --recursive http://gitea.yggdrasill.ga/Secure_SoC/gcc_toolchain`
 1. `cd riscv_security_contest_toolchain`
 1. `./configure --prefix=<RISCV_GCC_TOOLCHAIN_PATH> -with-arch=rv32imc --with-abi=ilp32`
 1. `make newlib -j10`
