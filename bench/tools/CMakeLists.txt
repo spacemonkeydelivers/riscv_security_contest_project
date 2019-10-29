@@ -20,8 +20,8 @@ ExternalProject_Add(
     BUILD_COMMAND make
         -f "${CMAKE_CURRENT_SOURCE_DIR}/libc/Makefile"
         CFLAGS=${FLAGS}
-        CC=${TOOLCHAIN}/bin/riscv32-unknown-elf-gcc
-        AR=${TOOLCHAIN}/bin/riscv32-unknown-elf-ar
+        CC=${TOOLCHAIN}/bin/${RV_CC}
+        AR=${TOOLCHAIN}/bin/${RV_AR}
         INSTALL_DIR=${_SUBPROJECT_INSTALL_PREFIX}
         TOP=${CMAKE_CURRENT_SOURCE_DIR}/libc all install test_program VERBOSE=1
     INSTALL_COMMAND ""

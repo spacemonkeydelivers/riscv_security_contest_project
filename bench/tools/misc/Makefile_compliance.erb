@@ -1,6 +1,7 @@
 include <%= ENV['TOOLS_DISTRIB'] %>/share/testsMakefile.include
 
 CC         = $(RISCV_CC)
+LD         = $(RISCV_LD)
 OBJCOPY    = $(RISCV_OBJCOPY)
 LDFLAGS    = $(RISCV_LDFLAGS_COMMON)
 LDSCRIPT   = $(RISCV_COMPLIANCE_LD_SCRIPT)
@@ -12,6 +13,9 @@ CFLAGS    += -march=rv32imc
 <% end %>
 # uncomment the line below if you wan to disable IO facilities of compliance tests
 # CFLAGS     += -DDISABLE_COMPLIANCE_IO
+
+LDFLAGS    = ${RISCV_LDFLAGS_COMMON} -I$(RISCV_ASM_INCLUDES)
+LDFLAGS   += -march=$(MARCH_ASM_TESTS) -mabi=ilp32
 
 SRC  = <%= input_asm %>
 
@@ -28,7 +32,7 @@ tcl_copy: $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl
 	cp $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl filter_init.tcl
 
 test.elf: asm_pre.s
-	$(CC) -Xlinker -T$(LDSCRIPT) $(CFLAGS) asm_pre.s -o test.elf
+	$(LD) -Xlinker -T$(LDSCRIPT) $(LDFLAGS) asm_pre.s -o test.elf
 
 asm_pre.s: $(SRC)
 	$(CC) -E $(CFLAGS) $(SRC) -o asm_pre.s

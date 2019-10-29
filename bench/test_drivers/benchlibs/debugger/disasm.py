@@ -3,7 +3,7 @@ import shutil
 
 class Disassembler:
     def __init__(self, path_to_elf):
-        self._objdump = os.environ['TOOLCHAIN_DIR'] + '/bin/riscv32-unknown-elf-objdump'
+        self._objdump = 'riscv32-unknown-elf-objdump'
         disasm_cmd = ' '.join([
               self._objdump,
               '-d test.elf | '

@@ -1,6 +1,7 @@
 include <%= ENV['TOOLS_DISTRIB'] %>/share/testsMakefile.include
 
 CC         = $(RISCV_CC)
+LD         = $(RISCV_LD)
 OBJCOPY    = $(RISCV_OBJCOPY)
 LDFLAGS    = $(RISCV_LDFLAGS_COMMON)
 LDSCRIPT   = $(RISCV_ASM_LD_SCRIPT)
@@ -12,6 +13,9 @@ CFLAGS    += -DENABLE_FPGA_EXIT
 <% if asm_c_ext %>
 CFLAGS    += -march=rv32imc
 <% end %>
+
+LDFLAGS    = ${RISCV_LDFLAGS_COMMON} -I$(RISCV_ASM_INCLUDES)
+LDFLAGS   += -march=$(MARCH_ASM_TESTS) -mabi=ilp32
 
 SRC  = <%= input_asm %>
 
@@ -34,9 +38,9 @@ fpga.info: test.elf
 	-uB $(TESTBENCH_TOOLS_SRC)/misc/fpga_info.py test.elf fpga.info >/dev/null
 
 test.elf: asm_pre.s
-	$(CC) -Xlinker -T$(RISCV_ASM_LD_SCRIPT) \
+	$(LD) -Xlinker -T$(RISCV_ASM_LD_SCRIPT) \
 	-Xlinker --defsym=__SOC_MEM_SIZE=$(SOC_RAM_SIZE) \
-	$(CFLAGS) asm_pre.s -o test.elf
+	$(LDFLAGS) asm_pre.s -o test.elf
 
 asm_pre.s: $(SRC) $(RISCV_ASM_INCLUDES)/boot.S $(RISCV_ASM_INCLUDES)/defines.S
 	$(CC) -x c -E $(CFLAGS) $(SRC) -o asm_pre.s

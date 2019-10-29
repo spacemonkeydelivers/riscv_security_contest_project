@@ -6,9 +6,9 @@ enable_testing()
 # Project's name
 project(riscv_soc)
 
-set(DEFAULT_ARCH_C_TESTS "rv32i")
-set(DEFAULT_ARCH_ASM_TESTS "rv32im")
-set(DEFAULT_ARCH_COMPLIANCE_TESTS "rv32im")
+set(DEFAULT_ARCH_C_TESTS "rv32ic")
+set(DEFAULT_ARCH_ASM_TESTS "rv32imc")
+set(DEFAULT_ARCH_COMPLIANCE_TESTS "rv32imc")
 set(DEFAULT_ARCH_ZEPHYR_TESTS "rv32imc") # this one is not used at the moment
 # DO NOT USE!!!
 option(BUILD_OVP_MODELS "Build OVP VLNV library (Imperas installation is required)" OFF)
@@ -41,8 +41,31 @@ else()
     set(RISCV_TOOLCHAIN_PATH $ENV{RISCV_TOOLCHAIN_PATH})
 endif()
 
-if (NOT EXISTS "${RISCV_TOOLCHAIN_PATH}/bin/riscv32-unknown-elf-gcc")
-    message(FATAL_ERROR "Could not find gcc for risc-v: ${RISCV_TOOLCHAIN_PATH}/riscv32-unknown-elf-gcc\nPlease set RISCV_TOOLCHAIN appropriately")
+set(RV_CC "clang")
+if (NOT EXISTS "${RV_TOOLCHAIN_PATH}/bin/${RISCV_CC}")
+    message(FATAL_ERROR "Could not find compiler for risc-v: ${RV_TOOLCHAIN_PATH}/bin/${RV_CC}\nPlease set RISCV_TOOLCHAIN_PATH appropriately")
+endif()
+
+set(RV_NM "llvm-nm")
+if (NOT EXISTS "${RV_TOOLCHAIN_PATH}/bin/${RISCV_NM}")
+    message(FATAL_ERROR "Could not find nm tool for risc-v: ${RV_TOOLCHAIN_PATH}/bin/${RV_NM}\nPlease set RISCV_TOOLCHAIN_PATH appropriately")
+endif()
+
+set(RV_AR "llvm-ar")
+if (NOT EXISTS "${RV_TOOLCHAIN_PATH}/bin/${RISCV_AR}")
+    message(FATAL_ERROR "Could not find ar tool for risc-v: ${RV_TOOLCHAIN_PATH}/bin/${RV_AR}\nPlease set RISCV_TOOLCHAIN_PATH appropriately")
+endif()
+
+set(RV_LD "riscv32-unknown-elf-gcc")
+find_program(LD_PATH NAMES ${RV_LD} PATHS $ENV)
+if (NOT EXISTS ${LD_PATH})
+    message(FATAL_ERROR "Could not find gcc toolchain for risc-v: ${RV_LD}\nPlease set RISCV_TOOLCHAIN_PATH appropriately")
+endif()
+
+set(RV_OBJCOPY "riscv32-unknown-elf-objcopy")
+find_program(OBJCOPY_PATH NAMES ${RV_OBJCOPY} PATHS $ENV)
+if (NOT EXISTS ${OBJCOPY_PATH})
+    message(FATAL_ERROR "Could not find gcc toolchain for risc-v: ${RV_OBJCOPY}\nPlease set RISCV_TOOLCHAIN_PATH appropriately")
 endif()
 
 set(WEST_TEST_PATH "${CMAKE_SOURCE_DIR}/zephyrproject/.west/config")

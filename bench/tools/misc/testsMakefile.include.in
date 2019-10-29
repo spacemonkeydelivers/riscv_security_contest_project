@@ -1,10 +1,11 @@
 RISCV_TOOLCHAIN_ROOT = @RISCV_TOOLCHAIN_PATH@
-RISCV_CC  = $(RISCV_TOOLCHAIN_ROOT)/bin/riscv32-unknown-elf-gcc
-RISCV_NM  = $(RISCV_TOOLCHAIN_ROOT)/bin/riscv32-unknown-elf-nm
-RISCV_OBJCOPY = $(RISCV_TOOLCHAIN_ROOT)/bin/riscv32-unknown-elf-objcopy
+RISCV_CC  = $(RISCV_TOOLCHAIN_ROOT)/bin/${RV_CC}
+RISCV_LD  = ${RV_LD}
+RISCV_NM  = $(RISCV_TOOLCHAIN_ROOT)/bin/${RV_NM}
+RISCV_OBJCOPY = ${RV_OBJCOPY}
 
-RISCV_CFLAGS_COMMON = -O0 -std=c11 -Wall -Wextra -Werror -pipe -ffreestanding -nostdinc -nostdlib -nodefaultlibs -nostartfiles
-RISCV_LDFLAGS_COMMON = -nostdlib -nodefaultlibs -nostartfiles
+RISCV_CFLAGS_COMMON = -O0 -std=c11 -Wall -Wextra -Werror -pipe -ffreestanding -nostdinc -nostdlib -nodefaultlibs
+RISCV_LDFLAGS_COMMON = -nostdlib -nodefaultlibs -Wall -Werror
 
 TESTBENCH_TOOLS_SRC = @CMAKE_SOURCE_DIR@/bench/tools
 TESTBENCH_TOOLS_DISTRIB = @CMAKE_BINARY_DIR@/distrib/tools
