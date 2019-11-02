@@ -82,7 +82,7 @@ Build RTL simulator (verilator) and run tests:
 1. `pip3 install -r zephyr/scripts/requirements.txt`
 1. `cd ../ && mkdir build && cd build`
 1. `PATH=$PATH:<RISCV_GCC_TOOLCHAIN_PATH>`
-1. `RISCV_TOOLCHAIN=<LLVM_INSTALL_PREFIX> cmake  ../ && make -j10`
+1. `cmake -DRISCV_LLVM_TOOLCHAIN_PATH=<LLVM_INSTALL_PREFIX> ../ && make -j10`
 1. Running all the existing tests with: `ctest -j10`
 
 # Testing infrastructure

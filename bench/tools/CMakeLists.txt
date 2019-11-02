@@ -7,7 +7,6 @@ else()
     set(_SUBPROJECT_INSTALL_PREFIX install)
 endif()
 
-set(TOOLCHAIN ${RISCV_TOOLCHAIN_PATH})
 set(FLAGS "-ffreestanding -nostdinc -nodefaultlibs -nostdlib -Os -Wall -Werror -Wextra")
 set(FLAGS "${FLAGS} -I${PLATFORM_FILES_ROOT}/include")
 set(FLAGS "${FLAGS} -march=${DEFAULT_ARCH_C_TESTS}")
@@ -20,8 +19,8 @@ ExternalProject_Add(
     BUILD_COMMAND make
         -f "${CMAKE_CURRENT_SOURCE_DIR}/libc/Makefile"
         CFLAGS=${FLAGS}
-        CC=${TOOLCHAIN}/bin/${RV_CC}
-        AR=${TOOLCHAIN}/bin/${RV_AR}
+        CC=${RV_CC_PATH}
+        AR=${RV_AR_PATH}
         INSTALL_DIR=${_SUBPROJECT_INSTALL_PREFIX}
         TOP=${CMAKE_CURRENT_SOURCE_DIR}/libc all install test_program VERBOSE=1
     INSTALL_COMMAND ""
