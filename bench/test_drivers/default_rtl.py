@@ -37,6 +37,9 @@ def build_test_image(soc):
   return builder.find_driver()
 
 def run(libbench):
+
+  print("Working directory: {}".format(os.getcwd()))
+
   soc = soc_lib.RiscVSoc(libbench, 'memtest_trace.vcd', True)
 
   driver = build_test_image(soc)
