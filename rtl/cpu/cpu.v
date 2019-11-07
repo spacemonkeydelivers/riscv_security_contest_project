@@ -8,7 +8,8 @@
 module cpu
 #(
    parameter VECTOR_RESET = 32'd0,
-   parameter VECTOR_EXCEPTION = 32'd16
+   parameter VECTOR_EXCEPTION = 32'd16,
+   parameter CPU_USE_NEW_TEST_SEQUENCE = 1'd1
 )
 (
    input CLK_I,
@@ -31,12 +32,17 @@ module cpu
    input wire external_do_step_i,
    output wire [31:0] pc_o,
    output wire [4:0]  state_o,
-   output wire [31:0] insn_bytes_o
+   output wire [31:0] insn_bytes_o,
+   output wire        test_finished_o
 );
    
     /*verilator public_module*/
     /*verilator no_inline_module*/
-  
+ 
+    reg test_finished;
+    reg next_test_finished;
+    assign test_finished_o = test_finished;
+
     wire interrupt_occured = (TIMER_INTERRUPT_I && irq_timer_en) || TAGS_INTERRUPT_I;
     wire clk, reset;
     assign clk = CLK_I;
@@ -90,6 +96,7 @@ module cpu
     assign clear_tag_mismatch_o = tags_irq_clear;
     wire[31:0] reg_val1, reg_val2;
     reg[31:0] reg_datain;
+    wire [31:0] reg_flags;
 
     // Bus instance
     wb_cpu_bus bus_inst(
@@ -166,7 +173,8 @@ module cpu
         .I_re(reg_re),
         .I_we(reg_we),
         .O_regval1(reg_val1),
-        .O_regval2(reg_val2)
+        .O_regval2(reg_val2),
+        .register_flags_o(reg_flags)
     );
 
     wire mux_alu_s1_sel_f;
@@ -482,6 +490,7 @@ module cpu
          check_tags <= 0;
          prev_pc <= 0;
          exec_done <= 0;
+         test_finished <= 0;
       end
       else begin
 
@@ -517,6 +526,7 @@ module cpu
                          || (state == STATE_STORE1))
                      ? next_check_tags : check_tags;
          exec_done <= ((state == STATE_PRE_FETCH) || (state == STATE_EXEC)) ? next_exec_done : exec_done;
+         test_finished <= test_finished ? test_finished : next_test_finished;
       end
    end
 
@@ -563,15 +573,17 @@ module cpu
       csr_addr = 0;
       csr_data_in = 0;
 
+      next_test_finished = 0;
+
       case (state)
          STATE_RESET: begin
             next_state = STATE_PRE_FETCH;
          end
          STATE_UPDATE_PC: begin
             update_pc = 1;
-            next_state = external_singlestep_i ? STATE_CPU_IDLE : 
-                         addr_misaligned       ? STATE_TRAP     :
-                                                 STATE_PRE_FETCH;
+            next_state = external_singlestep_i || test_finished ? STATE_CPU_IDLE : 
+                         addr_misaligned                        ? STATE_TRAP     :
+                                                                  STATE_PRE_FETCH;
             next_pc = (next_pc_from_csr || next_addr_from_csr)      ? csr_data_out & ~32'h1 :
                       (exec_next_pc_from_alu || branch_pc_from_alu) ? alu_dataout & ~32'h1 :
                                                                       pcnext & ~32'h1;
@@ -760,6 +772,9 @@ module cpu
                         csr_addr = `MSR_MCAUSE;
                         csr_we = 1;
                         csr_data_in = CAUSE_ECALL;
+                        if (CPU_USE_NEW_TEST_SEQUENCE && reg_flags[2]) begin
+                           next_test_finished = 1;
+                        end
                      end
                      `SYSTEM_EBREAK: begin
                         trap_occured = 1;
@@ -866,7 +881,9 @@ module cpu
             next_pc_from_csr = 1;
          end
          STATE_CPU_IDLE: begin
-            next_state = external_do_step_i ? STATE_PRE_FETCH : STATE_CPU_IDLE;
+            next_state = external_do_step_i ? STATE_PRE_FETCH :
+                         test_finished      ? STATE_CPU_IDLE  :
+                                              STATE_CPU_IDLE;
          end
          default: begin
             next_state = STATE_DEAD;
