@@ -97,7 +97,7 @@ class RiscVSoc:
     def run(self, limit, expect_failure = False, break_on = None):
         self._soc.setPC(self._min_address)
         iterations = 0
-        while (self._stall_cnt < self._stall_threshold):
+        while ((self._stall_cnt < self._stall_threshold) and not self.check_test_finished()):
             self.tick()
 
             iterations = iterations + 1
@@ -278,6 +278,9 @@ class RiscVSoc:
 
     def upc(self):
         return self._soc.PC()
+
+    def check_test_finished(self):
+        return self._soc.testFinished()
 
     def read_register(self, num):
         if self._debug:
