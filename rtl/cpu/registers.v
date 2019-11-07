@@ -17,7 +17,7 @@ module registers
 
    genvar i;
    generate
-      for (i = 0; i < 32 ; i++) begin
+      for (i = 0; i < 32 ; i = i + 1) begin
          assign register_flags_o[i] = (regfile[i] == 0);
       end
    endgenerate 
