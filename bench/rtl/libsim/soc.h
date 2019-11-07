@@ -54,6 +54,8 @@ public:
     uint64_t counterGetTick ();
     uint64_t counterGetStep ();
 
+    bool getTestFinished() const;
+
 private:
     Vsoc*          m_soc         {nullptr};
     uint64_t       m_tickCnt     {0};
