@@ -150,6 +150,8 @@ test_add(cripe_cfg_parser_unit3   c/ripe --cmd="./cfg_unit/attack_3.cfg" WARN_DI
 test_add(cripe_cfg_parser_unit4   c/ripe --cmd="./cfg_unit/attack_4.cfg" INVERT_RESULT WARN_DISABLE)
 test_add(cripe_cfg_parser_unit5   c/ripe --cmd="./cfg_unit/attack_5.cfg" INVERT_RESULT WARN_DISABLE)
 
+test_add(c_dhrystone_1000 c/dhrystone WARN_DISABLE NIGHTLY)
+
 if (ENABLE_EXTENDED_RIPE_TESTS)
     include(${CMAKE_SOURCE_DIR}/cmake/ExtendedRipeTests.cmake)
 endif()

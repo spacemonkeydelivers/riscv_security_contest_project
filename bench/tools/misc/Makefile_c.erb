@@ -35,7 +35,7 @@ tcl_copy: $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl
 
 test.elf:  command_line.s $(SRC) $(LIBC_PATH)/libc.a
 	$(LD) $(LDFLAGS) command_line.s $(SRC) -I$(DIRECTORY) -I$(LIBC_INCLUDES) \
-    -static -L$(LIBC_PATH) -l$(LIBC) \
+    -static -L$(LIBC_PATH) -l$(LIBC) -lgcc \
     -Xlinker --defsym=__SOC_MEM_SIZE=$(SOC_RAM_SIZE) \
     -Xlinker -T$(LDSCRIPT) -o test.elf
 
