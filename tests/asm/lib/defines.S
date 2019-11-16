@@ -40,6 +40,8 @@
   li t2, 0xbaddad
   sw t2, 0(t1)
 #endif //ENABLE_FPGA_EXIT
+  // ra contains "return code"
+  li ra, \status
   li sp, 0
   ecall
 1:
