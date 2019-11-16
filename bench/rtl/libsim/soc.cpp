@@ -302,12 +302,18 @@ en_state RV_SOC::cpu_state() const
 {
     return (en_state)(int)m_soc->soc->cpu0->state;
 }
+
 uint64_t RV_SOC::counterGetTick ()
 {
     return  m_tickCnt;
 }
+
 uint64_t RV_SOC::counterGetStep ()
 {
     return m_fetchCnt;
 }
 
+bool RV_SOC::getTestFinished() const
+{
+    return m_soc->soc->test_finished_o;
+}
