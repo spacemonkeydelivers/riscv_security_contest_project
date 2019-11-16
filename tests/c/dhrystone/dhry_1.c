@@ -120,7 +120,7 @@ main ()
   }
   printf ("Please give the number of runs through the benchmark: ");
   {
-    int n = 1000;
+    int n = 10;
 //    scanf ("%d", &n);
     Number_Of_Runs = n;
   }
