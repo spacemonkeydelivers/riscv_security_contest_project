@@ -40,6 +40,8 @@
   li t2, 0xbaddad
   sw t2, 0(t1)
 #endif //ENABLE_FPGA_EXIT
+  li sp, 0
+  ecall
 1:
   j 1b
   wfi
