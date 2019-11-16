@@ -88,10 +88,27 @@ int __int_serve(struct s_esf_frame* frame, int n) {
 #define MTIME_BASE     0x40000000
 #define MTIMECMP_BASE  0x40000008
 #define MTIMEFREQ_BASE 0x40000010
+#define MTIME_AE_BASE  0x40000018
 
 __attribute__((section(".__system.os")))
 uint64_t __mtime() {
     volatile uint32_t *r = (uint32_t *)MTIME_BASE;
+
+    uint32_t lo = 0;
+    uint32_t hi = 0;
+
+    // guard against rollover when reading
+    do {
+        hi = r[1];
+        lo = r[0];
+    } while (r[1] != hi);
+
+    return (((uint64_t)hi) << 32) | lo;
+}
+
+__attribute__((section(".__system.os")))
+uint64_t __mtime_alw_en() {
+    volatile uint32_t *r = (uint32_t *)MTIME_AE_BASE;
 
     uint32_t lo = 0;
     uint32_t hi = 0;

@@ -21,7 +21,8 @@ module wb_timer
    reg [DATA_WIDTH - 1:0]             mtime, // current time
                                       mtimecmp, // treshold time
                                       tgt_clk, // clocks to wait
-                                      clk_cnt; // i_clk counter
+                                      clk_cnt, // i_clk counter
+                                      mtime_alw_en; // current time, always enabled
 
    localparam [2:0] MTIME_LO = 0;
    localparam [2:0] MTIME_HI = 1;
@@ -29,6 +30,8 @@ module wb_timer
    localparam [2:0] MTIMECMP_HI = 3;
    localparam [2:0] TGT_CLK_LO = 4;
    localparam [2:0] TGT_CLK_HI = 5;
+   localparam [2:0] MTIME_AE_LO = 6;
+   localparam [2:0] MTIME_AE_HI = 7;
 
 `define LO(reg_name) reg_name[31:0]
 `define HI(reg_name) reg_name[63:32]
@@ -54,6 +57,8 @@ module wb_timer
                       addr == MTIMECMP_HI ? `HI(mtimecmp) :
                       addr == TGT_CLK_LO  ? `LO(tgt_clk) :
                       addr == TGT_CLK_HI  ? `HI(tgt_clk) :
+                      addr == MTIME_AE_LO ? `LO(mtime_alw_en) :
+                      addr == MTIME_AE_HI ? `HI(mtime_alw_en) :
                       32'd0;
 
    always @ (posedge clk_i) begin
@@ -63,12 +68,14 @@ module wb_timer
          tgt_clk <= 0;
          ack <= 0;
          irq <= 0;
+         mtime_alw_en <= 0;
 
          // ONE
          clk_cnt <= 1;
       end
       else begin
          irq <= mtime >= mtimecmp;
+         mtime_alw_en <= mtime_alw_en + 1;
 
          if (wb_cyc_i & wb_we_i) begin
             // No increment for MTIME on write to it
