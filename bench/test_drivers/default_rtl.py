@@ -52,15 +52,19 @@ def run(libbench):
 
     expect_failure = False
     enforce_repl = False
+    ticks = 0
 
     for arg in sys.argv:
       if arg == '--driver-invert-result':
         expect_failure = True
       if arg == '--repl':
         enforce_repl = True
+      if "--ticks-timeout" in arg:
+        ticks = int(arg.split("=")[1])
 
     dbg = debug.Debugger(libbench, soc)
-    ticks = soc.get_ticks_to_run()
+    if not ticks:
+      ticks = soc.get_ticks_to_run()
     if sys.stdout.isatty() or enforce_repl:
       print('TTY session detected! starting debugger')
 

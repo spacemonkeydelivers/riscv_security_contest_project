@@ -11,13 +11,17 @@ set(DEBUGGER_TEST_RUNNER ${CMAKE_SOURCE_DIR}/tests/debugger/run.sh)
 
 function(test_add name)
 
-    set(options
+    set(options_no_value
         NIGHTLY
         DISABLE_SECURITY
         INVERT_RESULT
         WARN_DISABLE
         ENABLE_C_EXT)
-    cmake_parse_arguments(PARSE_ARGV 1 TEST_DESCR "${options}" "" "")
+
+    set(options_one_value
+        TICKS_TIMEOUT)
+
+    cmake_parse_arguments(PARSE_ARGV 1 TEST_DESCR "${options_no_value}" "${options_one_value}" "")
 
     set(TEST_DIR "${CMAKE_BINARY_DIR}/tests/${name}")
     # This is a hack. Stupid cmake won't create working directories if not exist
@@ -39,9 +43,13 @@ function(test_add name)
         set(ENABLE_C "--enable-compressed")
     endif()
 
+    if (${TEST_DESCR_TICKS_TIMEOUT})
+        set(TEST_TICKS_TIMEOUT "--ticks-timeout=${TEST_DESCR_TICKS_TIMEOUT}")
+    endif()
+
     add_test(NAME "${name}"
         COMMAND "${TEST_RUNNER}" ${TEST_DESCR_UNPARSED_ARGUMENTS}
-                ${RINVERT} ${NSC} ${NOWARN} ${ENABLE_C}
+                ${RINVERT} ${NSC} ${NOWARN} ${ENABLE_C} ${TEST_TICKS_TIMEOUT}
         WORKING_DIRECTORY "${TEST_DIR}")
 
     if (${TEST_DESCR_NIGHTLY})

@@ -20,7 +20,7 @@ class RiscVSoc:
         self._fwd_cntr = 0
         self._braindead_threshold = 50
         self._stall_threshold = self._braindead_threshold / 2 * 3
-        self._ticks_to_run = 3 * 5 * 10 ** 6
+        self._ticks_to_run = 5 * 10 ** 6
         self._min_address = 0
 
         self._uart = None
