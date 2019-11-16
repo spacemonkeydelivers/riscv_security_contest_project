@@ -1,10 +1,16 @@
 `define BYTE_SIZE_IN_BITS 8
 
+`ifdef SIMULATION_RUN
+   import "DPI-C" function int  log_file_open  (input string log_name);
+   import "DPI-C" function void log_file_write (input int log_fd, input int data);
+`endif
+
 module wb_uart 
 #(
       parameter WB_DATA_WIDTH      = 32,
       parameter WB_ADDR_WIDTH      = 32,
-      parameter WB_SEL_WIDTH       = (WB_DATA_WIDTH) / `BYTE_SIZE_IN_BITS
+      parameter WB_SEL_WIDTH       = (WB_DATA_WIDTH) / `BYTE_SIZE_IN_BITS,
+      parameter UART_LOG_FILE      = "uart_output.log"
 )
 (
 	output wire                       uart_tx_o,
@@ -40,6 +46,14 @@ module wb_uart
 
    reg  tx_started;
 
+`ifdef SIMULATION_RUN
+   integer log_fd;
+
+   initial begin
+      log_fd = log_file_open(UART_LOG_FILE);
+   end
+`endif
+
    always @ (posedge clk_i) begin
       if (rst_i) begin
          ack <= 0;
@@ -68,6 +82,9 @@ module wb_uart
                      if (tx_finished) begin
                         tx_started <= 0;
                         ack <= 1;
+`ifdef SIMULATION_RUN
+                        log_file_write(log_fd, wb_data_i);
+`endif
                      end
                   end
                end

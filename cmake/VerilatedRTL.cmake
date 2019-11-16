@@ -47,6 +47,7 @@ add_custom_command(
     COMMAND ${VERILATOR_BIN} ${VERILATOR_ARGS_LIST}
         -GFIRMWARE_FILE="${MEM_FILE}"
         -GSOC_RAM_SIZE=${SOC_RAM_SIZE}
+        -DSIMULATION_RUN
         -Wall
         -cc
         -Mdir ${RTL_MODEL_BUILD_PATH}
@@ -98,7 +99,7 @@ add_custom_target(
 )
 
 # Set a list of sources
-set(TESTBENCH_SRC bench/rtl/libsim/soc.cpp bench/rtl/libsim/ui.cpp)
+set(TESTBENCH_SRC bench/rtl/libsim/soc.cpp bench/rtl/libsim/ui.cpp bench/rtl/libsim/uart.cpp)
 
 add_library(dut SHARED ${TESTBENCH_SRC})
 target_compile_options(dut PUBLIC "-DD_SOC_RAM_SIZE=${SOC_RAM_SIZE}")
