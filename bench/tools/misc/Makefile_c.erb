@@ -17,6 +17,9 @@ CFLAGS += -march=rv32imc
 
 LDFLAGS    = ${RISCV_LDFLAGS_COMMON} -I$(RISCV_ASM_INCLUDES) <%= disable_warnings ? "-w" : "" %>
 LDFLAGS   += -march=$(MARCH_ASM_TESTS) -mabi=ilp32
+<% if asm_c_ext %>
+LDFLAGS    += -march=rv32imc
+<% end %>
 
 LIBC = <%= disable_security ? "c_ns" : "c" %>
 

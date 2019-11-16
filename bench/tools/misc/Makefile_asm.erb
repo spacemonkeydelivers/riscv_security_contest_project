@@ -16,6 +16,9 @@ CFLAGS    += -march=rv32imc
 
 LDFLAGS    = ${RISCV_LDFLAGS_COMMON} -I$(RISCV_ASM_INCLUDES)
 LDFLAGS   += -march=$(MARCH_ASM_TESTS) -mabi=ilp32
+<% if asm_c_ext %>
+LDFLAGS    += -march=rv32imc
+<% end %>
 
 SRC  = <%= input_asm %>
 

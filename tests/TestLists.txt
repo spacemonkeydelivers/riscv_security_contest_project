@@ -1,5 +1,5 @@
-add_debugger_test(debugger_sanity debugger/debugger_sanity.s
-                  ${CMAKE_SOURCE_DIR}/tests/debugger/sanity.input --repl)
+#add_debugger_test(debugger_sanity debugger/debugger_sanity.s
+#                  ${CMAKE_SOURCE_DIR}/tests/debugger/sanity.input --repl)
 
 test_add(basic_mem         basic/mem.py)
 test_add(store_byte_issue  basic/store_byte_issue.py)
@@ -91,8 +91,8 @@ test_add(c_libc_printk_ns       c/libc/printk DISABLE_SECURITY)
 test_add(c_libc_strcat       c/libc/strcat)
 test_add(c_libc_strcpy       c/libc/strcpy)
 test_add(c_libc_strlen       c/libc/strlen)
-test_add(c_libc_strncat      c/libc/strncat)
-test_add(c_libc_strncpy      c/libc/strncpy)
+test_add(c_libc_strncat      c/libc/strncat WARN_DISABLE)
+test_add(c_libc_strncpy      c/libc/strncpy WARN_DISABLE)
 test_add(c_libc_strtoul      c/libc/strtoul)
 test_add(c_libc_strcmp       c/libc/strcmp)
 
