@@ -76,7 +76,7 @@ Build RTL simulator (verilator) and run tests:
 1. `git clone --recursive http://gitea.yggdrasill.ga/Secure_SoC/secure_soc`
 1. `cd riscv_security_contest_project`
 1. `cd zephyrproject`
-1. `run pip3 install --user west`
+1. `pip3 install --user west`
 1. `west init -l zephyr/`
 1. `west update`
 1. `pip3 install -r zephyr/scripts/requirements.txt`
