@@ -3,11 +3,17 @@ pipeline {
 
     environment {
         PATH = "PATH=$PATH:/tank/work/dev/toolchains/riscv32imc-tags-newlib-gcc/bin/"
+        LLVM_TOOLCHAIN_PATH = "/tank/work/dev/toolchains/riscv32imc-llvm"
     }
     stages {
         stage('Build') {
             steps {
-                sh 'mkdir build && cd build && cmake -DRISCV_LLVM_TOOLCHAIN_PATH=/tank/work/dev/toolchains/riscv32imc-llvm/ ../ && make -j10'
+                sh """
+                  mkdir build && \
+                  cd build && \
+                  cmake -DRISCV_LLVM_TOOLCHAIN_PATH=${LLVM_TOOLCHAIN_PATH} ../ && \
+                  make -j10
+                """
             }
         }
         stage('Run debug verilated tests') {
