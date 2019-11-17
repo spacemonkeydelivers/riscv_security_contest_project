@@ -9,6 +9,8 @@ void _exit(int status)
       }
       __asm__ __volatile__(
               "mv ra, %[status]\n\t"
+              "li sp, 0\n\t"
+              "ecall\n\t"
               "1:\n\t"
               "j 1b\n\t"
               "wfi"
@@ -19,6 +21,8 @@ void _exit(int status)
     else {
       __asm__ __volatile__(
               "li ra, 0x0A11C001\n\t"
+              "li sp, 0\n\t"
+              "ecall\n\t"
               "1:\n\t"
               "j 1b\n\t"
               "wfi\n\t"
