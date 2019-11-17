@@ -21,7 +21,7 @@ def build_test_image(soc):
 
   test_type = sys.argv[1].split("/")[0]
 
-  if test_type == "c":
+  if test_type == "c" or test_type == "benchmarks":
     builder = BuilderC(soc)
   elif test_type == "asm":
     builder = BuilderAsm(soc)
