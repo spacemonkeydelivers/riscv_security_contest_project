@@ -9,19 +9,15 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                withCredentials(usernamePassword(credentialsId: GIT_CREDS, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME'){
-                    sh """
-                      git config --global credential.username {GIT_USERNAME}
-                      git config --global credential.helper "!echo password={GITPASSWORD}; echo"
-                      git submodule init && \
-                      git submodule update --recursive && \
-                      echo "ok" > .updated_marker && \
-                      mkdir build && \
-                      cd build && \
-                      cmake -DRISCV_LLVM_TOOLCHAIN_PATH=${LLVM_TOOLCHAIN_PATH} ../ && \
-                      make -j10
-                    """
-                }
+                sh """
+                  git submodule init && \
+                  git submodule update --recursive && \
+                  echo "ok" > .updated_marker && \
+                  mkdir build && \
+                  cd build && \
+                  cmake -DRISCV_LLVM_TOOLCHAIN_PATH=${LLVM_TOOLCHAIN_PATH} ../ && \
+                  make -j10
+                """
             }
         }
         stage('Run debug verilated tests') {
