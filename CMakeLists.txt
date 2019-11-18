@@ -1,10 +1,13 @@
 # Specify the minimum version for CMake
 cmake_minimum_required(VERSION 3.12)
-
 enable_testing()
-
 # Project's name
 project(riscv_soc)
+
+if (NOT EXISTS "${CMAKE_SOURCE_DIR}/.updated_marker")
+    message(FATAL_ERROR "submodules are not initialized, please run "
+                        "`${CMAKE_SOURCE_DIR}/update_submodules.sh`")
+endif()
 
 set(DEFAULT_ARCH_C_TESTS "rv32imc")
 set(DEFAULT_ARCH_ASM_TESTS "rv32imc")

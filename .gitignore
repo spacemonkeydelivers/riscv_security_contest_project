@@ -1,4 +1,4 @@
-**.pyc
+.updated_marker
 zephyrproject/net-tools/
 zephyrproject/tools/
 zephyrproject/modules/
@@ -7,3 +7,4 @@ build
 **.swp
 **.swo
 **.swn
+**.pyc
