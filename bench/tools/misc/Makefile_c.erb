@@ -5,6 +5,7 @@ LD         = $(RISCV_GCC_LD)
 NM         = $(RISCV_GCC_NM)
 OBJCOPY    = $(RISCV_GCC_OBJCOPY)
 
+LIBGCC_PATH = $(RISCV_LIBGCC_PATH)
 LIBC_PATH   = $(RISCV_PSEUDOLIBC_PATH)
 LIBC_INCLUDES = $(RISCV_PSEUDOLIBC_INCLUDES)
 
@@ -39,8 +40,9 @@ tcl_copy: $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl
 	cp $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl filter_init.tcl
 
 test.elf:  command_line.s $(SRC) $(LIBC_PATH)/libc.a
-	$(CC) $(LDFLAGS) command_line.s $(SRC) -I$(DIRECTORY) -I$(LIBC_INCLUDES) \
-	-static -L$(LIBC_PATH) -l$(LIBC) -lgcc \
+	$(CC) $(CFLAGS) $(SRC) command_line.s $(LIBGCC_PATH) \
+	-I$(DIRECTORY) -I$(LIBC_INCLUDES) \
+	-static -L$(LIBC_PATH) -l$(LIBC)  \
 	-Xlinker --defsym=__SOC_MEM_SIZE=$(SOC_RAM_SIZE) \
 	-Xlinker -T$(LDSCRIPT) -o test.elf
 

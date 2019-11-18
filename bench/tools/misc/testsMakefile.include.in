@@ -10,6 +10,8 @@ RISCV_GCC_NM      = ${RV_GCC_NM_PATH}
 RISCV_GCC_AR      = ${RV_GCC_AR_PATH}
 RISCV_GCC_OBJCOPY = ${RV_GCC_OBJCOPY_PATH}
 
+RISCV_LIBGCC_PATH = ${RV_LIBGCC_PATH}
+
 RISCV_CFLAGS_COMMON = -O0 -std=c11 -Wall -Wextra -Werror -pipe -ffreestanding -nostdinc -nostdlib -nodefaultlibs
 RISCV_LDFLAGS_COMMON = -nostdlib -nodefaultlibs -Wall -Werror
 

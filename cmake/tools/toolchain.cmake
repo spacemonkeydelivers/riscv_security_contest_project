@@ -53,3 +53,12 @@ foreach(tool ${RV_GCC_CC_PATH}
   endif()
 endforeach(tool)
 
+execute_process(COMMAND ${RV_GCC_CC_PATH} -print-libgcc-file-name
+                OUTPUT_VARIABLE RV_LIBGCC_PATH
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+if (NOT EXISTS ${RV_LIBGCC_PATH})
+    message(FATAL_ERROR "${RV_LIBGCC_PATH} (libgcc) was not detected :(\n"
+        "Please make sure that your toolchain distribution "
+        " (gcc) is bundled with libgcc")
+endif()
+
