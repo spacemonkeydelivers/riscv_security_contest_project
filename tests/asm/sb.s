@@ -28,6 +28,7 @@ PASSED
 failed:
 FAILED 1
 
+.balign 4
 test_data:
 .4byte 0x0
 
