@@ -5,3 +5,4 @@ __start:
     nop
     nop
     addi t1, t1, 1
+    PASSED
