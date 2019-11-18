@@ -9,7 +9,10 @@ pipeline {
         stage('Build') {
             steps {
                 sh """
+                  ls && \
+                  cd secure_soc && \
                   update_submodules.sh && \
+                  cd .. \
                   mkdir build && \
                   cd build && \
                   cmake -DRISCV_LLVM_TOOLCHAIN_PATH=${LLVM_TOOLCHAIN_PATH} ../ && \
