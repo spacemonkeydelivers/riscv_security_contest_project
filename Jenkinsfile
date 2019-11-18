@@ -4,6 +4,7 @@ pipeline {
     environment {
         PATH = "PATH=$PATH:/tank/work/dev/toolchains/riscv32imc-tags-newlib-gcc/bin/"
         LLVM_TOOLCHAIN_PATH = "/tank/work/dev/toolchains/riscv32imc-llvm"
+        GIT_SSH_COMMAND = 'ssh -i /home/jenkins/.ssh/id_rsa'
     }
     stages {
         stage('Build') {
