@@ -13,13 +13,13 @@ LDFLAGS    = $(RISCV_LDFLAGS_COMMON)
 LDSCRIPT   = $(RISCV_C_LD_SCRIPT)
 
 CFLAGS     = $(RISCV_CFLAGS_COMMON) <%= disable_warnings ? "-w" : "" %>
-CFLAGS    +=  -march=$(MARCH_C_TESTS) -mabi=ilp32
+CFLAGS    += -march=$(MARCH_C_TESTS) -mabi=ilp32
 <% if asm_c_ext %>
-CFLAGS += -march=rv32imc
+CFLAGS    += -march=rv32imc
 <% end %>
 
-LDFLAGS    = ${RISCV_LDFLAGS_COMMON} -I$(RISCV_ASM_INCLUDES) <%= disable_warnings ? "-w" : "" %>
-LDFLAGS   += -march=$(MARCH_ASM_TESTS) -mabi=ilp32
+LDFLAGS    = ${RISCV_LDFLAGS_COMMON} <%= disable_warnings ? "-w" : "" %>
+LDFLAGS   += -march=$(MARCH_C_TESTS) -mabi=ilp32
 <% if asm_c_ext %>
 LDFLAGS    += -march=rv32imc
 <% end %>
@@ -42,7 +42,7 @@ tcl_copy: $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl
 test.elf:  command_line.s $(SRC) $(LIBC_PATH)/libc.a
 	$(CC) $(CFLAGS) $(SRC) command_line.s $(LIBGCC_PATH) \
 	-I$(DIRECTORY) -I$(LIBC_INCLUDES) \
-	-static -L$(LIBC_PATH) -l$(LIBC)  \
+	-static -L$(LIBC_PATH) -l$(LIBC) \
 	-Xlinker --defsym=__SOC_MEM_SIZE=$(SOC_RAM_SIZE) \
 	-Xlinker -T$(LDSCRIPT) -o test.elf
 
