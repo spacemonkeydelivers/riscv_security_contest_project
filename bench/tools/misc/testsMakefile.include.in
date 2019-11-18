@@ -12,7 +12,7 @@ RISCV_GCC_OBJCOPY = ${RV_GCC_OBJCOPY_PATH}
 
 RISCV_LIBGCC_PATH = ${RV_LIBGCC_PATH}
 
-RISCV_CFLAGS_COMMON = -O0 -std=c11 -Wall -Wextra -Werror -pipe -ffreestanding -nostdinc -nostdlib -nodefaultlibs
+RISCV_CFLAGS_COMMON  = -O0 -std=c11 -Wall -Wextra -Werror -pipe -nostdinc -nostdlib -nodefaultlibs
 RISCV_LDFLAGS_COMMON = -nostdlib -nodefaultlibs -Wall -Werror
 
 TESTBENCH_TOOLS_SRC = @CMAKE_SOURCE_DIR@/bench/tools
