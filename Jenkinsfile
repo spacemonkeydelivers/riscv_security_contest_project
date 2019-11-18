@@ -9,7 +9,9 @@ pipeline {
         stage('Build') {
             steps {
                 sh """
-                  ./update_submodules.sh && \
+                  git submodule init && \
+                  git submodule update --recursive && \
+                  echo "ok" > .updated_marker && \
                   mkdir build && \
                   cd build && \
                   cmake -DRISCV_LLVM_TOOLCHAIN_PATH=${LLVM_TOOLCHAIN_PATH} ../ && \
