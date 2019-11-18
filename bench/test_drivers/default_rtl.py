@@ -36,6 +36,19 @@ def build_test_image(soc):
 
   return builder.find_driver()
 
+def run_spike():
+  tools = os.environ['TOOLS_DISTRIB']
+  spike_bin = os.path.join(tools, 'bin/spike')
+  sim_args = '-m0:256K --soc=beehive:uart_file=sim_uart.txt --pc=0 -g '
+  spike_cmd = '{} {} test.elf'.format(spike_bin, sim_args)
+  print('running spike:')
+  print(spike_cmd)
+  ret = os.system(spike_cmd)
+  if ret == 0:
+    print('greate succeess')
+  else:
+    raise Exception('miserable failure')
+
 def run(libbench):
 
   print("Working directory: {}".format(os.getcwd()))
@@ -43,6 +56,15 @@ def run(libbench):
   soc = soc_lib.RiscVSoc(libbench, 'memtest_trace.vcd', True)
 
   driver = build_test_image(soc)
+
+  spike_run = False
+  for arg in sys.argv:
+    if arg == '--spike':
+      spike_run = True
+
+  print('SPIKE RUN: {}', spike_run)
+  if spike_run:
+    return run_spike()
 
   soc.setDebug(False)
   ImageLoader.load_image("test.v", soc)

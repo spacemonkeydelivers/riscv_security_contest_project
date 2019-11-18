@@ -24,8 +24,10 @@ function(test_add name)
     cmake_parse_arguments(PARSE_ARGV 1 TEST_DESCR "${options_no_value}" "${options_one_value}" "")
 
     set(TEST_DIR "${CMAKE_BINARY_DIR}/tests/${name}")
+    set(TEST_DIR_SIM "${CMAKE_BINARY_DIR}/tests/sim_${name}")
     # This is a hack. Stupid cmake won't create working directories if not exist
     file(MAKE_DIRECTORY "${TEST_DIR}")
+    file(MAKE_DIRECTORY "${TEST_DIR_SIM}")
 
     if (${TEST_DESCR_INVERT_RESULT})
         set(RINVERT "--driver-invert-result")
@@ -52,8 +54,15 @@ function(test_add name)
                 ${RINVERT} ${NSC} ${NOWARN} ${ENABLE_C} ${TEST_TICKS_TIMEOUT}
         WORKING_DIRECTORY "${TEST_DIR}")
 
+    add_test(NAME "sim_${name}"
+        COMMAND "${TEST_RUNNER}" ${TEST_DESCR_UNPARSED_ARGUMENTS}
+                ${RINVERT} ${NSC} ${NOWARN} ${ENABLE_C} ${TEST_TICKS_TIMEOUT}
+                --spike
+                WORKING_DIRECTORY "${TEST_DIR_SIM}")
+
     if (${TEST_DESCR_NIGHTLY})
         set_tests_properties("${name}" PROPERTIES LABELS nightly)
+        set_tests_properties("sim_${name}" PROPERTIES LABELS nightly)
     endif()
 
 endfunction()
