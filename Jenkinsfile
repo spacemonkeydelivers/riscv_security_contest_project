@@ -8,8 +8,8 @@ pipeline {
     }
     stages {
         stage('Build') {
-            withCredentials(usernamePassword(credentialsId: GIT_CREDS, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME'){
-                steps {
+            steps {
+                withCredentials(usernamePassword(credentialsId: GIT_CREDS, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME'){
                     sh """
                       git config --global credential.username {GIT_USERNAME}
                       git config --global credential.helper "!echo password={GITPASSWORD}; echo"
