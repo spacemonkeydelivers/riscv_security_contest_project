@@ -10,7 +10,11 @@ if (NOT EXISTS "${CMAKE_SOURCE_DIR}/.updated_marker")
 endif()
 
 set(DEFAULT_ARCH_C_TESTS "rv32imc")
-set(DEFAULT_ARCH_ASM_TESTS "rv32imc")
+# asm tests must be compiled without C option, because some tests naively
+# assume that instructions are of 4 bytes length
+set(DEFAULT_ARCH_ASM_TESTS "rv32im")
+# complience tests should be compiled without C option, whenever a compressed
+# instruction is needed they provice compressed instruction explicitly
 set(DEFAULT_ARCH_COMPLIANCE_TESTS "rv32im")
 set(DEFAULT_ARCH_ZEPHYR_TESTS "rv32imc") # this one is not used at the moment
 # DO NOT USE!!!
