@@ -1,4 +1,4 @@
 [submodule "models/beehive-riscv-isa-sim"]
 	path = models/beehive-riscv-isa-sim
-	url = ssh://gitea.yggdrasill.ga/Secure_SoC/beehive-riscv-isa-sim
+	url = https://gitea.yggdrasill.ga/Secure_SoC/beehive-riscv-isa-sim
 	branch = beehive
