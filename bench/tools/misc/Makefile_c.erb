@@ -1,11 +1,13 @@
 include <%= ENV['TOOLS_DISTRIB'] %>/share/testsMakefile.include
 
+CC         = $(RISCV_GCC_CC)
+LD         = $(RISCV_GCC_LD)
+NM         = $(RISCV_GCC_NM)
+OBJCOPY    = $(RISCV_GCC_OBJCOPY)
+
 LIBC_PATH   = $(RISCV_PSEUDOLIBC_PATH)
 LIBC_INCLUDES = $(RISCV_PSEUDOLIBC_INCLUDES)
 
-CC         = $(RISCV_CC)
-LD         = $(RISCV_LD)
-OBJCOPY    = $(RISCV_OBJCOPY)
 LDFLAGS    = $(RISCV_LDFLAGS_COMMON)
 LDSCRIPT   = $(RISCV_C_LD_SCRIPT)
 
@@ -37,10 +39,10 @@ tcl_copy: $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl
 	cp $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl filter_init.tcl
 
 test.elf:  command_line.s $(SRC) $(LIBC_PATH)/libc.a
-	$(LD) $(LDFLAGS) command_line.s $(SRC) -I$(DIRECTORY) -I$(LIBC_INCLUDES) \
-    -static -L$(LIBC_PATH) -l$(LIBC) -lgcc \
-    -Xlinker --defsym=__SOC_MEM_SIZE=$(SOC_RAM_SIZE) \
-    -Xlinker -T$(LDSCRIPT) -o test.elf
+	$(CC) $(LDFLAGS) command_line.s $(SRC) -I$(DIRECTORY) -I$(LIBC_INCLUDES) \
+	-static -L$(LIBC_PATH) -l$(LIBC) -lgcc \
+	-Xlinker --defsym=__SOC_MEM_SIZE=$(SOC_RAM_SIZE) \
+	-Xlinker -T$(LDSCRIPT) -o test.elf
 
 test.v: test.elf
 	$(OBJCOPY) --target verilog test.elf test.v

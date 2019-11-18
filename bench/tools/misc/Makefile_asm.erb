@@ -1,8 +1,10 @@
 include <%= ENV['TOOLS_DISTRIB'] %>/share/testsMakefile.include
 
-CC         = $(RISCV_CC)
-LD         = $(RISCV_LD)
-OBJCOPY    = $(RISCV_OBJCOPY)
+CC         = $(RISCV_GCC_CC)
+LD         = $(RISCV_GCC_LD)
+NM         = $(RISCV_GCC_NM)
+OBJCOPY    = $(RISCV_GCC_OBJCOPY)
+
 LDFLAGS    = $(RISCV_LDFLAGS_COMMON)
 LDSCRIPT   = $(RISCV_ASM_LD_SCRIPT)
 
@@ -37,11 +39,11 @@ tcl_copy: $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl
 	cp $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl filter_init.tcl
 
 fpga.info: test.elf
-	NM_TOOL=$(RISCV_NM) $(PYTHON_INTERPRETER) \
+	NM_TOOL=$(NM) $(PYTHON_INTERPRETER) \
 	-uB $(TESTBENCH_TOOLS_SRC)/misc/fpga_info.py test.elf fpga.info >/dev/null
 
 test.elf: asm_pre.s
-	$(LD) -Xlinker -T$(RISCV_ASM_LD_SCRIPT) \
+	$(CC) -Xlinker -T$(RISCV_ASM_LD_SCRIPT) \
 	-Xlinker --defsym=__SOC_MEM_SIZE=$(SOC_RAM_SIZE) \
 	$(LDFLAGS) asm_pre.s -o test.elf
 

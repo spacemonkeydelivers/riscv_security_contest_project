@@ -12,13 +12,17 @@ else()
     message("using toolchain from <${RISCV_LLVM_TOOLCHAIN_PATH}> (specified by user)")
 endif()
 
-set(RV_CC_PATH "${RISCV_LLVM_TOOLCHAIN_PATH}/bin/clang")
-set(RV_NM_PATH "${RISCV_LLVM_TOOLCHAIN_PATH}/bin/llvm-nm")
-set(RV_AR_PATH "${RISCV_LLVM_TOOLCHAIN_PATH}/bin/llvm-ar")
+set(RV_LLVM_CC_PATH      "${RISCV_LLVM_TOOLCHAIN_PATH}/bin/clang")
+#set(RV_LLVM_LD_PATH      "${RISCV_LLVM_TOOLCHAIN_PATH}/bin/llvm-lld")
+set(RV_LLVM_NM_PATH      "${RISCV_LLVM_TOOLCHAIN_PATH}/bin/llvm-nm")
+set(RV_LLVM_AR_PATH      "${RISCV_LLVM_TOOLCHAIN_PATH}/bin/llvm-ar")
+set(RV_LLVM_OBJCOPY_PATH "${RISCV_LLVM_TOOLCHAIN_PATH}/bin/llvm-objcopy")
 
-foreach(tool ${RV_CC_PATH}
-             ${RV_NM_PATH}
-             ${RV_AR_PATH})
+# TODO: add lld ${RV_LLVM_LD_PATH}
+foreach(tool ${RV_LLVM_CC_PATH}
+             ${RV_LLVM_NM_PATH}
+             ${RV_LLVM_AR_PATH}
+             ${RV_LLVM_OBJCOPY_PATH})
   if (NOT EXISTS "${tool}")
     message(FATAL_ERROR "Could not find compiler for risc-v: "
             "${tool}\n"
@@ -26,17 +30,26 @@ foreach(tool ${RV_CC_PATH}
   endif()
 endforeach(tool)
 
-set(RV_LD "riscv32-unknown-elf-gcc")
-set(RV_OBJCOPY "riscv32-unknown-elf-objcopy")
+set(RV_GCC_CC "riscv32-unknown-elf-gcc")
+set(RV_GCC_LD "riscv32-unknown-elf-ld")
+set(RV_GCC_NM "riscv32-unknown-elf-nm")
+set(RV_GCC_AR "riscv32-unknown-elf-ar")
+set(RV_GCC_OBJCOPY "riscv32-unknown-elf-objcopy")
 
-find_program(RV_LD_PATH NAMES ${RV_LD})
-find_program(RV_OBJCOPY_PATH NAMES ${RV_OBJCOPY})
-if (NOT EXISTS ${RV_LD_PATH})
-    message(FATAL_ERROR "${RV_LD} is not detected in PATH :(\n"
+find_program(RV_GCC_CC_PATH NAMES ${RV_GCC_CC})
+find_program(RV_GCC_LD_PATH NAMES ${RV_GCC_LD})
+find_program(RV_GCC_NM_PATH NAMES ${RV_GCC_NM})
+find_program(RV_GCC_AR_PATH NAMES ${RV_GCC_AR})
+find_program(RV_GCC_OBJCOPY_PATH NAMES ${RV_GCC_OBJCOPY})
+
+foreach(tool ${RV_GCC_CC_PATH}
+             ${RV_GCC_LD_PATH}
+             ${RV_GCC_NM_PATH}
+             ${RV_GCC_AR_PATH}
+             ${RV_GCC_OBJCOPY_PATH})
+  if (NOT EXISTS "${tool}")
+    message(FATAL_ERROR "${tool} is not detected in PATH :(\n"
             "Please make sure that a proper gcc toolchain is available")
-endif()
-if (NOT EXISTS ${RV_OBJCOPY_PATH})
-    message(FATAL_ERROR "${RV_OBJCOPY} is not detected in PATH :(\n"
-            "Please make sure that a proper gcc toolchain is available")
-endif()
+  endif()
+endforeach(tool)
 

@@ -1,8 +1,10 @@
 include <%= ENV['TOOLS_DISTRIB'] %>/share/testsMakefile.include
 
-CC         = $(RISCV_CC)
-LD         = $(RISCV_LD)
-OBJCOPY    = $(RISCV_OBJCOPY)
+CC         = $(RISCV_GCC_CC)
+LD         = $(RISCV_GCC_LD)
+NM         = $(RISCV_GCC_NM)
+OBJCOPY    = $(RISCV_GCC_OBJCOPY)
+
 LDFLAGS    = $(RISCV_LDFLAGS_COMMON)
 LDSCRIPT   = $(RISCV_COMPLIANCE_LD_SCRIPT)
 
@@ -15,7 +17,7 @@ CFLAGS    += -march=rv32imc
 # CFLAGS     += -DDISABLE_COMPLIANCE_IO
 
 LDFLAGS    = ${RISCV_LDFLAGS_COMMON} -I$(RISCV_ASM_INCLUDES)
-LDFLAGS   += -march=$(MARCH_ASM_TESTS) -mabi=ilp32
+LDFLAGS   += -march=$(MARCH_COMPLIANCE_TESTS) -mabi=ilp32
 <% if asm_c_ext %>
 LDFLAGS    += -march=rv32imc
 <% end %>
@@ -34,8 +36,9 @@ clean:
 tcl_copy: $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl
 	cp $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl filter_init.tcl
 
+# clang/llvm can't build compliance tests
 test.elf: asm_pre.s
-	$(LD) -Xlinker -T$(LDSCRIPT) $(LDFLAGS) asm_pre.s -o test.elf
+	$(CC) -Xlinker -T$(LDSCRIPT) $(LDFLAGS) asm_pre.s -o test.elf
 
 asm_pre.s: $(SRC)
 	$(CC) -E $(CFLAGS) $(SRC) -o asm_pre.s

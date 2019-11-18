@@ -19,8 +19,8 @@ ExternalProject_Add(
     BUILD_COMMAND make
         -f "${CMAKE_CURRENT_SOURCE_DIR}/libc/Makefile"
         CFLAGS=${FLAGS}
-        CC=${RV_CC_PATH}
-        AR=${RV_AR_PATH}
+        CC=${RV_LLVM_CC_PATH}
+        AR=${RV_LLVM_AR_PATH}
         INSTALL_DIR=${_SUBPROJECT_INSTALL_PREFIX}
         TOP=${CMAKE_CURRENT_SOURCE_DIR}/libc all install test_program VERBOSE=1
     INSTALL_COMMAND ""
