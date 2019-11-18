@@ -10,7 +10,11 @@ endif()
 set(SPIKE_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/beehive-riscv-isa-sim")
 ExternalProject_Add(
     spike
-    CONFIGURE_COMMAND ${SPIKE_SRC_DIR}/configure --prefix=${_SUBPROJECT_INSTALL_PREFIX}
+    CONFIGURE_COMMAND
+      ${SPIKE_SRC_DIR}/configure
+      --prefix=${_SUBPROJECT_INSTALL_PREFIX}
+      --with-isa=RV32IMC
+      --enable-histogram
     SOURCE_DIR "${SPIKE_SRC_DIR}"
     BUILD_ALWAYS True
     BUILD_COMMAND $(MAKE)
