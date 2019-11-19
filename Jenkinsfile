@@ -8,25 +8,21 @@ pipeline {
     }
     stages {
         stage('Build') {
-            timeout(time: 60, unit: 'MINUTES') {
-                steps {
-                    sh """
-                      git submodule init && \
-                      git submodule update --recursive && \
-                      echo "ok" > .updated_marker && \
-                      mkdir build && \
-                      cd build && \
-                      cmake -DRISCV_LLVM_TOOLCHAIN_PATH=${LLVM_TOOLCHAIN_PATH} ../ && \
-                      make -j10
-                    """
-                }
+            steps {
+                sh """
+                  git submodule init && \
+                  git submodule update --recursive && \
+                  echo "ok" > .updated_marker && \
+                  mkdir build && \
+                  cd build && \
+                  cmake -DRISCV_LLVM_TOOLCHAIN_PATH=${LLVM_TOOLCHAIN_PATH} ../ && \
+                  make -j10
+                """
             }
         }
         stage('Run debug verilated tests') {
-            timeout(time: 60, unit: 'MINUTES') {
-                steps {
-                    sh 'cd build && ctest -LE nightly -j10'
-                }
+            steps {
+                sh 'cd build && ctest -LE nightly -j10'
             }
         }
     }
