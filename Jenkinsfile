@@ -22,7 +22,7 @@ pipeline {
         }
         stage('Run debug verilated tests') {
             steps {
-                sh 'cd build && ctest -LE nightly -j10'
+                sh 'cd build && ctest -LE nightly -j10 --timeout 900'
             }
         }
     }
