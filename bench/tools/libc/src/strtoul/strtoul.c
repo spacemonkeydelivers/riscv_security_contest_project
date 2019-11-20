@@ -69,8 +69,6 @@ unsigned long  strtoul(const char *restrict str, char **restrict str_end,
     return 0;
 }
 */
-static int errno;
-
 unsigned long
 strtoul(const char *nptr, char **endptr, register int base)
 {
