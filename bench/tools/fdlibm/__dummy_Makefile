@@ -1,0 +1,4 @@
+# pseudo library, not a real implementation
+install : $(TOP)/__dummy_math.h
+	install -d $(INSTALL_DIR)/lib $(INSTALL_DIR)/include
+	install -m 644 $(TOP)/__dummy_math.h $(INSTALL_DIR)/include/math.h

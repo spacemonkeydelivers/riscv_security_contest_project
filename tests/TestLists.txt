@@ -76,6 +76,8 @@ test_add(asm_csrrs_small   asm/csrrs_compliance.s)
 
 test_add(c_basic             c/basic)
 
+test_add(c_libm_basic        c/libm/basic)
+
 test_add(c_libc_exit_S       c/libc/exit_succ)
 test_add(c_libc_exit_F       c/libc/exit_fail INVERT_RESULT)
 test_add(c_libc_main_ret_S   c/libc/main_ret_succ)
@@ -87,7 +89,7 @@ test_add(c_libc_malloc       c/libc/malloc)
 test_add(c_libc_memset       c/libc/memset)
 test_add(c_libc_memcmp       c/libc/memcmp)
 test_add(c_libc_printk       c/libc/printk)
-test_add(c_libc_printk_ns       c/libc/printk DISABLE_SECURITY)
+test_add(c_libc_printk_ns    c/libc/printk DISABLE_SECURITY)
 test_add(c_libc_strcat       c/libc/strcat)
 test_add(c_libc_strcpy       c/libc/strcpy)
 test_add(c_libc_strlen       c/libc/strlen)
