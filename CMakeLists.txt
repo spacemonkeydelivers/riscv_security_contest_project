@@ -41,10 +41,9 @@ include(cmake/VerilatedRTL.cmake)
 
 # tools expect that platform headers are available
 set(SUBPROJECT_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/distrib/tools")
-
-# build auxiliary suporting tools (like libc)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/bench/tools")
 # build auxiliary SW models
+set(SUBPROJECT_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/distrib/models/spike")
 add_subdirectory(models)
 
 # OVP
