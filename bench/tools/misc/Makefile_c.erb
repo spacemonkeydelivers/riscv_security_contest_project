@@ -21,7 +21,7 @@ CFLAGS    += -march=rv32imc
 LDFLAGS    = ${RISCV_LDFLAGS_COMMON} <%= disable_warnings ? "-w" : "" %>
 LDFLAGS   += -march=$(MARCH_C_TESTS) -mabi=ilp32
 <% if asm_c_ext %>
-LDFLAGS    += -march=rv32imc
+LDFLAGS   += -march=rv32imc
 <% end %>
 
 LIBC = <%= disable_security ? "c_ns" : "c" %>
@@ -40,9 +40,9 @@ tcl_copy: $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl
 	cp $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl filter_init.tcl
 
 test.elf:  command_line.s $(SRC) $(LIBC_PATH)/libc.a
-	$(CC) $(CFLAGS) $(SRC) command_line.s $(LIBGCC_PATH) \
+	$(CC) $(CFLAGS) $(SRC) command_line.s \
 	-I$(DIRECTORY) -I$(LIBC_INCLUDES) \
-	-static -L$(LIBC_PATH) -l$(LIBC) \
+	-static -L$(LIBC_PATH) -lm -l$(LIBC) $(LIBGCC_PATH) \
 	-Xlinker --defsym=__SOC_MEM_SIZE=$(SOC_RAM_SIZE) \
 	-Xlinker -T$(LDSCRIPT) -o test.elf
 

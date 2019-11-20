@@ -34,7 +34,7 @@ ExternalProject_Add(
     SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/fdlibm"
     BUILD_ALWAYS True
     BUILD_COMMAND $(MAKE)
-        -f "${CMAKE_CURRENT_SOURCE_DIR}/fdlibm/__dummy_Makefile"
+        -f "${CMAKE_CURRENT_SOURCE_DIR}/fdlibm/Makefile"
         C_FLAGS=${LIBM_C_FLAGS}
         C_COMPILER=${RV_LLVM_CC_PATH}
         AR=${RV_LLVM_AR_PATH}
