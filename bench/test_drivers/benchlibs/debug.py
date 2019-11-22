@@ -47,6 +47,8 @@ class Debugger:
             'states': OrderedDict(),
             'tick_cnt': 0
         }
+
+        # TODO: use runner_options.py code here
         if os.environ.has_key('DBG'):
             DBG = [x.strip() for x in os.environ['DBG'].split(' ')]
         else:
