@@ -1,6 +1,6 @@
 import dut_wrapper.soc as soc_lib
 
-def run(libbench):
+def run(libbench, opts):
   soc = soc_lib.RiscVSoc(libbench, 'memtest_trace.vcd', True)
   # Issue is with sb instruction, 
   soc.print_ram(start_address = 0x100, num_words = 1)
