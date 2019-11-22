@@ -24,10 +24,14 @@ function(test_add name)
 
     cmake_parse_arguments(PARSE_ARGV 1 TEST_DESCR "${options_no_value}" "${options_one_value}" "")
 
-    set(TEST_DIR "${CMAKE_BINARY_DIR}/tests/${name}")
-    set(TEST_DIR_SIM "${CMAKE_BINARY_DIR}/tests/sim_${name}")
+    set(RTL_TEST_NAME "rtl_${name}")
+    set(SIM_TEST_NAME "sim_${name}")
+
+    set(TEST_DIR_RTL "${CMAKE_BINARY_DIR}/tests/${RTL_TEST_NAME}")
+    set(TEST_DIR_SIM "${CMAKE_BINARY_DIR}/tests/${SIM_TEST_NAME}")
+
     # This is a hack. Stupid cmake won't create working directories if not exist
-    file(MAKE_DIRECTORY "${TEST_DIR}")
+    file(MAKE_DIRECTORY "${TEST_DIR_RTL}")
     file(MAKE_DIRECTORY "${TEST_DIR_SIM}")
 
     if (${TEST_DESCR_INVERT_RESULT})
@@ -50,24 +54,24 @@ function(test_add name)
         set(TEST_TICKS_TIMEOUT "--ticks-timeout=${TEST_DESCR_TICKS_TIMEOUT}")
     endif()
 
-    add_test(NAME "${name}"
+    add_test(NAME "${RTL_TEST_NAME}"
         COMMAND "${TEST_RUNNER}" ${TEST_DESCR_UNPARSED_ARGUMENTS}
                 ${RINVERT} ${NSC} ${NOWARN} ${ENABLE_C} ${TEST_TICKS_TIMEOUT}
-        WORKING_DIRECTORY "${TEST_DIR}")
+                WORKING_DIRECTORY "${TEST_DIR_RTL}")
 
-    add_test(NAME "sim_${name}"
+    add_test(NAME "${SIM_TEST_NAME}"
         COMMAND "${TEST_RUNNER}" ${TEST_DESCR_UNPARSED_ARGUMENTS}
                 ${RINVERT} ${NSC} ${NOWARN} ${ENABLE_C} ${TEST_TICKS_TIMEOUT}
                 --spike
                 WORKING_DIRECTORY "${TEST_DIR_SIM}")
 
     if (${TEST_DESCR_NIGHTLY})
-        set_tests_properties("${name}" PROPERTIES LABELS nightly)
-        set_tests_properties("sim_${name}" PROPERTIES LABELS nightly)
+        set_tests_properties("${RTL_TEST_NAME}" PROPERTIES LABELS nightly)
+        set_tests_properties("${SIM_TEST_NAME}" PROPERTIES LABELS nightly)
     endif()
 
     if (${TEST_DESCR_SPIKE_FAILURE})
-        set_tests_properties("sim_${name}" PROPERTIES LABELS "nightly;sim_failure")
+        set_tests_properties("${SIM_TEST_NAME}" PROPERTIES LABELS "nightly;sim_failure")
     endif()
 
 endfunction()
