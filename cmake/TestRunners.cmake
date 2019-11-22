@@ -16,6 +16,7 @@ function(test_add name)
         DISABLE_SECURITY
         INVERT_RESULT
         WARN_DISABLE
+        SPIKE_FAILURE
         ENABLE_C_EXT)
 
     set(options_one_value
@@ -63,6 +64,10 @@ function(test_add name)
     if (${TEST_DESCR_NIGHTLY})
         set_tests_properties("${name}" PROPERTIES LABELS nightly)
         set_tests_properties("sim_${name}" PROPERTIES LABELS nightly)
+    endif()
+
+    if (${TEST_DESCR_SPIKE_FAILURE})
+        set_tests_properties("sim_${name}" PROPERTIES LABELS "nightly;sim_failure")
     endif()
 
 endfunction()
