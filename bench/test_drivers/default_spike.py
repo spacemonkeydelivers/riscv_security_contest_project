@@ -3,8 +3,8 @@ import os
 import runner_checks as rchecks
 
 def run(libbench, opts, runner_override = None):
-  tools = os.environ['TOOLS_DISTRIB']
-  spike_bin = os.path.join(tools, 'bin/spike')
+  tools = os.environ['DISTRIB_ROOT_DIR']
+  spike_bin = os.path.join(tools, 'models/spike/bin/spike')
 
   print('running spike:')
   dbg_arg = ''
