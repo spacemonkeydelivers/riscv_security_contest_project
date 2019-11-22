@@ -1,9 +1,13 @@
 #!@Python2_EXECUTABLE@ -uB
 
+PYTHONDONTWRITEBYTECODE=True
+
 # A proper way would be to set this one to CMAKE_INSTALL_PREFIX, but
 # BINARY dir is more convinient for users
+import imp
 import sys
 import os
+
 sys.path.append('@CMAKE_BINARY_DIR@/distrib/platform/lib')
 sys.path.append('@CMAKE_SOURCE_DIR@/bench/test_drivers')
 
@@ -22,17 +26,27 @@ os.environ['TOOLCHAIN_DIR'] = '@RISCV_TOOLCHAIN_PATH@'
 sys.path.append("@CMAKE_SOURCE_DIR@/bench/rtl")
 
 print(sys.argv)
-print(sys.argv[1])
+
+print('=== BUILD ===')
+BUILDER_PATH = "@CMAKE_SOURCE_DIR@/bench/test_drivers/build.py"
+print('building test image at <{}>'.format(os.getcwd()))
+print('loading builder from <{}>'.format(BUILDER_PATH))
+builder = imp.load_source("the_builder", BUILDER_PATH)
+test_type = sys.argv[1].split("/")[0]
+runner_override = builder.build(test_type)
+
+print('=== RUN ===')
 if sys.argv[1].endswith(".py"):
   TEST_DRIVER = os.path.join(TESTS_DIR, sys.argv[1])
 elif sys.argv[1] == "--remote":
   TEST_DRIVER = "@CMAKE_SOURCE_DIR@/bench/test_drivers/remote_init.py"
+elif ('--spike' in sys.argv):
+  TEST_DRIVER = "@CMAKE_SOURCE_DIR@/bench/test_drivers/default_spike.py"
 else:
   TEST_DRIVER = "@CMAKE_SOURCE_DIR@/bench/test_drivers/default_rtl.py"
 
+from runner_options import RunnerOptions
+opts = RunnerOptions()
 print('loading <{}> for {}'.format(TEST_DRIVER, sys.argv[1]))
-import imp
-
-PYTHONDONTWRITEBYTECODE=True
 test = imp.load_source("the_test", TEST_DRIVER)
-test.run(libdut)
+test.run(libdut, opts)

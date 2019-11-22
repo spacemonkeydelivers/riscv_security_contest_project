@@ -7,108 +7,44 @@ import re
 
 import dut_wrapper.soc as soc_lib
 import benchlibs.debug as debug
+import runner_checks as rchecks
 
 from benchlibs.image_loader import ImageLoader
 
-from builders.builder_asm import BuilderAsm
-from builders.builder_c import BuilderC
-from builders.builder_compliance import BuilderCompliance
-from builders.builder_zephyr import BuilderZephyr
-
-import subprocess, os, sys
-
-def build_test_image(soc):
-
-  test_type = sys.argv[1].split("/")[0]
-
-  if test_type == "c" or test_type == "benchmarks":
-    builder = BuilderC(soc)
-  elif test_type == "asm":
-    builder = BuilderAsm(soc)
-  elif test_type == "compliance":
-    builder = BuilderCompliance(soc)
-  elif test_type == "zephyr":
-    builder = BuilderZephyr(soc)
-  elif test_type == "debugger":
-    builder = BuilderAsm(soc)
-  else:
-    raise Exception("unknown test type {}".format(test_type))
-
-  return builder.find_driver()
-
-def run_spike():
-  tools = os.environ['TOOLS_DISTRIB']
-  spike_bin = os.path.join(tools, 'bin/spike')
-  sim_args = '-m0:256K --soc=beehive:uart_file=sim_uart.txt --pc=0 -g '
-  spike_cmd = '{} {} test.elf'.format(spike_bin, sim_args)
-  print('running spike:')
-  print(spike_cmd)
-  ret = os.system(spike_cmd)
-  if ret == 0:
-    print('greate succeess')
-  else:
-    raise Exception('miserable failure')
-
-def run(libbench):
-
-  print("Working directory: {}".format(os.getcwd()))
+def run(libbench, opts, runner_override = None):
 
   soc = soc_lib.RiscVSoc(libbench, 'memtest_trace.vcd', True)
-
-  driver = build_test_image(soc)
-
-  spike_run = False
-  for arg in sys.argv:
-    if arg == '--spike':
-      spike_run = True
-
-  print('SPIKE RUN: {}', spike_run)
-  if spike_run:
-    return run_spike()
-
   soc.setDebug(False)
+
   ImageLoader.load_image("test.v", soc)
 
-  if driver == None:
-    print "could not detect custom driver, using standard procedure"
+  if runner_override:
+    print "custom runner procedure detected, control transfered"
+    return driver.run(libbench, soc)
 
-    expect_failure = False
-    enforce_repl = False
-    ticks = 0
+  print "could not detect custom runner procedure, using standard procedure"
 
-    for arg in sys.argv:
-      if arg == '--driver-invert-result':
-        expect_failure = True
-      if arg == '--repl':
-        enforce_repl = True
-      if "--ticks-timeout" in arg:
-        ticks = int(arg.split("=")[1])
+  dbg = debug.Debugger(libbench, soc)
 
-    dbg = debug.Debugger(libbench, soc)
-    if not ticks:
-      ticks = soc.get_ticks_to_run()
-    if sys.stdout.isatty() or enforce_repl:
-      print('TTY session detected! starting debugger')
+  if opts.ticks_limit == 0:
+    print 'no ticks_limit specified, getting limit from the SOC object'
+    opts.ticks_limit = soc.get_ticks_to_run()
+    print 'new ticks_limit: {}'.format(opts.ticks_limit)
 
-      # Unbuffer output (this ensures the output is in the correct order)
-      sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+  if sys.stdout.isatty() or opts.enforce_repl:
+    print('TTY session detected! starting debugger')
 
-      tee = subprocess.Popen(["tee", "log.txt"], stdin=subprocess.PIPE)
-      os.dup2(tee.stdin.fileno(), sys.stdout.fileno())
-      os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
+  # Unbuffer output (this ensures the output is in the correct order)
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
 
-      dbg.set_tracing_enabled(True)
-      dbg.repl()
-    else:
-      soc.run(ticks, expect_failure = expect_failure)
-      if os.path.isfile('uart.expected'):
-        ret = os.system(' && '.join(['cat io.txt | sed \'/^LIBC: /d\'>_io.txt',
-                                     'diff _io.txt uart.expected']))
-        if ret == 0:
-          print('UART output matches the expected one')
-        else:
-          raise Exception('UART output mismatch!, test failed')
+    tee = subprocess.Popen(["tee", "log.txt"], stdin=subprocess.PIPE)
+    os.dup2(tee.stdin.fileno(), sys.stdout.fileno())
+    os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
+
+    dbg.set_tracing_enabled(True)
+    dbg.repl()
   else:
-    print "custom driver detected, control transfered"
-    driver.run(libbench, soc)
+    soc.run(opts.ticks_limit, expect_failure = opts.expect_failure)
+    print("Working directory: {}".format(os.getcwd()))
+    rchecks.RunnerChecks().check_uart('io.txt')
 

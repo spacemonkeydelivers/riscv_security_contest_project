@@ -14,7 +14,7 @@ import dut_wrapper.fpga as soc_lib
 
 from benchlibs.image_loader import ImageLoader
 
-def main(filename):
+def main(filename, opts, runner_override = None):
     if not os.path.isfile(filename):
         print 'could not find input file <{}>'.format(filename)
         raise RuntimeError('incorrect input file')

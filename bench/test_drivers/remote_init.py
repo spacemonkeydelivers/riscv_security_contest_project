@@ -135,7 +135,7 @@ def run_ctest(build_directory, test_name):
     else:
         assert False, "What the hell is this"
 
-def run(libbench):
+def run(libbench, opts, runner_override = None):
     INPUT_FILE = sys.argv[2]
     if not os.path.isfile(INPUT_FILE):
         print 'could not detect input file <{}>'.format(INPUT_FILE)
