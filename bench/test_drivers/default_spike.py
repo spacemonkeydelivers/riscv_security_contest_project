@@ -13,7 +13,8 @@ def run(libbench, opts, runner_override = None):
 
   sim_args = '-m0:256K --soc=beehive:uart_file=sim_uart.txt:id={} --pc=0 {}'.format(
               os.getcwd(), dbg_arg)
-  spike_cmd = '{} {} test.elf 2>exec.log '.format(spike_bin, sim_args)
+  img_path = os.path.join(os.getcwd(), 'test.elf')
+  spike_cmd = '{} {} {} 2>exec.log '.format(spike_bin, sim_args, img_path)
   print(spike_cmd)
 
   ret = os.system(spike_cmd)
