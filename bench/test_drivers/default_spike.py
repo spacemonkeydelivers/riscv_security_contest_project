@@ -11,7 +11,8 @@ def run(libbench, opts, runner_override = None):
   if opts.dbg_enable_trace:
     dbg_arg = ' -l '
 
-  sim_args = '-m0:256K --soc=beehive:uart_file=sim_uart.txt --pc=0 {} '.format(dbg_arg)
+  sim_args = '-m0:256K --soc=beehive:uart_file=sim_uart.txt:id={} --pc=0 {}'.format(
+              os.getcwd(), dbg_arg)
   spike_cmd = '{} {} test.elf 2>exec.log '.format(spike_bin, sim_args)
   print(spike_cmd)
 
