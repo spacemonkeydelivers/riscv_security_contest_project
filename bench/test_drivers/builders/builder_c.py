@@ -77,7 +77,7 @@ def make_command_line():
     f.write('\n'.join(asm))
 
 class BuilderC(MakeFileBuilder):
-  def __init__(self, soc):
+  def __init__(self):
     c_root = os.path.join(os.environ['TESTS_DIR'], sys.argv[1])
     pattern = os.path.join(c_root, '*.c')
     print('searching for c files as <{}>'.format(pattern))

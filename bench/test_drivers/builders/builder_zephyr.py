@@ -3,7 +3,7 @@ import sys
 import os
 
 class BuilderZephyr(MakeFileBuilder):
-  def __init__(self, soc):
+  def __init__(self):
     test = sys.argv[1].split("/")[1]
     elf = os.path.join(os.environ['ZEPHYR_BUILDS'], test, 'zephyr', 'zephyr.elf')
 
