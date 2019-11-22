@@ -54,7 +54,7 @@ test_add(asm_tags_mismatch_if_icd   asm/tags/mismatch_if_icd.s)
 test_add(asm_tags_mismatch_if_ice   asm/tags/mismatch_if_ice.s SPIKE_FAILURE)
 test_add(asm_tags_mismatch_sw   asm/tags/mismatch_sw.s SPIKE_FAILURE)
 test_add(asm_tags_mismatch_lw   asm/tags/mismatch_lw.s SPIKE_FAILURE)
-test_add(asm_tags_match_s_l     asm/tags/match_s_l.s SPIKE_FAILURE)
+test_add(asm_tags_match_s_l     asm/tags/match_s_l.s)
 test_add(asm_tags_disabled_stlt asm/tags/disabled_stlt.s)
 
 test_add(asm_mext_mult          asm/mext/mult.s)

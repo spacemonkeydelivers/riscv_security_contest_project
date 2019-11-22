@@ -12,7 +12,7 @@ main:
     // load addresses we want to tag
     la a0, tagged1
     la a1, tagged2
-    addi a1, a1, 14
+    addi a1, a1, 14 // + 14
 
     // store tags
     st t1, 0(a0)
@@ -64,34 +64,35 @@ main:
     lb t1, 15(a0)
 
     li t1, 0x012345678
-    addi a1, a1, 1
-    sw t1, 0(a1)
-    sw t1, -4(a1)
-    sw t1, -8(a1)
-    sw t1, -12(a1)
+    addi a1, a1, 1 // + 15
+    sw t1, -3(a1)
+    sw t1, -7(a1)
+    sw t1, -11(a1)
+    sw t1, -15(a1)
     // half
-    sh t1, -0(a1)
-    sh t1, -2(a1)
-    sh t1, -4(a1)
-    sh t1, -8(a1)
-    sh t1, -10(a1)
-    sh t1, -12(a1)
-    sh t1, -14(a1)
+    sh t1, -1(a1)
+    sh t1, -3(a1)
+    sh t1, -5(a1)
+    sh t1, -9(a1)
+    sh t1, -11(a1)
+    sh t1, -13(a1)
+    sh t1, -15(a1)
     // bytes
-    sb t1, -0(a1)
-    sb t1, -2(a1)
-    sb t1, -4(a1)
-    sb t1, -8(a1)
-    sb t1, -10(a1)
-    sb t1, -12(a1)
-    sb t1, -14(a1)
     sb t1, -1(a1)
     sb t1, -3(a1)
-    sb t1, -7(a1)
+    sb t1, -5(a1)
     sb t1, -9(a1)
     sb t1, -11(a1)
     sb t1, -13(a1)
     sb t1, -15(a1)
+    sb t1, -2(a1)
+    sb t1, -4(a1)
+    sb t1, -6(a1)
+    sb t1, -8(a1)
+    sb t1, -10(a1)
+    sb t1, -12(a1)
+    sb t1, -14(a1)
+    sb t1, 0(a1)
 
     PASSED
 
