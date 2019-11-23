@@ -1,3 +1,6 @@
+#ifndef __INCLUDE_GUARD_RISCV_MATH__
+#define __INCLUDE_GUARD_RISCV_MATH__
+
 
 /* @(#)fdlibm.h 1.5 04/04/22 */
 /*
@@ -214,3 +217,5 @@ extern double __kernel_sin __P((double,double,int));
 extern double __kernel_cos __P((double,double));
 extern double __kernel_tan __P((double,double,int));
 extern int    __kernel_rem_pio2 __P((double*,double*,int,int,int,const int*));
+
+#endif /* end of include guard: __INCLUDE_GUARD_RISCV_MATH__ */
