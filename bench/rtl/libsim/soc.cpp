@@ -265,31 +265,6 @@ void RV_SOC::clearRam()
     }
 }
     
-bool RV_SOC::validUartTransaction() const
-{
-    bool valid = (m_soc->soc->uart0->wb_cyc_i == m_soc->soc->uart0->wb_ack_o) && m_soc->soc->uart0->wb_cyc_i;
-    return valid;
-}
-
-bool RV_SOC::validUartTxTransaction() const
-{
-    bool valid = validUartTransaction() && (m_soc->soc->uart0->wb_addr_i == UART_TX_ADDR);
-    return valid;
-}
-
-bool RV_SOC::validUartRxTransaction() const
-{
-    bool valid = validUartTransaction() && (m_soc->soc->uart0->wb_addr_i == UART_RX_ADDR);
-    return valid;
-}
-
-uint8_t RV_SOC::getUartTxData()
-{
-    assert(validUartTxTransaction());
-    uint8_t data = ((m_soc->soc->uart0->wb_data_i) & 0xFF);
-    return data;
-}
-    
 bool RV_SOC::validPc() const
 {
     bool valid =   (m_soc->soc->cpu0->state == (int)en_state::FETCH)

@@ -10,7 +10,7 @@
 
 int log_file_open (const char* log_name)
 {
-    int fd = open(log_name, O_DSYNC | O_CREAT | O_RDWR);
+    int fd = open(log_name, O_DSYNC | O_CREAT | O_RDWR, 0777);
     return fd;
 }
 

@@ -10,7 +10,7 @@ module wb_uart
       parameter WB_DATA_WIDTH      = 32,
       parameter WB_ADDR_WIDTH      = 32,
       parameter WB_SEL_WIDTH       = (WB_DATA_WIDTH) / `BYTE_SIZE_IN_BITS,
-      parameter UART_LOG_FILE      = "uart_output.log"
+      parameter UART_LOG_FILE      = "io.txt"
 )
 (
 	output wire                       uart_tx_o,

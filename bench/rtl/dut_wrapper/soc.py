@@ -132,18 +132,8 @@ class RiscVSoc:
 
     def _tick(self, ticks):
         self._soc.tick(1)
-        self.print_uart_tx()
         for c in self._on_tick_callbacks:
             c()
-
-    def print_uart_tx(self):
-        if self._soc.uartTxValid():
-            character = str(chr(self._soc.readTxByte()))
-
-            if self._uart == None:
-                self._uart = open("io.txt", "w", 0)
-
-            self._uart.write(character)
 
     def reset(self):
         self._soc.reset()
