@@ -21,5 +21,5 @@ int isspace(int c) {
 int tolower(int c) {
     if (!isalpha(c))
         return c;
-    return (c >= 'A' && c <= 'Z') ? c - 'A' : c;
+    return (c >= 'A' && c <= 'Z') ? c + 32 : c;
 }
