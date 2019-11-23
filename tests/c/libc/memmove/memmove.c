@@ -7,7 +7,7 @@ int main() {
     char* src = &a[1];
     char* dst = &a[0];
     memmove(dst, src, 3);
-    for (int i = 0; i < sizeof(a); i++) {
+    for (int i = 0; i < 4; i++) {
         if (a[i] != b[i])
             return EXIT_FAILURE;
     }
