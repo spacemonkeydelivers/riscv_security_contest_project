@@ -16,7 +16,7 @@ ExternalProject_Add(
     DEPENDS platform_headers
     SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libc"
     BUILD_ALWAYS True
-    BUILD_COMMAND make
+    BUILD_COMMAND $(MAKE)
         -f "${CMAKE_CURRENT_SOURCE_DIR}/libc/Makefile"
         CFLAGS=${FLAGS}
         CC=${RV_LLVM_CC_PATH}
@@ -33,8 +33,8 @@ ExternalProject_Add(
     DEPENDS platform_headers libc
     SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/fdlibm"
     BUILD_ALWAYS True
-    BUILD_COMMAND make
-        -f "${CMAKE_CURRENT_SOURCE_DIR}/fdlibm/__dummy_Makefile"
+    BUILD_COMMAND $(MAKE)
+        -f "${CMAKE_CURRENT_SOURCE_DIR}/fdlibm/Makefile"
         C_FLAGS=${LIBM_C_FLAGS}
         C_COMPILER=${RV_LLVM_CC_PATH}
         AR=${RV_LLVM_AR_PATH}

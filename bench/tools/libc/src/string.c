@@ -148,3 +148,30 @@ int strcmp(const char *lhs, const char *rhs) {
     return (diff > 0) ? 1 : -1;
 }
 
+void *memmove(void *dest, const void *src, size_t n) {
+    const char *csrc = (char *)src; 
+    char *cdst       = (char *)dest;
+    char *temp       = (char *)malloc(n);
+    for (size_t i = 0; i < n; ++i) {
+        temp[i] = csrc[i];
+    }
+
+    for (size_t i = 0; i < n; ++i) {
+        cdst[i] = temp[i];
+    }
+
+    free(temp);
+    return dest;
+}
+
+char *strchr(const char *s, int c) {
+    char* cur = (char*)s;
+    while (*cur) {
+        if (*cur == c) {
+            return cur;
+        } else {
+            cur++;
+        }
+    }
+    return NULL;
+}
