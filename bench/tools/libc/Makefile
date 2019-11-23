@@ -8,7 +8,7 @@ LIBNAME=libc
 NS_LIBNAME=libc_ns
 INSTALL_HEADERS=stdarg.h stdbool.h stddef.h stdint.h \
 	stdio.h stdlib.h string.h unistd.h time.h errno.h \
-	assert.h ctype.h
+	assert.h ctype.h limits.h
 INSTALL_SOC_HEADERS=traps.h timer.h hwrand.h
 INSTALL_MISC_HEADERS=printk.h toolchain.h
 INSTALL_SHARE_CONTENT=soc.ld
