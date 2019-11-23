@@ -11,6 +11,9 @@ import os
 sys.path.append('@CMAKE_BINARY_DIR@/distrib/platform/lib')
 sys.path.append('@CMAKE_SOURCE_DIR@/bench/test_drivers')
 
+import chores.pdeathsig
+chores.pdeathsig.set_pdeathsig()()
+
 import libdut
 TESTS_DIR = "@CMAKE_SOURCE_DIR@/tests"
 

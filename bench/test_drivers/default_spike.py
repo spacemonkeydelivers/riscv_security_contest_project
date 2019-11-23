@@ -1,25 +1,34 @@
+import subprocess
 import os
+import sys
 
 import runner_checks as rchecks
+import chores.pdeathsig
 
 def run(libbench, opts, runner_override = None):
   tools = os.environ['DISTRIB_ROOT_DIR']
   spike_bin = os.path.join(tools, 'models/spike/bin/spike')
 
   print('running spike:')
-  dbg_arg = ''
+  sim_args = [
+      spike_bin,
+      '-m0:256K',
+      '--soc=beehive:uart_file=sim_uart.txt:id={}'.format(os.getcwd()),
+      '--pc=0'
+  ]
   if opts.dbg_enable_trace:
-    dbg_arg = ' -l '
+    sim_args.append('-l')
+  sim_args.append(os.path.join(os.getcwd(), 'test.elf'))
 
-  sim_args = '-m0:256K --soc=beehive:uart_file=sim_uart.txt:id={} --pc=0 {}'.format(
-              os.getcwd(), dbg_arg)
-  img_path = os.path.join(os.getcwd(), 'test.elf')
-  spike_cmd = '{} {} {} 2>exec.log '.format(spike_bin, sim_args, img_path)
-  print(spike_cmd)
+  print(' '.join(sim_args))
+  sim = subprocess.Popen(sim_args, preexec_fn = chores.pdeathsig.set_pdeathsig())
+  sim.wait()
 
-  ret = os.system(spike_cmd)
+  tee = subprocess.Popen(["tee", "log.txt"], stdin=subprocess.PIPE)
+  os.dup2(tee.stdin.fileno(), sys.stdout.fileno())
+  os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
 
-  if ret == 0:
+  if sim.returncode == 0:
     print('Great Success')
   else:
     if (opts.expect_failure):
