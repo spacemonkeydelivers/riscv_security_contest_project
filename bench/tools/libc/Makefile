@@ -2,11 +2,13 @@ INCLUDE=$(TOP)/include
 OBJ_FILES=boot.o isr.o config.o libgcc_.o mulsi3.o \
 	os.o malloc.o \
 	libc-start.o printf.o strtoul.o \
-	stdlib.o unistd.o string.o time.o errno.o
+	stdlib.o unistd.o string.o time.o errno.o \
+	ctype.o
 LIBNAME=libc
 NS_LIBNAME=libc_ns
 INSTALL_HEADERS=stdarg.h stdbool.h stddef.h stdint.h \
-	stdio.h stdlib.h string.h unistd.h time.h errno.h
+	stdio.h stdlib.h string.h unistd.h time.h errno.h \
+	ctype.h
 INSTALL_SOC_HEADERS=traps.h timer.h hwrand.h
 INSTALL_MISC_HEADERS=printk.h toolchain.h
 INSTALL_SHARE_CONTENT=soc.ld
@@ -90,6 +92,9 @@ time.o: $(TOP)/src/time.c
 	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -o $@ -c $<
 
 errno.o: $(TOP)/src/errno.c
+	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -o $@ -c $<
+
+ctype.o: $(TOP)/src/ctype.c
 	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -o $@ -c $<
 
 $(LIBNAME).a: $(OBJ_FILES) security.o
