@@ -233,6 +233,7 @@ void RV_SOC::reset()
     m_soc->rst_i = 1;
     m_soc->cpu_rst_i = 1;
     tick();
+    tick();
     m_soc->rst_i = 0;
     m_soc->cpu_rst_i = 0;
     tick();
@@ -313,5 +314,7 @@ uint64_t RV_SOC::counterGetStep ()
 
 bool RV_SOC::getTestFinished() const
 {
-    return m_soc->soc->test_finished_o;
+    int val = 0;
+    get_test_finished(&val);
+    return val;
 }

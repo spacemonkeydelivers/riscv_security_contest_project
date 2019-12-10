@@ -105,6 +105,14 @@ module soc
    );
       state = {27'b0, cpu0.state};
    endtask
+   
+   export "DPI-C" task get_test_finished;
+   task get_test_finished
+   (
+      output int finished
+   );
+      finished = {31'b0, test_finished_o};
+   endtask
 
    localparam WB_DATA_WIDTH = 32;
    localparam WB_ADDR_WIDTH = 32;
