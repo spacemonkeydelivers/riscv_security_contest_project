@@ -21,7 +21,6 @@ module wb_cpu_bus(
 		output reg STB_O,
 		output reg WE_O
 	);
-   /*verilator public_module*/ 
 		
    reg [3:0] op;
 

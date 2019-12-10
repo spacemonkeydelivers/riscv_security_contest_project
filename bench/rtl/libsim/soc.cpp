@@ -64,8 +64,6 @@ void RV_SOC::tick(unsigned num)
     assert(m_soc);
     for (unsigned i = 0; i < num; i++)
     {
-        // dirty hack to skip headache for running on sim and fpga
-        m_soc->soc->uart0->cfg_divider = 1;
         if (m_tickCnt == 0) {
 
             m_soc->clk_i = 0;
@@ -215,7 +213,7 @@ uint32_t RV_SOC::readWord(unsigned address)
     }
     assert(!(address & 0x3) && "Address misaligned");
     unsigned wordIdx = address / wordSize;
-    int val;
+    int val = 0;
     ram_read_word(wordIdx, &val);
     return val;
 }
@@ -249,7 +247,7 @@ void RV_SOC::writeReg(unsigned num, uint32_t val)
 uint32_t RV_SOC::readReg(unsigned num)
 {
     assert(num < m_regFileSize);
-    int val;
+    int val = 0;
     regfile_read_word(num, &val);
     return val;
 }
@@ -281,15 +279,16 @@ void RV_SOC::clearRam()
     
 bool RV_SOC::validPc() const
 {
-    bool valid =   (m_soc->soc->cpu0->state == (int)en_state::FETCH)
-                && (m_soc->soc->cpu0->bus_inst->CYC_O)
-                && (m_soc->soc->cpu0->bus_inst->ACK_I);
-    return valid;
+    int val = 0;
+    cpu_valid_pc(&val);
+    return val;
 }
 
 en_state RV_SOC::cpu_state() const
 {
-    return (en_state)(int)m_soc->soc->cpu0->state;
+    int val = 0;
+    cpu_get_state(&val);
+    return (en_state)val;
 }
 
 uint64_t RV_SOC::counterGetTick ()

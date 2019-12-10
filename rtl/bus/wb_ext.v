@@ -26,7 +26,6 @@ module wb_ext
    output wire                       wb_stb_o,
    output wire                       wb_cyc_o
 );
-   /*verilator no_inline_module*/
 
    localparam TRAN_SIZE_BYTE = 0;
    localparam TRAN_SIZE_HALF = 1;

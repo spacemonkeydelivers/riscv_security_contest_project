@@ -37,7 +37,6 @@ module soc
    output wire [31:0]                insn_bytes_o,
    output wire                       test_finished_o
 );
-   /*verilator no_inline_module*/
 
    export "DPI-C" task ram_get_size;
    task ram_get_size
@@ -89,6 +88,22 @@ module soc
       input int word
    );
       cpu0.reg_inst.write_word(addr, word);
+   endtask
+   
+   export "DPI-C" task cpu_valid_pc;
+   task cpu_valid_pc
+   (
+      output int valid
+   );
+      valid = {31'b0, valid_pc};
+   endtask
+   
+   export "DPI-C" task cpu_get_state;
+   task cpu_get_state
+   (
+      output int state
+   );
+      state = {27'b0, cpu0.state};
    endtask
 
    localparam WB_DATA_WIDTH = 32;
@@ -294,6 +309,7 @@ module soc
    reg cpu_en = 0;
    reg [2:0] cpu_op = 0;
    wire cpu_busy;
+   wire valid_pc;
 
    cpu
    #(
@@ -323,7 +339,8 @@ module soc
       .pc_o (pc_o),
       .state_o (state_o),
       .insn_bytes_o (insn_bytes_o),
-      .test_finished_o (test_finished_o)
+      .test_finished_o (test_finished_o),
+      .valid_pc_o (valid_pc)
    );
 
    wb_uart

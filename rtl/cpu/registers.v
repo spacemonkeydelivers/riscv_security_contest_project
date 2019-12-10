@@ -15,7 +15,6 @@ module registers
    output reg  [REG_FILE_WIDTH - 1:0] O_regval2,
    output wire [REG_FILE_WIDTH - 1:0] register_flags_o
 );
-   /*verilator public_module*/ 
 
    task get_size
    (

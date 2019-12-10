@@ -57,7 +57,6 @@ module decoder
    output wire [2:0]  funct3_o,
    output wire        write_reg_o
 );
-   /*verilator public_module*/ 
 
    wire [4:0] opcode = I_instr[6:2];
    reg [31:0] imm;

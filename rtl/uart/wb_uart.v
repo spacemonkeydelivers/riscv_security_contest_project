@@ -25,7 +25,6 @@ module wb_uart
    output wire                       wb_ack_o,
    output wire [WB_DATA_WIDTH - 1:0] wb_data_o
 );
-   /*verilator public_module*/ 
 
    localparam [1:0] UART_ADDR_DIVIDER          = 2'd0,
                     UART_ADDR_DATA_TO_TRANSMIT = 2'd1,
@@ -63,6 +62,7 @@ module wb_uart
       end else begin
          if (uart_accessed) begin
             case (uart_reg_sel)
+`ifndef SIMULATION_RUN
                UART_ADDR_DIVIDER: begin
                   ack <= 1;
                   if (wb_we_i) begin
@@ -71,6 +71,7 @@ module wb_uart
                      data_out <= cfg_divider;
                   end
                end
+`endif
                UART_ADDR_SANITY: begin
                   if (!wb_we_i) begin
                      data_out <= UART_SANITY_VALUE;

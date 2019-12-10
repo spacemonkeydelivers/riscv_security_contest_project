@@ -15,7 +15,6 @@ module wb_timer
     output wire                       timer_irq_o,
     output wire                       timer_mtimecmp_accessed_o);
 
-   /*verilator public_module*/
    localparam DATA_WIDTH = 64;
 
    reg [DATA_WIDTH - 1:0]             mtime, // current time

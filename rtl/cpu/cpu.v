@@ -33,12 +33,12 @@ module cpu
    output wire [31:0] pc_o,
    output wire [4:0]  state_o,
    output wire [31:0] insn_bytes_o,
-   output wire        test_finished_o
+   output wire        test_finished_o,
+   output wire        valid_pc_o
 );
    
-    /*verilator public_module*/
-    /*verilator no_inline_module*/
- 
+    assign valid_pc_o = (state == STATE_FETCH) && CYC_O && ACK_I;
+
     reg test_finished;
     reg next_test_finished;
     assign test_finished_o = test_finished;
@@ -453,12 +453,12 @@ module cpu
     assign branch = (dec_branchmask & {!alu_ltu, alu_ltu, !alu_lt, alu_lt, !alu_eq, alu_eq}) != 0;
 
 
-   reg [4:0] state;
+   reg [4:0] state /* verilator public */;
    reg [4:0] next_state;
    assign state_o = state;
    assign pc_o = pc;
 
-   reg [31:0] pc;
+   reg [31:0] pc /* verilator public */;
    /* verilator lint_off UNOPT */
    reg [31:0] next_pc;
    /* verilator lint_on UNOPT */
