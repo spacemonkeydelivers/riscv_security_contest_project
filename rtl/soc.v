@@ -65,6 +65,32 @@ module soc
       ram0.ram0.write_word(addr, word);
    endtask
 
+   export "DPI-C" task regfile_get_size;
+   task regfile_get_size
+   (
+      output int rf_size
+   );
+      rf_size = cpu0.reg_inst.REG_FILE_SIZE;
+   endtask
+
+   export "DPI-C" task regfile_read_word;
+   task regfile_read_word
+   (
+      input  int addr,
+      output int word
+   );
+      cpu0.reg_inst.read_word(addr, word);
+   endtask
+
+   export "DPI-C" task regfile_write_word;
+   task regfile_write_word
+   (
+      input int addr,
+      input int word
+   );
+      cpu0.reg_inst.write_word(addr, word);
+   endtask
+
    localparam WB_DATA_WIDTH = 32;
    localparam WB_ADDR_WIDTH = 32;
    localparam WB_SEL_WIDTH  = 4;

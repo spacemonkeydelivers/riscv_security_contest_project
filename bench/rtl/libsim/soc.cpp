@@ -26,7 +26,10 @@ RV_SOC::RV_SOC(const char* trace)
     ram_get_size(&ramSize);
     m_ramSize = ramSize;
 
-    m_regFileSize = sizeof(m_soc->soc->cpu0->reg_inst->regfile);
+    int rfSize;
+    regfile_get_size(&rfSize);
+    m_regFileSize = rfSize;
+
     clearRam();
     reset();
 }
@@ -240,13 +243,15 @@ uint64_t RV_SOC::getWordSize() const
 void RV_SOC::writeReg(unsigned num, uint32_t val)
 {
     assert(num < m_regFileSize);
-    m_soc->soc->cpu0->reg_inst->regfile[num] = val;
+    regfile_write_word(num, val);
 }
 
 uint32_t RV_SOC::readReg(unsigned num)
 {
     assert(num < m_regFileSize);
-    return m_soc->soc->cpu0->reg_inst->regfile[num];
+    int val;
+    regfile_read_word(num, &val);
+    return val;
 }
 
 void RV_SOC::setPC(uint32_t pc)
