@@ -105,6 +105,9 @@ if(ENABLE_VCD_TRACING)
     set(DUT_FLAGS ${DUT_FLAGS} -DTRACE_ENABLED)
 endif()
 
+if(ENABLE_THREADING)
+    set(DUT_FLAGS ${DUT_FLAGS} -DVL_THREADED)
+endif()
 
 add_library(dut SHARED ${TESTBENCH_SRC})
 target_compile_options(dut PUBLIC ${DUT_FLAGS})
