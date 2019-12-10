@@ -48,7 +48,6 @@ add_custom_command(
         -GFIRMWARE_FILE="${MEM_FILE}"
         -GSOC_RAM_SIZE=${SOC_RAM_SIZE}
         -DSIMULATION_RUN
-        -Wall
         -cc
         -Mdir ${RTL_MODEL_BUILD_PATH}
         ${RTL_SRC_PATH}/soc.v
@@ -100,9 +99,15 @@ add_custom_target(
 
 # Set a list of sources
 set(TESTBENCH_SRC bench/rtl/libsim/soc.cpp bench/rtl/libsim/ui.cpp bench/rtl/libsim/dpi.cpp)
+# Check if vcd tracing should be enabled
+set(DUT_FLAGS -DD_SOC_RAM_SIZE=${SOC_RAM_SIZE})
+if(ENABLE_VCD_TRACING)
+    set(DUT_FLAGS ${DUT_FLAGS} -DTRACE_ENABLED)
+endif()
+
 
 add_library(dut SHARED ${TESTBENCH_SRC})
-target_compile_options(dut PUBLIC "-DD_SOC_RAM_SIZE=${SOC_RAM_SIZE}")
+target_compile_options(dut PUBLIC ${DUT_FLAGS})
 add_dependencies(dut Vmodel platform_headers generate_vsoc_enums)
 target_include_directories(dut PUBLIC
     ${VERILATOR_INCLUDE}

@@ -56,7 +56,9 @@ private:
     Vsoc*          m_soc         {nullptr};
     uint64_t       m_tickCnt     {0};
     uint64_t       m_fetchCnt    {0};
+#ifdef TRACE_ENABLED
     VerilatedVcdC* m_trace       {nullptr};
+#endif
 
     uint32_t       m_ramSize     {0};
     uint64_t       m_regFileSize {0};

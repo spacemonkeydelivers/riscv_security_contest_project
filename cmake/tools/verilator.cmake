@@ -10,7 +10,10 @@ if (${VERILATOR_BIN} MATCHES "NOTFOUND" OR ${VERILATOR_INCLUDE} MATCHES "NOTFOUN
 endif()
 
 # VERILATOR_* is used to build verilator library and RLT simulator
-set(VERILATOR_FLAGS "--trace --trace-params --trace-structs")
-set(VERILATOR_FLAGS "${VERILATOR_FLAGS} -Wall --MMD --public")
-set(VERILATOR_FLAGS "${VERILATOR_FLAGS} -CFLAGS -g -CFLAGS -fpic")
+set(VERILATOR_FLAGS "")
+if(ENABLE_VCD_TRACING)
+    set(VERILATOR_FLAGS "${VERILATOR_FLAGS} --trace --trace-params --trace-structs")
+endif()
+set(VERILATOR_FLAGS "${VERILATOR_FLAGS} -Wall --MMD --public -O3")
+set(VERILATOR_FLAGS "${VERILATOR_FLAGS} -CFLAGS -fpic")
 

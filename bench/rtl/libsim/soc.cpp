@@ -36,11 +36,13 @@ RV_SOC::RV_SOC(const char* trace)
 
 RV_SOC::~RV_SOC()
 {
+#ifdef TRACE_ENABLED
     if (m_trace)
     {
         m_trace->close();
         m_trace = nullptr;
     }
+#endif
     assert(m_soc);
     delete m_soc;
 }
@@ -49,6 +51,7 @@ void RV_SOC::enableVcdTrace()
 {
     if (m_tracePath)
     {
+#ifdef TRACE_ENABLED
         Verilated::traceEverOn(true);
         if (!m_trace) {
             delete m_trace;
@@ -56,6 +59,7 @@ void RV_SOC::enableVcdTrace()
         m_trace = new VerilatedVcdC;
         m_soc->trace(m_trace, 99);
         m_trace->open(m_tracePath);
+#endif
     }
 }
 
@@ -69,9 +73,11 @@ void RV_SOC::tick(unsigned num)
             m_soc->clk_i = 0;
             m_soc->eval();
 
+#ifdef TRACE_ENABLED
             if (m_trace) {
                 m_trace->dump(m_tickCnt);
             }
+#endif
 
             m_tickCnt++;
             break;
@@ -80,17 +86,21 @@ void RV_SOC::tick(unsigned num)
 
         m_soc->clk_i = 1;
         m_soc->eval();
+#ifdef TRACE_ENABLED
         if (m_trace) {
             m_trace->dump(m_tickCnt);
         }
+#endif
         m_tickCnt++;
 
         m_soc->clk_i = 0;
         m_soc->eval();
+#ifdef TRACE_ENABLED
         if (m_trace) {
             m_trace->dump(m_tickCnt);
             m_trace->flush();
         }
+#endif
         m_tickCnt++;
 
         en_state state_after = cpu_state();
