@@ -3,6 +3,7 @@ set(VERILATOR_LIBRARY verilated)
 set(VERILATED_SOURCE_LIST
     verilated.cpp
     verilated_save.cpp
+    verilated_dpi.cpp
 )
 if (VERILATOR_FLAGS MATCHES "trace")
     set(VERILATED_SOURCE_LIST ${VERILATED_SOURCE_LIST} verilated_vcd_c.cpp)

@@ -3,6 +3,7 @@
 
 #include <cstdint>
 
+#include "svdpi.h"
 
 #include <platform/soc_enums.h>
 
@@ -27,7 +28,7 @@ public:
     void writeReg(unsigned num, uint32_t val);
     uint32_t readReg(unsigned num);
 
-    uint64_t getRamSize() const;
+    uint32_t getRamSize() const;
     uint64_t getWordSize() const;
     uint32_t getPC() const;
     void  setPC(uint32_t pc);
@@ -57,10 +58,12 @@ private:
     uint64_t       m_fetchCnt    {0};
     VerilatedVcdC* m_trace       {nullptr};
 
-    uint64_t       m_ramSize     {0};
+    uint32_t       m_ramSize     {0};
     uint64_t       m_regFileSize {0};
 
     const char*    m_tracePath   {nullptr};
+
+    svScope        m_svScope;
 
     enum busMaster
     {

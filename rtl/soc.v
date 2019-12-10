@@ -39,6 +39,32 @@ module soc
 );
    /*verilator no_inline_module*/
 
+   export "DPI-C" task ram_get_size;
+   task ram_get_size
+   (
+      output int ram_size
+   );
+      ram_size = SOC_RAM_SIZE;
+   endtask
+
+   export "DPI-C" task ram_read_word;
+   task ram_read_word
+   (
+      input  int addr,
+      output int word
+   );
+      ram0.ram0.read_word(addr, word);
+   endtask
+
+   export "DPI-C" task ram_write_word;
+   task ram_write_word
+   (
+      input int addr,
+      input int word
+   );
+      ram0.ram0.write_word(addr, word);
+   endtask
+
    localparam WB_DATA_WIDTH = 32;
    localparam WB_ADDR_WIDTH = 32;
    localparam WB_SEL_WIDTH  = 4;

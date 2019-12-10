@@ -18,7 +18,14 @@ RV_SOC::RV_SOC(const char* trace)
 {
     m_soc = new Vsoc;
     m_tracePath = trace;
-    m_ramSize = sizeof(m_soc->soc->ram0->ram0->mem);
+
+    m_svScope = svGetScopeFromName("TOP.soc");
+    svSetScope(m_svScope);
+
+    int ramSize;
+    ram_get_size(&ramSize);
+    m_ramSize = ramSize;
+
     m_regFileSize = sizeof(m_soc->soc->cpu0->reg_inst->regfile);
     clearRam();
     reset();
@@ -192,7 +199,7 @@ void RV_SOC::writeWord(unsigned address, uint32_t val)
     }
     assert(!(address & 0x3) && "Address misaligned");
     unsigned wordIdx = address / wordSize;
-    m_soc->soc->ram0->ram0->mem[wordIdx] = val;
+    ram_write_word(wordIdx, val);
 }
 
 uint32_t RV_SOC::readWord(unsigned address)
@@ -205,7 +212,9 @@ uint32_t RV_SOC::readWord(unsigned address)
     }
     assert(!(address & 0x3) && "Address misaligned");
     unsigned wordIdx = address / wordSize;
-    return m_soc->soc->ram0->ram0->mem[wordIdx];
+    int val;
+    ram_read_word(wordIdx, &val);
+    return val;
 }
 
 void RV_SOC::reset()
@@ -218,7 +227,7 @@ void RV_SOC::reset()
     tick();
 }
 
-uint64_t RV_SOC::getRamSize() const
+uint32_t RV_SOC::getRamSize() const
 {
     return m_ramSize;
 }

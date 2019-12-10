@@ -99,7 +99,7 @@ add_custom_target(
 )
 
 # Set a list of sources
-set(TESTBENCH_SRC bench/rtl/libsim/soc.cpp bench/rtl/libsim/ui.cpp bench/rtl/libsim/uart.cpp)
+set(TESTBENCH_SRC bench/rtl/libsim/soc.cpp bench/rtl/libsim/ui.cpp bench/rtl/libsim/dpi.cpp)
 
 add_library(dut SHARED ${TESTBENCH_SRC})
 target_compile_options(dut PUBLIC "-DD_SOC_RAM_SIZE=${SOC_RAM_SIZE}")
