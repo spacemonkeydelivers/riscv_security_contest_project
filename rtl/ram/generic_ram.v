@@ -30,7 +30,7 @@ module generic_ram
       output int word
    );
       begin
-         word[RAM_WORDS_WIDTH - 1:0] = mem[addr];
+         word = {{(32 - RAM_WORDS_WIDTH){1'b0}}, mem[addr]};
       end
    endtask
 
