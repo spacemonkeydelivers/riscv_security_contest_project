@@ -18,5 +18,12 @@ if(ENABLE_THREADING)
     set(VERILATOR_FLAGS "${VERILATOR_FLAGS} --threads 2")
 endif()
 set(VERILATOR_FLAGS "${VERILATOR_FLAGS} --MMD -O3 -Wall -Wno-UNUSED")
-set(VERILATOR_FLAGS "${VERILATOR_FLAGS} -CFLAGS -fpic -CFLAGS -O3 -CFLAGS -fno-stack-protector -CFLAGS -fstrict-aliasing -CFLAGS -fbranch-probabilities -CFLAGS -flto -LDFLAGS -flto")
+set(VERILATOR_FLAGS "${VERILATOR_FLAGS}
+    -CFLAGS -fpic
+    -CFLAGS -O3
+    -CFLAGS -fno-stack-protector
+    -CFLAGS -fstrict-aliasing
+    -CFLAGS -fbranch-probabilities
+    -CFLAGS -flto
+    -LDFLAGS -flto")
 
