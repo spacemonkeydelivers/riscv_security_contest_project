@@ -22,5 +22,16 @@ int main () {
         printf("ERROR: it seems that strcpy does not work correctly\n");
         return EXIT_FAILURE;
     }
+
+    memset(buffer, 0, sizeof(buffer));
+    result = strcpy(buffer, "123456");
+    if (result != buffer) {
+        printf("ERROR: *strcpy* is expected to return destination\n");
+        return EXIT_FAILURE;
+    }
+    if (memcmp(etalon_values, buffer, sizeof(etalon_values)) != 0) {
+        printf("ERROR: it seems that strcpy does not work correctly\n");
+        return EXIT_FAILURE;
+    }
     return EXIT_SUCCESS;
 }
