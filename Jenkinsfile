@@ -8,6 +8,7 @@ pipeline {
     environment {
         PATH = "PATH=$PATH:/tank/work/dev/toolchains/riscv32imc-tags-newlib-gcc/bin/"
         LLVM_TOOLCHAIN_PATH = "/tank/work/dev/toolchains/riscv32imc-llvm"
+        GCC_TOOLCHAIN_PATH = "/tank/work/dev/toolchains/riscv32imc-tags-newlib-gcc"
         GIT_SSH_COMMAND = 'ssh -i /home/jenkins/.ssh/id_rsa'
     }
     stages {
@@ -19,7 +20,7 @@ pipeline {
                   echo "ok" > .updated_marker && \
                   mkdir build && \
                   cd build && \
-                  cmake -DENABLE_ASSERTS=1 -DRISCV_LLVM_TOOLCHAIN_PATH=${LLVM_TOOLCHAIN_PATH} ../ && \
+                  cmake -DENABLE_ASSERTS=1 -DRISCV_LLVM_TOOLCHAIN_PATH=${LLVM_TOOLCHAIN_PATH} -DRISCV_GCC_TOOLCHAIN_PATH=${GCC_TOOLCHAIN_PATH} ../ && \
                   make -j10
                 """
             }
