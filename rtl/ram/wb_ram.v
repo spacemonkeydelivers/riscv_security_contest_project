@@ -159,7 +159,19 @@ module wb_ram
          default: data_to_write = 0;
       endcase
    end
-   
+
+`ifdef ENABLE_ASSERTS
+   always @ (*) begin
+      if (wb_cyc_i && (wb_sel_i != 4'hF)) begin
+         case (wb_sel_i)
+            `WB_SEL_WORD: assert(addr_to_check == 2'b0);
+            `WB_SEL_HALF: assert(!wb_addr_i[0]);
+            default: assert(1'b1);
+         endcase
+      end
+   end
+`endif
+
    always @ (posedge wb_clk_i) begin
       if (wb_rst_i) begin
          state <= STATE_IDLE;
