@@ -19,7 +19,7 @@ pipeline {
                   echo "ok" > .updated_marker && \
                   mkdir build && \
                   cd build && \
-                  cmake -DRISCV_LLVM_TOOLCHAIN_PATH=${LLVM_TOOLCHAIN_PATH} ../ && \
+                  cmake -DENABLE_ASSERTS=1 -DRISCV_LLVM_TOOLCHAIN_PATH=${LLVM_TOOLCHAIN_PATH} ../ && \
                   make -j10
                 """
             }
