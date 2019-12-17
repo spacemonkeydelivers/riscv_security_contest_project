@@ -17,7 +17,7 @@ size_t strlen(const char *str) {
 
 char *strcpy(char *restrict dest, const char *restrict src) {
     char* restrict ptr_d = dest;
-    while (*ptr_d) {
+    while (*src) {
         *ptr_d++ = *src;
         ++src;
     }
