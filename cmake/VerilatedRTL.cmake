@@ -37,6 +37,11 @@ if (NOT DEFINED MEM_FILE)
     set(MEM_FILE ${CMAKE_BINARY_DIR}/tmp/mem_img.hex)
 endif()
 
+set(EN_ASSERT "")
+if(ENABLE_ASSERT)
+    set(EN_ASSERT -DENABLE_ASSERTS)
+endif()
+
 separate_arguments(VERILATOR_ARGS_LIST
                    WINDOWS_COMMAND "${VERILATOR_FLAGS} -I${RTL_SRC_PATH}")
 separate_arguments(VERILATOR_ARGS_POST_LIST
@@ -47,7 +52,7 @@ add_custom_command(
     COMMAND ${VERILATOR_BIN} ${VERILATOR_ARGS_LIST}
         -GFIRMWARE_FILE="${MEM_FILE}"
         -GSOC_RAM_SIZE=${SOC_RAM_SIZE}
-        -DSIMULATION_RUN
+        -DSIMULATION_RUN ${EN_ASSERT}
         -cc
         -Mdir ${RTL_MODEL_BUILD_PATH}
         ${RTL_SRC_PATH}/soc.v
