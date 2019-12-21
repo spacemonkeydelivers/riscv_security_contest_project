@@ -6,7 +6,6 @@ pipeline {
     }
 
     environment {
-        PATH = "PATH=$PATH:/tank/work/dev/toolchains/riscv32imc-tags-newlib-gcc/bin/"
         LLVM_TOOLCHAIN_PATH = "/tank/work/dev/toolchains/riscv32imc-llvm"
         GCC_TOOLCHAIN_PATH = "/tank/work/dev/toolchains/riscv32imc-tags-newlib-gcc"
         GIT_SSH_COMMAND = 'ssh -i /home/jenkins/.ssh/id_rsa'
