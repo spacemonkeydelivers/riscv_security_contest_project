@@ -20,6 +20,7 @@ ExternalProject_Add(
         -f "${CMAKE_CURRENT_SOURCE_DIR}/libc/Makefile"
         CFLAGS=${FLAGS}
         CC=${RV_LLVM_CC_PATH}
+        LD=${RV_GCC_LD_PATH}
         AR=${RV_LLVM_AR_PATH}
         INSTALL_DIR=${_SUBPROJECT_INSTALL_PREFIX}
         TOP=${CMAKE_CURRENT_SOURCE_DIR}/libc all install test_program VERBOSE=1
@@ -38,6 +39,7 @@ ExternalProject_Add(
         C_FLAGS=${LIBM_C_FLAGS}
         C_COMPILER=${RV_LLVM_CC_PATH}
         AR=${RV_LLVM_AR_PATH}
+        LD=${RV_GCC_LD_PATH}
         INSTALL_DIR=${_SUBPROJECT_INSTALL_PREFIX}
         TOP=${CMAKE_CURRENT_SOURCE_DIR}/fdlibm
         install VERBOSE=1

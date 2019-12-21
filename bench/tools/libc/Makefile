@@ -35,6 +35,7 @@ install: $(DEPS_INSTALL)
 test_program: $(LIBNAME).a $(TOP)/tests/basic.c
 	$(CC) $(CFLAGS) $(TOP)/tests/cmd_line.s $(TOP)/tests/basic.c -static -L. -lc \
 		-Xlinker --defsym=__SOC_MEM_SIZE=999999 \
+		-LinkerBin $(LD) \
 		-T$(TOP)/share/soc.ld -I$(TOP)/include -o test_program
 
 all: $(LIBNAME).a $(NS_LIBNAME).a

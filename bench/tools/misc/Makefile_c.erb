@@ -43,6 +43,7 @@ test.elf:  command_line.s $(SRC) $(LIBC_PATH)/libc.a
 	$(CC) $(CFLAGS) $(SRC) command_line.s \
 	-I$(DIRECTORY) -I$(LIBC_INCLUDES) \
 	-static -L$(LIBC_PATH) -lm -l$(LIBC) $(LIBGCC_PATH) \
+        -LinkerBin $(LD) \
 	-Xlinker --defsym=__SOC_MEM_SIZE=$(SOC_RAM_SIZE) \
 	-Xlinker -T$(LDSCRIPT) -o test.elf
 
