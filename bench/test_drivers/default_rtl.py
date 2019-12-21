@@ -24,7 +24,8 @@ def run(libbench, opts, runner_override = None):
 
   print "could not detect custom runner procedure, using standard procedure"
 
-  dbg = debug.Debugger(libbench, soc)
+  objdump_bin = os.environ['TOOLCHAIN_DIR'] + '/bin/riscv32-unknown-elf-objdump'
+  dbg = debug.Debugger(libbench, soc, objdump_bin)
 
   if opts.ticks_limit == 0:
     print 'no ticks_limit specified, getting limit from the SOC object'

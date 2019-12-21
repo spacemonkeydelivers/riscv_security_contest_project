@@ -22,8 +22,8 @@ class Debugger:
     def register_cmd(cmd):
         return None
 
-    def __init__(self, benchlib, soc):
-        self._disasm = disasm_lib.Disassembler(None)
+    def __init__(self, benchlib, soc, objdump):
+        self._disasm = disasm_lib.Disassembler(objdump)
         self._bench  = benchlib
         self._soc    = soc
         self._cmd    = {}

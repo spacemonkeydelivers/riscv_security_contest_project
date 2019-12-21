@@ -26,7 +26,7 @@ os.environ['ZEPHYR_BUILDS'] = '@CMAKE_BINARY_DIR@/zephyr_build'
 os.environ['DISTRIB_ROOT_DIR'] = '@CMAKE_BINARY_DIR@/distrib'
 os.environ['TOOLS_DISTRIB'] = '@CMAKE_BINARY_DIR@/distrib/tools'
 os.environ['TESTS_DIR'] = TESTS_DIR
-os.environ['TOOLCHAIN_DIR'] = '@RISCV_TOOLCHAIN_PATH@'
+os.environ['TOOLCHAIN_DIR'] = '@RISCV_GCC_TOOLCHAIN_PATH@'
 sys.path.append("@CMAKE_SOURCE_DIR@/bench/rtl")
 
 print(sys.argv)

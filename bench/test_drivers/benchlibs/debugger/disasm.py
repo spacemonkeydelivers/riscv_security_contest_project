@@ -2,8 +2,8 @@ import os
 import shutil
 
 class Disassembler:
-    def __init__(self, path_to_elf):
-        self._objdump = 'riscv32-unknown-elf-objdump'
+    def __init__(self, objdump_bin):
+        self._objdump = objdump_bin
         disasm_cmd = ' '.join([
               self._objdump,
               '-d test.elf | '
