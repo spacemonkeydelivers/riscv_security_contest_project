@@ -479,6 +479,8 @@ module cpu
 
    reg [31:0] prev_pc;
 
+   reg [31:0] insn_counter;
+
    always @ (posedge clk) begin
       if (reset) begin
          state <= STATE_RESET;
@@ -491,6 +493,7 @@ module cpu
          prev_pc <= 0;
          exec_done <= 0;
          test_finished <= 0;
+         insn_counter <= 0;
       end
       else begin
 
@@ -527,6 +530,9 @@ module cpu
                      ? next_check_tags : check_tags;
          exec_done <= ((state == STATE_PRE_FETCH) || (state == STATE_EXEC)) ? next_exec_done : exec_done;
          test_finished <= test_finished ? test_finished : next_test_finished;
+`ifdef SIMULATION_RUN
+         insn_counter <= (state == STATE_DECODE) ? insn_counter + 1 : insn_counter;
+`endif
       end
    end
 

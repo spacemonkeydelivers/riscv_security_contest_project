@@ -51,6 +51,7 @@ public:
     uint64_t counterGetStep ();
 
     bool getTestFinished() const;
+    uint32_t getInstExecCount() const;
 
 private:
     Vsoc*          m_soc         {nullptr};

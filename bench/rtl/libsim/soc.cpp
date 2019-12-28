@@ -318,3 +318,10 @@ bool RV_SOC::getTestFinished() const
     get_test_finished(&val);
     return val;
 }
+    
+uint32_t RV_SOC::getInstExecCount() const
+{
+    int val = 0;
+    cpu_get_instruction_exec_count(&val);
+    return val;
+}

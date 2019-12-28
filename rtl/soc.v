@@ -113,6 +113,14 @@ module soc
    );
       finished = {31'b0, test_finished_o};
    endtask
+   
+   export "DPI-C" task cpu_get_instruction_exec_count;
+   task cpu_get_instruction_exec_count
+   (
+      output int cnt
+   );
+      cnt = cpu0.insn_counter;
+   endtask
 
    localparam WB_DATA_WIDTH = 32;
    localparam WB_ADDR_WIDTH = 32;

@@ -116,6 +116,7 @@ class RiscVSoc:
                 raise UserWarning("breakpoint reached")
 
         print("hart does not make forward progress for too long. Assume test exit")
+        print("hart executed {0} instructions".format(self.instructions_executed()))
         status = self.read_register(1) # exit status is in ra
 
         SUCCESS_CODE = 0x0A11C001
@@ -285,3 +286,6 @@ class RiscVSoc:
     def print_register_file(self):
         for num in range(self._soc.regFileSize()):
             print("Register {0:02d} has value of 0x{1:08x}".format(num, self._soc.readReg(num)))
+
+    def instructions_executed(self):
+        return self._soc.instExecCount()
