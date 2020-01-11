@@ -6,29 +6,38 @@ NM         = $(RISCV_GCC_NM)
 OBJCOPY    = $(RISCV_GCC_OBJCOPY)
 
 LIBGCC_PATH = $(RISCV_LIBGCC_PATH)
-LIBC_PATH   = $(RISCV_PSEUDOLIBC_PATH)
-LIBC_INCLUDES = $(RISCV_PSEUDOLIBC_INCLUDES)
+
+# TODO: move this crap (selection) to runner
+<% if enable_stack_tagging %>
+LIBC_PATH   = $(RISCV_PSEUDOLIBC_MTE_PATH)
+LIBC_INCLUDES = $(RISCV_PSEUDOLIBC_MTE_INCLUDES)
+<% elsif disable_security %>
+LIBC_PATH   = $(RISCV_PSEUDOLIBC_NS_PATH)
+LIBC_INCLUDES = $(RISCV_PSEUDOLIBC_NS_INCLUDES)
+<% else %>
+LIBC_PATH   = $(RISCV_PSEUDOLIBC_MT_PATH)
+LIBC_INCLUDES = $(RISCV_PSEUDOLIBC_MT_INCLUDES)
+<% end %>
 
 LDFLAGS    = $(RISCV_LDFLAGS_COMMON)
 LDSCRIPT   = $(RISCV_C_LD_SCRIPT)
 
 CFLAGS     = $(RISCV_CFLAGS_COMMON) <%= disable_warnings ? "-w" : "" %>
-CFLAGS    += -march=$(MARCH_C_TESTS) -mabi=ilp32
+LDFLAGS    = ${RISCV_LDFLAGS_COMMON} <%= disable_warnings ? "-w" : "" %>
+
 <% if asm_c_ext %>
-CFLAGS    += -march=rv32imc
+C_TEST_MARCH = rv32imc
+<% else %>
+C_TEST_MARCH = $(MARCH_C_TESTS)
 <% end %>
 
 <% if enable_stack_tagging %>
-CFLAGS    += --target=riscv32 -march=rv32imcxbeehive -fsanitize=memtag
+CFLAGS    += -mabi=ilp32 --target=riscv32 -march=$(C_TEST_MARCH)xbeehive -fsanitize=memtag
+LDFLAGS   += -mabi=ilp32 -march=$(C_TEST_MARCH)xbeehive
+<% else %>
+CFLAGS    += -mabi=ilp32 -march=$(C_TEST_MARCH)
+LDFLAGS   += -mabi=ilp32 -march=$(C_TEST_MARCH)
 <% end %>
-
-LDFLAGS    = ${RISCV_LDFLAGS_COMMON} <%= disable_warnings ? "-w" : "" %>
-LDFLAGS   += -march=$(MARCH_C_TESTS) -mabi=ilp32
-<% if asm_c_ext %>
-LDFLAGS   += -march=rv32imc
-<% end %>
-
-LIBC = <%= disable_security ? "c_ns" : "c" %>
 
 SRC  = <%= input_c %>
 DIRECTORY = <%= c_root %>
@@ -46,7 +55,7 @@ tcl_copy: $(TESTBENCH_TOOLS_SRC)/trace/filter_init.tcl
 test.elf:  command_line.s $(SRC) $(LIBC_PATH)/libc.a
 	$(CC) $(CFLAGS) $(SRC) command_line.s \
 	-I$(DIRECTORY) -I$(LIBC_INCLUDES) \
-	-static -L$(LIBC_PATH) -lm -l$(LIBC) $(LIBGCC_PATH) \
+	-static -L$(LIBC_PATH) -lm -lc $(LIBGCC_PATH) \
         -LinkerBin $(LD) \
 	-Xlinker --defsym=__SOC_MEM_SIZE=$(SOC_RAM_SIZE) \
 	-Xlinker -T$(LDSCRIPT) -o test.elf
