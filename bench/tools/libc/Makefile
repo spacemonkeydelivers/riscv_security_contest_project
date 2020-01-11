@@ -5,7 +5,6 @@ OBJ_FILES=boot.o isr.o config.o libgcc_.o mulsi3.o \
 	stdlib.o unistd.o string.o time.o errno.o \
 	assert.o ctype.o
 LIBNAME=libc
-NS_LIBNAME=libc_ns
 INSTALL_HEADERS=stdarg.h stdbool.h stddef.h stdint.h \
 	stdio.h stdlib.h string.h unistd.h time.h errno.h \
 	assert.h ctype.h limits.h
@@ -18,7 +17,7 @@ I_SOC_HEADERS := $(addprefix $(TOP)/include/soc/,$(INSTALL_SOC_HEADERS))
 I_MISC_HEADERS:= $(addprefix $(TOP)/include/misc/,$(INSTALL_MISC_HEADERS))
 I_SHARE       := $(addprefix $(TOP)/share/,$(INSTALL_SHARE_CONTENT))
 I_STRUCTURE   := $(addprefix $(INSTALL_DIR)/,lib include include/soc include/misc share)
-DEPS_INSTALL := $(LIBNAME).a $(NS_LIBNAME).a
+DEPS_INSTALL := $(LIBNAME).a
 DEPS_INSTALL += $(I_HEADERS)
 DEPS_INSTALL += $(I_SOC_HEADERS)
 DEPS_INSTALL += $(I_MISC_HEADERS)
@@ -26,7 +25,7 @@ DEPS_INSTALL += $(I_SHARE)
 
 install: $(DEPS_INSTALL)
 	install -d $(I_STRUCTURE)
-	install -m 644 $(LIBNAME).a $(NS_LIBNAME).a $(INSTALL_DIR)/lib
+	install -m 644 $(LIBNAME).a $(INSTALL_DIR)/lib
 	install -m 644 $(I_HEADERS) $(INSTALL_DIR)/include
 	install -m 644 $(I_SOC_HEADERS) $(INSTALL_DIR)/include/soc
 	install -m 644 $(I_MISC_HEADERS) $(INSTALL_DIR)/include/misc
@@ -38,7 +37,7 @@ test_program: $(LIBNAME).a $(TOP)/tests/basic.c
 		-LinkerBin $(LD) \
 		-T$(TOP)/share/soc.ld -I$(TOP)/include -o test_program
 
-all: $(LIBNAME).a $(NS_LIBNAME).a
+all: $(LIBNAME).a
 
 generated/esf.h: $(TOP)/src/internals/esf.h.erb
 	mkdir -p generated && erb -T 1 $(TOP)/src/internals/esf.h.erb >generated/esf.h
@@ -101,17 +100,19 @@ assert.o: $(TOP)/src/assert.c
 ctype.o: $(TOP)/src/ctype.c
 	$(CC) $(CFLAGS) $(addprefix -I,$(INCLUDE)) -o $@ -c $<
 
+ifeq ($(CONFIGURATION),ns)
+$(LIBNAME).a: $(OBJ_FILES) no_security.o
+	$(AR) rcs $@ $^
+else
 $(LIBNAME).a: $(OBJ_FILES) security.o
 	$(AR) rcs $@ $^
-
-$(NS_LIBNAME).a: $(OBJ_FILES) no_security.o
-	$(AR) rcs $@ $^
+endif
 
 # ar -rcT libaz.a ../build/distrib/tools/lib/libc.a /tank/work/dev/toolchains/riscv32-newlib-gcc/lib/gcc/riscv32-unknown-elf/8.3.0/libgcc.a
 .PHONY: clean
 
 clean:
-	rm -rf ${BUILD_DIR}/$(OBJ_FILES) ${BUILD_DIR}/$(LIBNAME).a ${BUILD_DIR}/$(NS_LIBNAME).a
+	rm -rf ${BUILD_DIR}/$(OBJ_FILES) ${BUILD_DIR}/$(LIBNAME).a
 	rm ${BUILD_DIR}/security.o ${BUILD_DIR}/no_security.o
 
 # End of Makefile
