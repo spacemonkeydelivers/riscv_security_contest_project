@@ -13,7 +13,12 @@ set(FLAGS "${FLAGS} -march=${DEFAULT_ARCH_C_TESTS}")
 
 set(MTE_FLAGS "")
 
-add_custom_target(libc ALL)
+add_custom_target(clink ALL
+   COMMAND ${CMAKE_COMMAND} -E make_directory "${_SUBPROJECT_INSTALL_PREFIX}/share/"
+   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/libc/share/soc.ld ${_SUBPROJECT_INSTALL_PREFIX}/share/
+   DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/libc/share/soc.ld"
+)
+add_custom_target(libc ALL DEPENDS clink)
 
 function(addlibc_target target_name)
     set(LIBC_C_FLAGS "${FLAGS}")
