@@ -25,7 +25,7 @@ class RunnerOptions():
     else:
       DBG = ''
 
-    print('checking for os.environ("DBG") for [+trace, +vcf, +ticks_to_run]')
+    print('checking for os.environ("DBG") for [+trace, +vcd, +ticks_to_run]')
 
     if '+trace' in DBG:
       print 'env.DBG has +trace. Logging facilities enabled'
