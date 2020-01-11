@@ -8,12 +8,15 @@ def extract_c_directives(filename, directives):
 
   directives.append('disable_security = false')
   directives.append('disable_warnings = false')
+  directives.append('enable_stack_tagging = false')
 
   for arg in sys.argv:
     if arg == '--nonsecure-libc':
         directives.append('disable_security = true')
     if arg == '--disable-c-warnings':
         directives.append('disable_warnings = true')
+    if arg == '--enable-stack-tagging':
+        directives.append('enable_stack_tagging = true')
 
 def make_command_line():
   cmd_file = None

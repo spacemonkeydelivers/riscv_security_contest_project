@@ -18,6 +18,10 @@ CFLAGS    += -march=$(MARCH_C_TESTS) -mabi=ilp32
 CFLAGS    += -march=rv32imc
 <% end %>
 
+<% if enable_stack_tagging %>
+CFLAGS    += --target=riscv32 -march=rv32imcxbeehive -fsanitize=memtag
+<% end %>
+
 LDFLAGS    = ${RISCV_LDFLAGS_COMMON} <%= disable_warnings ? "-w" : "" %>
 LDFLAGS   += -march=$(MARCH_C_TESTS) -mabi=ilp32
 <% if asm_c_ext %>

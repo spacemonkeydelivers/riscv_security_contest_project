@@ -162,7 +162,7 @@ test_add(cripe_cfg_parser_unit4   c/ripe --cmd="./cfg_unit/attack_4.cfg" INVERT_
 test_add(cripe_cfg_parser_unit5   c/ripe --cmd="./cfg_unit/attack_5.cfg" INVERT_RESULT WARN_DISABLE)
 
 test_add(c_bench_dhrystone_10 benchmarks/dhrystone WARN_DISABLE)
-test_add(c_bench_coremark benchmarks/coremark TICKS_TIMEOUT 30000000)
+test_add(c_bench_coremark benchmarks/coremark TICKS_TIMEOUT 70000000)
 
 test_add(c_bench_crc32 benchmarks/crc32 NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
 test_add(c_bench_cubic benchmarks/cubic NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
