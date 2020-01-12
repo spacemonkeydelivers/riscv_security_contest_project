@@ -1,0 +1,179 @@
+# START: C LIBRARY test group
+test_add(c_tm_basic          c/basic)
+test_add(c_mte_basic         c/basic ENABLE_MTE)
+
+test_add(c_tml_libm_basic    c/libm/basic)
+test_add(c_mte_libm_basic    c/libm/basic ENABLE_MTE)
+
+test_add(c_tml_libc_exit_S   c/libc/exit_succ)
+test_add(c_mte_libc_exit_S   c/libc/exit_succ ENABLE_MTE)
+
+test_add(c_tml_libc_exit_F   c/libc/exit_fail INVERT_RESULT)
+test_add(c_mte_libc_exit_F   c/libc/exit_fail INVERT_RESULT ENABLE_MTE)
+
+test_add(c_tml_libc_main_ret_S c/libc/main_ret_succ)
+test_add(c_mte_libc_main_ret_S c/libc/main_ret_succ ENABLE_MTE)
+
+test_add(c_tml_libc_main_ret_F c/libc/main_ret_fail INVERT_RESULT)
+test_add(c_mte_libc_main_ret_F c/libc/main_ret_fail INVERT_RESULT ENABLE_MTE)
+
+test_add(c_tml_libc_printf4   c/libc/printf4)
+test_add(c_mte_libc_printf4   c/libc/printf4 ENABLE_MTE)
+
+test_add(c_tml_libc_printf5   c/libc/printf5)
+test_add(c_mte_libc_printf5   c/libc/printf5 ENABLE_MTE)
+
+test_add(c_tml_libc_printf_int c/libc/printf_int)
+test_add(c_mte_libc_printf_int c/libc/printf_int ENABLE_MTE)
+
+test_add(c_tml_libc_malloc    c/libc/malloc)
+test_add(c_mte_libc_malloc    c/libc/malloc ENABLE_MTE)
+
+test_add(c_tml_libc_memset    c/libc/memset)
+test_add(c_mte_libc_memset    c/libc/memset ENABLE_MTE)
+
+test_add(c_tml_libc_memcmp    c/libc/memcmp)
+test_add(c_mte_libc_memcmp    c/libc/memcmp ENABLE_MTE)
+
+test_add(c_tml_libc_printk    c/libc/printk)
+test_add(c_mte_libc_printk    c/libc/printk ENABLE_MTE)
+
+test_add(c_nsl_libc_printk    c/libc/printk DISABLE_SECURITY)
+
+test_add(c_tml_libc_strcat    c/libc/strcat)
+test_add(c_mte_libc_strcat    c/libc/strcat ENABLE_MTE)
+
+test_add(c_tml_libc_strcpy    c/libc/strcpy)
+test_add(c_mte_libc_strcpy    c/libc/strcpy ENABLE_MTE)
+
+test_add(c_tml_libc_strlen    c/libc/strlen)
+test_add(c_mte_libc_strlen    c/libc/strlen ENABLE_MTE)
+
+test_add(c_tml_libc_strncat   c/libc/strncat WARN_DISABLE)
+test_add(c_mte_libc_strncat   c/libc/strncat WARN_DISABLE ENABLE_MTE)
+
+test_add(c_tml_libc_strncpy   c/libc/strncpy WARN_DISABLE)
+test_add(c_mte_libc_strncpy   c/libc/strncpy WARN_DISABLE ENABLE_MTE)
+
+test_add(c_tml_libc_strtoul   c/libc/strtoul)
+test_add(c_mte_libc_strtoul   c/libc/strtoul ENABLE_MTE)
+
+test_add(c_tml_libc_strcmp    c/libc/strcmp)
+test_add(c_mte_libc_strcmp    c/libc/strcmp ENABLE_MTE)
+
+test_add(c_tml_libc_abort     c/libc/abort INVERT_RESULT)
+test_add(c_mte_libc_abort     c/libc/abort INVERT_RESULT ENABLE_MTE)
+
+test_add(c_tml_libc_isalpha   c/libc/isalpha)
+test_add(c_mte_libc_isalpha   c/libc/isalpha ENABLE_MTE)
+
+test_add(c_tml_libc_isdigit   c/libc/isdigit)
+test_add(c_mte_libc_isdigit   c/libc/isdigit ENABLE_MTE)
+
+test_add(c_tml_libc_isspace   c/libc/isspace)
+test_add(c_mte_libc_isspace   c/libc/isspace ENABLE_MTE)
+
+test_add(c_tml_libc_isxdigit  c/libc/isxdigit)
+test_add(c_mte_libc_isxdigit  c/libc/isxdigit ENABLE_MTE)
+
+test_add(c_tml_libc_memmove   c/libc/memmove)
+test_add(c_mte_libc_memmove   c/libc/memmove ENABLE_MTE)
+
+test_add(c_tml_libc_strch     c/libc/strch)
+test_add(c_mte_libc_strch     c/libc/strch ENABLE_MTE)
+
+test_add(c_tml_libc_tolower   c/libc/tolower)
+test_add(c_mte_libc_tolower   c/libc/tolower ENABLE_MTE)
+# END: C LIBRARY test group
+
+# START: SECURITY-DIRECTED C-BASED test group
+test_add(c_tml_Slibc_s_malloc  c/libc_sec/s_malloc)
+test_add(c_mte_Slibc_s_malloc  c/libc_sec/s_malloc ENABLE_MTE)
+
+test_add(c_tml_Slibc_s_free    c/libc_sec/s_free NIGHTLY)
+test_add(c_mte_Slibc_s_free    c/libc_sec/s_free NIGHTLY ENABLE_MTE)
+
+test_add(c_nsl_Slibc_ns_malloc c/libc_sec/ns_malloc DISABLE_SECURITY)
+test_add(c_nsl_Slibc_ns_free   c/libc_sec/ns_free DISABLE_SECURITY)
+# END: SECURITY-DIRECTED test group
+
+# START: SOC-SPECIFIC test group
+test_add(c_tml_soc_isr_route_timer_base   c/soc/isr_route_timer_base)
+test_add(c_mte_soc_isr_route_timer_base   c/soc/isr_route_timer_base ENABLE_MTE)
+
+test_add(c_tml_soc_isr_route_ialign_base  c/soc/isr_route_ialign_base NIGHTLY)
+test_add(c_mte_soc_isr_route_ialign_base  c/soc/isr_route_ialign_base NIGHTLY ENABLE_MTE)
+
+test_add(c_tml_soc_hwrand                 c/soc/hwrand NIGHTLY)
+test_add(c_mte_soc_hwrand                 c/soc/hwrand NIGHTLY ENABLE_MTE)
+# END: SOC-SPECIFIC test group
+
+test_add(c_tml_example_cmdln   c/examples/cmd_line --cmd="./cmd.line")
+test_add(c_mte_example_cmdln   c/examples/cmd_line --cmd="./cmd.line" ENABLE_MTE)
+
+test_add(c_tml_example_prrel   c/examples/cmd_line --cmd="c/examples/cmd_line/cmd.line")
+test_add(c_mte_example_prrel   c/examples/cmd_line --cmd="c/examples/cmd_line/cmd.line" ENABLE_MTE)
+
+test_add(c_tml_example_abs     c/examples/cmd_line
+         --cmd="${CMAKE_SOURCE_DIR}/tests/c/examples/cmd_line/cmd.line")
+test_add(c_mte_example_abs     c/examples/cmd_line
+         --cmd="${CMAKE_SOURCE_DIR}/tests/c/examples/cmd_line/cmd.line" ENABLE_MTE)
+
+test_add(c_tml_fibonacci            c/fibo)
+test_add(c_mte_fibonacci            c/fibo ENABLE_MTE)
+
+test_add(c_tml_fibonacci_compressed c/fibo ENABLE_C_EXT)
+test_add(c_mte_fibonacci_compressed c/fibo ENABLE_C_EXT ENABLE_MTE)
+
+test_add(c_tml_ripe_ha1  c/ripe --cmd="./cfg/h_attack_1.cfg" INVERT_RESULT WARN_DISABLE)
+test_add(c_mte_ripe_ha1  c/ripe --cmd="./cfg/h_attack_1.cfg" INVERT_RESULT WARN_DISABLE ENABLE_MTE)
+test_add(c_tml_ripe_ha2  c/ripe --cmd="./cfg/h_attack_2.cfg" INVERT_RESULT WARN_DISABLE SPIKE_FAILURE NIGHTLY)
+test_add(c_mte_ripe_ha2  c/ripe --cmd="./cfg/h_attack_2.cfg" INVERT_RESULT WARN_DISABLE SPIKE_FAILURE NIGHTLY ENABLE_MTE)
+test_add(c_tml_ripe_ha3  c/ripe --cmd="./cfg/h_attack_3.cfg" INVERT_RESULT NIGHTLY WARN_DISABLE)
+test_add(c_mte_ripe_ha3  c/ripe --cmd="./cfg/h_attack_3.cfg" INVERT_RESULT NIGHTLY WARN_DISABLE ENABLE_MTE)
+test_add(c_tml_ripe_ha4  c/ripe --cmd="./cfg/h_attack_4.cfg" INVERT_RESULT NIGHTLY WARN_DISABLE)
+test_add(c_mte_ripe_ha4  c/ripe --cmd="./cfg/h_attack_4.cfg" INVERT_RESULT NIGHTLY WARN_DISABLE ENABLE_MTE)
+test_add(c_tml_ripe_ha5  c/ripe --cmd="./cfg/h_attack_5.cfg" INVERT_RESULT WARN_DISABLE)
+test_add(c_mte_ripe_ha5  c/ripe --cmd="./cfg/h_attack_5.cfg" INVERT_RESULT WARN_DISABLE ENABLE_MTE)
+
+test_add(c_tml_ripe_a1   c/ripe --cmd="./cfg/attack_1.cfg" INVERT_RESULT WARN_DISABLE)
+test_add(c_mte_ripe_a1   c/ripe --cmd="./cfg/attack_1.cfg" INVERT_RESULT WARN_DISABLE ENABLE_MTE)
+test_add(c_tml_ripe_a2   c/ripe --cmd="./cfg/attack_2.cfg" INVERT_RESULT WARN_DISABLE SPIKE_FAILURE NIGHTLY)
+test_add(c_mte_ripe_a2   c/ripe --cmd="./cfg/attack_2.cfg" INVERT_RESULT WARN_DISABLE SPIKE_FAILURE NIGHTLY ENABLE_MTE)
+test_add(c_tml_ripe_a3   c/ripe --cmd="./cfg/attack_3.cfg" NIGHTLY INVERT_RESULT WARN_DISABLE)
+test_add(c_mte_ripe_a3   c/ripe --cmd="./cfg/attack_3.cfg" NIGHTLY INVERT_RESULT WARN_DISABLE ENABLE_MTE)
+test_add(c_tml_ripe_a4   c/ripe --cmd="./cfg/attack_4.cfg" NIGHTLY INVERT_RESULT WARN_DISABLE)
+test_add(c_mte_ripe_a4   c/ripe --cmd="./cfg/attack_4.cfg" NIGHTLY INVERT_RESULT WARN_DISABLE ENABLE_MTE)
+test_add(c_tml_ripe_a5   c/ripe --cmd="./cfg/attack_5.cfg" INVERT_RESULT WARN_DISABLE)
+test_add(c_mte_ripe_a5   c/ripe --cmd="./cfg/attack_5.cfg" INVERT_RESULT WARN_DISABLE ENABLE_MTE)
+
+test_add(c_tml_C_ripe_a1   c/ripe --cmd="./cfg/attack_1.cfg" INVERT_RESULT ENABLE_C_EXT WARN_DISABLE)
+test_add(c_mte_C_ripe_a1   c/ripe --cmd="./cfg/attack_1.cfg" INVERT_RESULT ENABLE_C_EXT WARN_DISABLE ENABLE_MTE)
+test_add(c_tml_C_ripe_a2   c/ripe --cmd="./cfg/attack_2.cfg" INVERT_RESULT ENABLE_C_EXT WARN_DISABLE SPIKE_FAILURE NIGHTLY)
+test_add(c_mte_C_ripe_a2   c/ripe --cmd="./cfg/attack_2.cfg" INVERT_RESULT ENABLE_C_EXT WARN_DISABLE SPIKE_FAILURE NIGHTLY ENABLE_MTE)
+test_add(c_tml_C_ripe_a3   c/ripe --cmd="./cfg/attack_3.cfg" NIGHTLY INVERT_RESULT ENABLE_C_EXT WARN_DISABLE)
+test_add(c_mte_C_ripe_a3   c/ripe --cmd="./cfg/attack_3.cfg" NIGHTLY INVERT_RESULT ENABLE_C_EXT WARN_DISABLE ENABLE_MTE)
+test_add(c_tml_C_ripe_a4   c/ripe --cmd="./cfg/attack_4.cfg" NIGHTLY INVERT_RESULT ENABLE_C_EXT WARN_DISABLE)
+test_add(c_mte_C_ripe_a4   c/ripe --cmd="./cfg/attack_4.cfg" NIGHTLY INVERT_RESULT ENABLE_C_EXT WARN_DISABLE ENABLE_MTE)
+test_add(c_tml_C_ripe_a5   c/ripe --cmd="./cfg/attack_5.cfg" INVERT_RESULT ENABLE_C_EXT WARN_DISABLE)
+test_add(c_mte_C_ripe_a5   c/ripe --cmd="./cfg/attack_5.cfg" INVERT_RESULT ENABLE_C_EXT WARN_DISABLE ENABLE_MTE)
+
+test_add(c_nsl_ripe_a1   c/ripe --cmd="./cfg/attack_1.cfg" DISABLE_SECURITY WARN_DISABLE)
+test_add(c_nsl_ripe_a2   c/ripe --cmd="./cfg/attack_2.cfg" NIGHTLY DISABLE_SECURITY WARN_DISABLE)
+test_add(c_nsl_ripe_a3   c/ripe --cmd="./cfg/attack_3.cfg" DISABLE_SECURITY WARN_DISABLE)
+test_add(c_nsl_ripe_a4   c/ripe --cmd="./cfg/attack_4.cfg" DISABLE_SECURITY WARN_DISABLE)
+test_add(c_nsl_ripe_a5   c/ripe --cmd="./cfg/attack_5.cfg" DISABLE_SECURITY WARN_DISABLE)
+
+test_add(c_nslC_ripe_a1  c/ripe --cmd="./cfg/attack_1.cfg" DISABLE_SECURITY ENABLE_C_EXT WARN_DISABLE)
+test_add(c_nslC_ripe_a2  c/ripe --cmd="./cfg/attack_2.cfg" NIGHTLY DISABLE_SECURITY ENABLE_C_EXT WARN_DISABLE)
+test_add(c_nslC_ripe_a3  c/ripe --cmd="./cfg/attack_3.cfg" DISABLE_SECURITY ENABLE_C_EXT WARN_DISABLE)
+test_add(c_nslC_ripe_a4  c/ripe --cmd="./cfg/attack_4.cfg" DISABLE_SECURITY ENABLE_C_EXT WARN_DISABLE)
+test_add(c_nslC_ripe_a5  c/ripe --cmd="./cfg/attack_5.cfg" DISABLE_SECURITY ENABLE_C_EXT WARN_DISABLE)
+
+test_add(cripe_tml_cfg_parser_unit0   c/ripe --cmd="./cfg_unit/attack_0.cfg" WARN_DISABLE)
+test_add(cripe_mte_cfg_parser_unit0   c/ripe --cmd="./cfg_unit/attack_0.cfg" WARN_DISABLE ENABLE_MTE)
+test_add(cripe_cfg_parser_unit1   c/ripe --cmd="./cfg_unit/attack_1.cfg" INVERT_RESULT WARN_DISABLE)
+test_add(cripe_cfg_parser_unit2   c/ripe --cmd="./cfg_unit/attack_2.cfg" INVERT_RESULT WARN_DISABLE)
+test_add(cripe_cfg_parser_unit3   c/ripe --cmd="./cfg_unit/attack_3.cfg" WARN_DISABLE)
+test_add(cripe_cfg_parser_unit4   c/ripe --cmd="./cfg_unit/attack_4.cfg" INVERT_RESULT WARN_DISABLE)
+test_add(cripe_cfg_parser_unit5   c/ripe --cmd="./cfg_unit/attack_5.cfg" INVERT_RESULT WARN_DISABLE)

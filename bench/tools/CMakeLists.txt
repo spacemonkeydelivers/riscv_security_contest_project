@@ -65,9 +65,9 @@ function(addlibc_target target_name)
     )
 endfunction()
 
-addlibc_target("tm")
-addlibc_target("ns")
-addlibc_target("mte")
+addlibc_target(tm)
+addlibc_target(ns)
+addlibc_target(mte)
 
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/misc/testsMakefile.include.in"

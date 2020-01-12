@@ -1,0 +1,63 @@
+# START: BENCHMARK test group
+test_add(c_tml_bench_dhrystone_10 benchmarks/dhrystone WARN_DISABLE)
+test_add(c_mte_bench_dhrystone_10 benchmarks/dhrystone WARN_DISABLE ENABLE_MTE)
+
+test_add(c_tml_bench_coremark benchmarks/coremark TICKS_TIMEOUT 70000000)
+test_add(c_mte_bench_coremark benchmarks/coremark TICKS_TIMEOUT 70000000 ENABLE_MTE)
+
+test_add(c_tml_bench_crc32 benchmarks/crc32 NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_crc32 benchmarks/crc32 NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_cubic benchmarks/cubic NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_cubic benchmarks/cubic NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_edn benchmarks/edn NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_edn benchmarks/edn NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_huffbench benchmarks/huffbench NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_huffbench benchmarks/huffbench NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_matmult-int benchmarks/matmult-int NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_matmult-int benchmarks/matmult-int NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_minver benchmarks/minver NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_minver benchmarks/minver NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_nbody benchmarks/nbody NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_nbody benchmarks/nbody NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_nettle-aes benchmarks/nettle-aes NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_nettle-aes benchmarks/nettle-aes NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_nettle-sha256 benchmarks/nettle-sha256 NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_nettle-sha256 benchmarks/nettle-sha256 NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_nsichneu benchmarks/nsichneu NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_nsichneu benchmarks/nsichneu NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_picojpeg benchmarks/picojpeg NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_picojpeg benchmarks/picojpeg NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_qrduino benchmarks/qrduino NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_qrduino benchmarks/qrduino NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_sglib-combined benchmarks/sglib-combined NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_sglib-combined benchmarks/sglib-combined NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_slre benchmarks/slre NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_slre benchmarks/slre NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_st benchmarks/st NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_st benchmarks/st NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_statemate benchmarks/statemate NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_statemate benchmarks/statemate NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_ud benchmarks/ud NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_ud benchmarks/ud NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_wikisort benchmarks/wikisort NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_wikisort benchmarks/wikisort NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
+
+test_add(c_tml_bench_aha-mont64 benchmarks/aha-mont64 NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000)
+test_add(c_mte_bench_aha-mont64 benchmarks/aha-mont64 NIGHTLY WARN_DISABLE TICKS_TIMEOUT 500000000 ENABLE_MTE)
