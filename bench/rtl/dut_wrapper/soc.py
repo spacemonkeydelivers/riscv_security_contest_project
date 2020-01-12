@@ -118,6 +118,10 @@ class RiscVSoc:
         print("hart does not make forward progress for too long. Assume test exit")
         print("hart executed {0} instructions".format(self.instructions_executed()))
         print("hart executed {0} ticks".format(self.ticks_executed()))
+        stats = open('stats.txt', 'w')
+        stats.write("hart executed {0} instructions\n".format(self.instructions_executed()))
+        stats.write("hart executed {0} ticks\n".format(self.ticks_executed()))
+        stats.close()
         status = self.read_register(1) # exit status is in ra
 
         SUCCESS_CODE = 0x0A11C001
