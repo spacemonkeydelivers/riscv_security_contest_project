@@ -22,7 +22,7 @@ add_custom_target(libc ALL DEPENDS clink)
 
 function(addlibc_target target_name)
     set(LIBC_C_FLAGS "${FLAGS}")
-    set(LIBC_INSTALL_DIR "${_SUBPROJECT_INSTALL_PREFIX}/libc/${target_name}")
+    set(LIB_INSTALL_DIR "${_SUBPROJECT_INSTALL_PREFIX}/lib/${target_name}")
     set(LIBC_TGT_NAME "libc_${target_name}")
     add_dependencies(libc ${LIBC_TGT_NAME})
     ExternalProject_Add(
@@ -37,14 +37,13 @@ function(addlibc_target target_name)
             CC=${RV_LLVM_CC_PATH}
             LD=${RV_GCC_LD_PATH}
             AR=${RV_LLVM_AR_PATH}
-            INSTALL_DIR=${LIBC_INSTALL_DIR}
+            INSTALL_DIR=${LIB_INSTALL_DIR}
             CONFIGURATION=${target_name}
             TOP=${CMAKE_CURRENT_SOURCE_DIR}/libc all install test_program VERBOSE=1
         INSTALL_COMMAND ""
     )
 
-    set(LIBM_C_FLAGS "${LIBC_C_FLAGS} -w -I${LIBC_INSTALL_DIR}/include")
-    set(LIBM_INSTALL_DIR "${_SUBPROJECT_INSTALL_PREFIX}/libm/${target_name}")
+    set(LIBM_C_FLAGS "${LIBC_C_FLAGS} -w -I${LIB_INSTALL_DIR}/include")
     set(LIBM_TGT_NAME "libm_${target_name}")
     add_dependencies(libc ${LIBM_TGT_NAME})
     ExternalProject_Add(
@@ -59,7 +58,7 @@ function(addlibc_target target_name)
             C_COMPILER=${RV_LLVM_CC_PATH}
             AR=${RV_LLVM_AR_PATH}
             LD=${RV_GCC_LD_PATH}
-            INSTALL_DIR=${LIBM_INSTALL_DIR}
+            INSTALL_DIR=${LIB_INSTALL_DIR}
             TOP=${CMAKE_CURRENT_SOURCE_DIR}/fdlibm
             install VERBOSE=1
         INSTALL_COMMAND ""
