@@ -55,7 +55,7 @@ function(test_add name)
         set(TEST_TICKS_TIMEOUT "--ticks-timeout=${TEST_DESCR_TICKS_TIMEOUT}")
     endif()
 
-    if (${TEST_DESCT_ENABLE_MTE})
+    if (${TEST_DESCR_ENABLE_MTE})
         set(ENABLE_MTE "--enable-stack-tagging")
     endif()
 
