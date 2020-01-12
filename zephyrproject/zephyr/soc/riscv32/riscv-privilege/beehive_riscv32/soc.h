@@ -14,12 +14,12 @@
 #include <soc_common.h>
 
 /* UART Configuration */
-#define RISCV_BEEHIVE_UART_BASE      0x80000004
+#define RISCV_BEEHIVE_UART_BASE      0x8000004
 
 /* Timer configuration */
-#define RISCV_MTIME_BASE             0x40000000
-#define RISCV_MTIMECMP_BASE          0x40000008
-#define BEEHIVE_MTIMECTRL_BASE       0x40000010
+#define RISCV_MTIME_BASE             0x4000000
+#define RISCV_MTIMECMP_BASE          0x4000008
+#define BEEHIVE_MTIMECTRL_BASE       0x4000010
 
 #define RISCV_BEEHIVE_SECURE_MONITOR_PANIC_IRQ 16
 

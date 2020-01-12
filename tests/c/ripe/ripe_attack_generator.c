@@ -24,7 +24,7 @@ unsigned int ptr_diff(const void* p1, const void* p2) {
     unsigned long pl1 = (unsigned long)p1;
     unsigned long pl2 = (unsigned long)p2;
     if (hardened_mode) {
-        return (pl1 & ((1 << 26) - 1)) - (pl2 & ((1 << 26) - 1));
+        return (pl1 & ((1 << 28) - 1)) - (pl2 & ((1 << 28) - 1));
     } else {
         return pl1 - pl2;
     }

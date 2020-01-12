@@ -46,7 +46,7 @@ bss_init:
     li s0, 8
     csrw mstatus, s0
 # Configure uart to 9600 baud
-    li a1, 0x80000000
+    li a1, 0x8000000
     li a0, 13889
     sw a0, 0(a1)
 

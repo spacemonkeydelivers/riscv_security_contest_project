@@ -85,10 +85,10 @@ int __int_serve(struct s_esf_frame* frame, int n) {
     return 0;
 }
 
-#define MTIME_BASE     0x40000000
-#define MTIMECMP_BASE  0x40000008
-#define MTIMEFREQ_BASE 0x40000010
-#define MTIME_AE_BASE  0x40000018
+#define MTIME_BASE     0x4000000
+#define MTIMECMP_BASE  0x4000008
+#define MTIMEFREQ_BASE 0x4000010
+#define MTIME_AE_BASE  0x4000018
 
 __attribute__((section(".__system.os")))
 uint64_t __mtime() {
@@ -185,7 +185,7 @@ void _putchar(char character) {
     (void)character;
     if (character == '\0')
         return;
-    volatile char* dst = (volatile char*)0x80000004;
+    volatile char* dst = (volatile char*)0x8000004;
     *dst = character;
 }
 __attribute__((section(".__system.os")))

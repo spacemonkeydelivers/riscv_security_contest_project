@@ -33,7 +33,7 @@ module wb_ram
       output wire [WB_DATA_WIDTH - 1:0] wb_data_o
    );
    
-   localparam WB_ADDR_SKIP_BITS = 2;
+   localparam WB_ADDR_SKIP_BITS = 0;
    localparam GRANULES_NUM = (WB_RAM_WORDS * `WORD_SIZE_IN_BYTES) / GRANULE_SIZE_BYTES;
    localparam GRAMULES_ADDR_SKIP = log2(GRANULE_SIZE_BYTES);
    localparam GRANULES_ADDR_WIDTH = log2(GRANULES_NUM);

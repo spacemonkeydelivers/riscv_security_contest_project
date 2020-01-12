@@ -9,7 +9,7 @@ A
 
 .section .reset, "awx"
 __start:
-lui sp, 0x80000
+lui sp, 0x8000
 addi a0, zero, 0x41
 sb a0, 4(sp)
 addi zero, zero, 0

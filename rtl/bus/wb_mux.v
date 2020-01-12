@@ -59,6 +59,7 @@ module wb_mux
    localparam WB_ACCESS_TIMER = 1;
    localparam WB_ACCESS_RAM   = 0;
    localparam WB_ACCESS_UART  = 2;
+   localparam WB_TAG_SKIP     = 4;
 
    wire [WB_ADDR_WIDTH - 1:0] wb_master_addr_i = (bus_master_i) ? wb_ext_addr_i : wb_cpu_addr_i;
    wire [WB_DATA_WIDTH - 1:0] wb_master_data_i = (bus_master_i) ? wb_ext_data_i : wb_cpu_data_i;
@@ -67,7 +68,7 @@ module wb_mux
    wire                       wb_master_stb_i  = (bus_master_i) ? wb_ext_stb_i  : wb_cpu_stb_i;
    wire                       wb_master_cyc_i  = (bus_master_i) ? wb_ext_cyc_i  : wb_cpu_cyc_i;
 
-   wire [1:0] wb_periph_select = wb_master_addr_i[WB_DATA_WIDTH - 1:WB_DATA_WIDTH - 2];
+   wire [1:0] wb_periph_select = wb_master_addr_i[WB_DATA_WIDTH - WB_TAG_SKIP - 1:WB_DATA_WIDTH - WB_TAG_SKIP - 2];
 
    wire access_ram   = (WB_ACCESS_RAM == wb_periph_select);
    wire access_uart  = (WB_ACCESS_UART == wb_periph_select);

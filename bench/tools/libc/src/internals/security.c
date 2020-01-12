@@ -33,7 +33,7 @@ unsigned _ossec_init       (const struct init_ctx* ctx) {
     unsigned ptr = (unsigned)&sec_cntx;
     __asm__ __volatile__(
             "csrw tags, %[en_value]\n\t"
-            "li t0, (~(0xf << 26))\n\t"
+            "li t0, 0x0fffffff\n\t"
             "and t1, %[ptr], t0\n\t"
             "st %[sec_tag], 0(t1)"
             : /* No outputs. */
@@ -48,10 +48,10 @@ __attribute__((section(".__system.os")))
 static unsigned _ossec_get_protected_ptr(unsigned ptr) {
     unsigned result = 0;
     __asm__ __volatile__(
-            "li t0, (~(0xf << 26))\n\t"
+            "li t0, 0x0fffffff\n\t"
             "and t0, %[ptr], t0\n\t"
             "lt t1, 0(t0)\n\t" //load tag
-            "slli t1, t1, 26\n\t"
+            "slli t1, t1, 28\n\t"
             "or %[result], t0, t1"
             : [result]"=r"(result)
             : [ptr]"r" (ptr)
@@ -89,7 +89,7 @@ unsigned _ossec_protect_ptr(volatile void* ptr, unsigned size) {
     if (raw_ptr % 16) {
         _ossec_alignment_assert(raw_ptr);
     }
-    unsigned untagged_ptr = (raw_ptr & (~(0xf << 26)));
+    unsigned untagged_ptr = (raw_ptr & 0x0fffffff);
 
     unsigned granules_to_tag = size / GRANULE_SIZE + ((size % GRANULE_SIZE) ? 1 : 0);
     unsigned address_to_tag = untagged_ptr;
@@ -101,12 +101,12 @@ unsigned _ossec_protect_ptr(volatile void* ptr, unsigned size) {
                 : "t0", "memory");
         address_to_tag += 16;
     }
-    unsigned result =  untagged_ptr | (tag << 26);
+    unsigned result =  untagged_ptr | (tag << 28);
     return result;
 }
 __attribute__((section(".__system.os")))
 unsigned _ossec_get_essence(volatile void* ptr) {
-    return ((unsigned)ptr) & ((1 << 26) - 1);
+    return ((unsigned)ptr) & ((1 << 28) - 1);
 }
 
 __attribute__((section(".__system.os")))

@@ -4,7 +4,7 @@
 .text
 main:
     mv sp, zero
-    lui sp, 0x40000
+    lui sp, 0x4000
 
     // Disable interrupts
     li t2, 0
@@ -48,7 +48,7 @@ check_mip_bit_set:
 
 check_mip_mtimecmp:
     mv sp, zero
-    lui sp, 0x40000
+    lui sp, 0x4000
     li t0, -1
     sw t0, 12(sp)
 

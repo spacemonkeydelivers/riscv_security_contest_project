@@ -68,13 +68,13 @@
    __test_exit \status, TARGET
 .endm
 
-#define UART_DIV_ADDR  0x80000000
-#define UART_BASE_ADDR 0x80000004
+#define UART_DIV_ADDR  0x8000000
+#define UART_BASE_ADDR 0x8000004
 
 #define GRANULE_TAG_WIDTH 4
-#define TAG_OFFSET (32 - 2 - GRANULE_TAG_WIDTH)
+#define TAG_OFFSET (32 - GRANULE_TAG_WIDTH)
 
-#define SET_TAG(sdst, tmp, tag) li tmp, (~(0xf << TAG_OFFSET)); \
+#define SET_TAG(sdst, tmp, tag) li tmp, (0x0fffffff); \
     and sdst, sdst, tmp ; \
     slli tmp, tag, TAG_OFFSET ; \
     or sdst, tmp, sdst
