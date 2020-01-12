@@ -11,7 +11,7 @@ set(FLAGS "-ffreestanding -nostdinc -nodefaultlibs -nostdlib -Os -Wall -Werror -
 set(FLAGS "${FLAGS} -I${PLATFORM_FILES_ROOT}/include")
 set(FLAGS "${FLAGS} -march=${DEFAULT_ARCH_C_TESTS}")
 
-set(MTE_FLAGS "")
+set(MTE_FLAGS "--target=riscv32 -march=rv32imcxbeehive -fsanitize=memtag")
 
 add_custom_target(clink ALL
    COMMAND ${CMAKE_COMMAND} -E make_directory "${_SUBPROJECT_INSTALL_PREFIX}/share/"
@@ -22,6 +22,10 @@ add_custom_target(libc ALL DEPENDS clink)
 
 function(addlibc_target target_name)
     set(LIBC_C_FLAGS "${FLAGS}")
+    if ("${target_name}" STREQUAL "mte")
+        set(LIBC_C_FLAGS "${LIBC_C_FLAGS} ${MTE_FLAGS}")
+    endif()
+    # message("TargetName: ${target_name} / ${LIBC_C_FLAGS}")
     set(LIB_INSTALL_DIR "${_SUBPROJECT_INSTALL_PREFIX}/lib/${target_name}")
     set(LIBC_TGT_NAME "libc_${target_name}")
     add_dependencies(libc ${LIBC_TGT_NAME})
