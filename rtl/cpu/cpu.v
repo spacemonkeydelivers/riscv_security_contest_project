@@ -9,7 +9,8 @@ module cpu
 #(
    parameter VECTOR_RESET = 32'd0,
    parameter VECTOR_EXCEPTION = 32'd16,
-   parameter CPU_USE_NEW_TEST_SEQUENCE = 1'd1
+   parameter CPU_USE_NEW_TEST_SEQUENCE = 1'd1,
+   parameter CPU_SKIP_TAG_CHECK_ON_SP = 1'd0
 )
 (
    input CLK_I,
@@ -696,25 +697,25 @@ module cpu
             case(dec_funct3)
                `FUNC_LB: begin
                   bus_op = `BUSOP_READB;
-                  next_check_tags = tags_en;
+                  next_check_tags = (CPU_SKIP_TAG_CHECK_ON_SP ? ((dec_rs1== 5'd2) ? 1'd0 : tags_en) : tags_en);
                end
                `FUNC_LH: begin
                   bus_op = `BUSOP_READH;
-                  next_check_tags = tags_en;
+                  next_check_tags = (CPU_SKIP_TAG_CHECK_ON_SP ? ((dec_rs1== 5'd2) ? 1'd0 : tags_en) : tags_en);
                end
                `FUNC_LW: begin
                   bus_op = `BUSOP_READW;
-                  next_check_tags = tags_en;
+                  next_check_tags = (CPU_SKIP_TAG_CHECK_ON_SP ? ((dec_rs1== 5'd2) ? 1'd0 : tags_en) : tags_en);
                end
                `FUNC_LBU: begin
                   bus_op = `BUSOP_READBU;
-                  next_check_tags = tags_en;
+                  next_check_tags = (CPU_SKIP_TAG_CHECK_ON_SP ? ((dec_rs1== 5'd2) ? 1'd0 : tags_en) : tags_en);
                end
                `FUNC_LT: begin
                   bus_op = `BUSOP_READT;
                end
                default: begin
-                  next_check_tags = tags_en;
+                  next_check_tags = (CPU_SKIP_TAG_CHECK_ON_SP ? ((dec_rs1== 5'd2) ? 1'd0 : tags_en) : tags_en);
                   bus_op = `BUSOP_READHU; // FUNC_LHU
                end
             endcase
@@ -729,18 +730,18 @@ module cpu
             mux_bus_addr_sel = `MUX_BUSADDR_ALU;
             case(dec_funct3)
                `FUNC_SB: begin
-                  next_check_tags = tags_en;
+                  next_check_tags = (CPU_SKIP_TAG_CHECK_ON_SP ? ((dec_rs1== 5'd2) ? 1'd0 : tags_en) : tags_en);
                   bus_op = `BUSOP_WRITEB;
                end
                `FUNC_SH: begin
-                  next_check_tags = tags_en;
+                  next_check_tags = (CPU_SKIP_TAG_CHECK_ON_SP ? ((dec_rs1== 5'd2) ? 1'd0 : tags_en) : tags_en);
                   bus_op = `BUSOP_WRITEH;
                end
                `FUNC_ST: begin
                   bus_op = `BUSOP_WRITET;
                end
                default: begin
-                  next_check_tags = tags_en;
+                  next_check_tags = (CPU_SKIP_TAG_CHECK_ON_SP ? ((dec_rs1== 5'd2) ? 1'd0 : tags_en) : tags_en);
                   bus_op = `BUSOP_WRITEW; // FUNC_SW
                end
             endcase
