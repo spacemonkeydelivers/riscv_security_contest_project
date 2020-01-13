@@ -50,6 +50,7 @@ test_add(asm_tags_mismatch_sw   asm/tags/mismatch_sw.s)
 test_add(asm_tags_mismatch_lw   asm/tags/mismatch_lw.s)
 test_add(asm_tags_match_s_l     asm/tags/match_s_l.s)
 test_add(asm_tags_disabled_stlt asm/tags/disabled_stlt.s)
+test_add(asm_tags_match_on_sp   asm/tags/match_sp.s NIGHTLY)
 
 test_add(asm_mext_mult          asm/mext/mult.s)
 test_add(asm_mext_mulh          asm/mext/mulh.s)
