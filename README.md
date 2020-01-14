@@ -80,10 +80,6 @@ Build RTL simulator (verilator) and run tests:
 1. Running all the existing tests with: `ctest -j10`
 
 *Optional* Build zephyr-based programs (latest tested configuration is *1.14.1-r1*)
-1. install ZEPHYR_SDK: [the guide](https://docs.zephyrproject.org/1.14.1/getting_started/installation_linux.html#zephyr-sdk).
-TLDR: `wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.10.0/zephyr-sdk-0.10.0-setup.run`
-1. make sure that you have `ZEPHYR_SDK_INSTALL_DIR` environment variable
-set properly.
 1. `cd zephyrproject`
 1. `pip3 install --user west`
 1. `west init -l zephyr/`
