@@ -75,14 +75,20 @@ Build the LLVM toolchain:
 Build RTL simulator (verilator) and run tests:
 1. `git clone --recursive http://gitea.yggdrasill.ga/Secure_SoC/secure_soc`
 1. `cd riscv_security_contest_project`
+1. `cd ../ && mkdir build && cd build`
+1. `cmake -DRISCV_GCC_TOOLCHAIN_PATH=<GCC_INSTALL_PREFIX> -DRISCV_LLVM_TOOLCHAIN_PATH=<LLVM_INSTALL_PREFIX> ../ && make -j10`
+1. Running all the existing tests with: `ctest -j10`
+
+*Optional* Build zephyr-based programs (latest tested configuration is *1.14.1-r1*)
+1. install ZEPHYR_SDK: [the guide](https://docs.zephyrproject.org/1.14.1/getting_started/installation_linux.html#zephyr-sdk).
+TLDR: `wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.10.0/zephyr-sdk-0.10.0-setup.run`
+1. make sure that you have `ZEPHYR_SDK_INSTALL_DIR` environment variable
+set properly.
 1. `cd zephyrproject`
 1. `pip3 install --user west`
 1. `west init -l zephyr/`
 1. `west update`
 1. `pip3 install -r zephyr/scripts/requirements.txt`
-1. `cd ../ && mkdir build && cd build`
-1. `cmake -DRISCV_GCC_TOOLCHAIN_PATH=<GCC_INSTALL_PREFIX> -DRISCV_LLVM_TOOLCHAIN_PATH=<LLVM_INSTALL_PREFIX> ../ && make -j10`
-1. Running all the existing tests with: `ctest -j10`
 
 # Testing infrastructure
 
