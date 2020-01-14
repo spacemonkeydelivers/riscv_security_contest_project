@@ -27,12 +27,12 @@ expected tag with memory access performed the following technique is used. The
 **tag** is encoded in the virtual address of the memory reference, like this:
 ```
 VA (32-bit) looks as follows:
- |31:30 | 29:26 | 25:0|
- | PASS |  TAG  |  LA |
+ |31:28 | 27:26 | 25:0|
+ | TAG  | PASS  |  LA |
+- TAG:  bits 31:28 contain the expected memory tag (color) of the performed memory reference
 - PASS: physical address space select. Can be used (depending on a situation
         and/or chip configuration) as either auxiliary bits to logical address
         or as an "address space identifier" to enable access to peripheral devices.
-- TAG:  bits 29:26 contain the expected memory tag (color) of the performed memory reference
 - LA:   logical address (aka virtual on systems with virtual memory).
 ```
 The described scheme also implies that when memory tagging extension is
@@ -46,8 +46,9 @@ used as an extension the LA).
 name: tags
 id: 0x345
 fields:
-| ... |   2    |  1   |   0   |
-|     | ICEN   | IACK |  LSEN |
+| ... |    3    |   2    |  1   |   0   |
+|     | SKIP_SP | ICEN   | IACK |  LSEN |
+- SKIP_SP: enables skip tag check for sp based accesses
 - ICEN: enables tag checking on instruction fetch
 - IACK: write of a non-zero value acknowledges pending "Secure Monitor Panic" interrupt.
 - LSEN: enables tag checkin on load/store operation.
