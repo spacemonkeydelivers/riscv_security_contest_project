@@ -23,6 +23,7 @@
 #define TAG_CTRL_ENABLE (1 << 0)
 #define TAG_CTRL_IACK   (1 << 1)
 #define TAG_CTRL_ICHECK_ENABLE (1 << 2)
+#define TAG_CTRL_SKIP_SP_CHECK_ENABLE (1 << 3)
 
 .ifdef __test_exit
   .purgem __test_exit

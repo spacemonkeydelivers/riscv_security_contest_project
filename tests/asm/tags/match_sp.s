@@ -3,7 +3,7 @@
 
 .text
 main:
-    li a0, TAG_CTRL_ENABLE
+    li a0, (TAG_CTRL_ENABLE | TAG_CTRL_SKIP_SP_CHECK_ENABLE)
     csrw tags, a0
 
     li t1, TAG_V2
