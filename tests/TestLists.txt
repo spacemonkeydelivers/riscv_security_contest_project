@@ -10,6 +10,6 @@ endif()
 
 foreach(test ${ZEPHYR_APPS})
     string(REPLACE "/" "_" APP_NAME ${test})
-    test_add(zephyr_${APP_NAME} zephyr/${APP_NAME} NIGHTLY INVERT_RESULT)
+    test_add(zephyr_${APP_NAME} zephyr/${APP_NAME} NIGHTLY INVERT_RESULT SPIKE_START_PC 4096)
 endforeach()
 

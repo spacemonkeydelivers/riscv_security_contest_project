@@ -21,7 +21,8 @@ function(test_add name)
         ENABLE_MTE)
 
     set(options_one_value
-        TICKS_TIMEOUT)
+        TICKS_TIMEOUT
+        SPIKE_START_PC)
 
     cmake_parse_arguments(PARSE_ARGV 1 TEST_DESCR "${options_no_value}" "${options_one_value}" "")
 
@@ -53,6 +54,10 @@ function(test_add name)
 
     if (${TEST_DESCR_TICKS_TIMEOUT})
         set(TEST_TICKS_TIMEOUT "--ticks-timeout=${TEST_DESCR_TICKS_TIMEOUT}")
+    endif()
+    
+    if (${TEST_DESCR_SPIKE_START_PC})
+        set(TEST_TICKS_TIMEOUT "--spike-start-pc=${TEST_DESCR_SPIKE_START_PC}")
     endif()
 
     if (${TEST_DESCR_ENABLE_MTE})

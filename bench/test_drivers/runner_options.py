@@ -6,6 +6,7 @@ class RunnerOptions():
 
     self.ticks_limit = 0
     self.expect_failure = False
+    self.spike_start_pc = 0
     self.enforce_repl = False
 
     self.dbg_enable_trace = False
@@ -13,6 +14,8 @@ class RunnerOptions():
     self.dbg_ticks_limit2 = 0
 
     for arg in sys.argv:
+      if "--spike-start-pc" in arg:
+        self.spike_start_pc = int(arg.split("=")[1])
       if arg == '--driver-invert-result':
         self.expect_failure = True
       if arg == '--repl':

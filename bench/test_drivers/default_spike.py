@@ -14,7 +14,7 @@ def run(libbench, opts, runner_override = None):
       spike_bin,
       '-m0:256K',
       '--soc=beehive:uart_file=sim_uart.txt:id={}'.format(os.getcwd()),
-      '--pc=0'
+      '--pc={}'.format(opts.spike_start_pc)
   ]
   if opts.dbg_enable_trace:
     sim_args.append('-l')
