@@ -29,7 +29,7 @@ test_add(asm_cext_basic         asm/compressed/c_basic.s ENABLE_C_EXT)
 test_add(asm_cext_fetch_flow    asm/compressed/c_fetch_flow.s ENABLE_C_EXT)
 test_add(asm_cext_fetch_flow_b  asm/compressed/c_fetch_flow_brn.s ENABLE_C_EXT)
 
-test_add(asm_timer              asm/timer.s SPIKE_FAILURE)
+test_add(asm_timer              asm/timer.s)
 test_add(asm_uart               asm/uart.s)
 test_add(asm_uart_collapse      asm/uart_collapse.s)
 test_add(asm_sb                 asm/sb.s)
