@@ -136,7 +136,6 @@ main(void)
     try_attack();
 
     printf("Unexpected back in main\n");
-    return 0;
 
 }
 
