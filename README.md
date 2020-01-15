@@ -206,3 +206,44 @@ TODO: add details.
 | TODO | TODO | TODO |
 
 
+# TODO
+
+- <RTL/SIM> introduce a control mechanism to enforce RND to return sequential numbers
+- <RTL/SIM> introduce "tag freeze mechanism"
+- <TESTS> fix debugger unit-test
+- <TESTS> debug failed secure tests
+- <TESTS> write a test for disabling tag checks of SP-based references featuring
+a compressed load/store
+- <TESTS> debug failed benchmarks in mte mode
+    * huffbench - fails with tag check. might be spill-fill related
+    * nsichneu - fails with odd OutOfMemory on linking stage with ld
+    * slre - fails with tag check. might be spill-fill related
+    * wikisort - fails with tag check. might be spill-fill related
+- <INFRA> zephyr linker scripts are not flexible enough to accomodate for
+memory mapping changes.
+- <INFRA> automate overhead report generation
+- <INFRA> fix runner message about "not forward progress for too long"
+- <INFRA> figure out why runner stopped printing stdout from the simulation
+- <INFRA> fix zephyr building instructions (we expect the specific west version)
+- <INFRA> message "no data to build uart checker available" is printed 4 times
+- <INFRA> make sure that zephyr-based can be built with clang and arbitrary libc
+- <LLVM> add LIT-based tests for RISCV architecture
+- <LLVM> Intrinsic lowering support: stgp
+- <LLVM> Figure our what happens on spill/fills
+- <LLVM> Few small corrections in ISEL:
+    * irg - we should probably check that mask is zero
+    * stg - we should reduce the number of instructions by inroducing sub instead of add
+    * tagp - excessive and
+    * irg - we should  not clear destination
+
+# WORKLOG
+
+### WW03'20
+
++ [DONE] <LLVM> new clang/llvm with MTE support
++ [DONE] <INFRA> support for several libc types and new types of c tests
++ [DONE] <SIM> fix spike help to provide information about logging facilities
++ [DONE] <RTL/SIM> update placement of tag bits in the address
++ [DONE] <RTL/SIM> introduce configuration mechanism to disable mtag checks on SP-based
+memory references
++ [DONE] <RTL/SIM> implement timer in SPIKE
