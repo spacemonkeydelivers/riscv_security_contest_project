@@ -22,10 +22,12 @@ foreach(TEST_NAME ${ZEPHYR_APPS})
     string(REPLACE "/" "_" APP_NAME ${TEST_NAME})
     set(TEST_PATH "samples/${TEST_NAME}")
     set(OUTPUT_PATH "${CMAKE_BINARY_DIR}/zephyr_build/${APP_NAME}")
-    set(CROSS_ARG "${RISCV_GCC_TOOLCHAIN_PATH}/bin/riscv32-unknown-elf-")
+    set(RISCV_GCC_PREFIX "${RISCV_GCC_TOOLCHAIN_PATH}/bin/riscv32-unknown-elf-")
+    set(BEEHIVE_LLVM_PREFIX "${RISCV_LLVM_TOOLCHAIN_PATH}/bin/")
     add_custom_command(
         OUTPUT ${OUTPUT_PATH}/zephyr/zephyr.elf
-        COMMAND ${CMAKE_SOURCE_DIR}/cmake/helpers/zephyr_build.sh ${TEST_PATH} ${OUTPUT_PATH} ${CROSS_ARG}
+        COMMAND ${CMAKE_SOURCE_DIR}/cmake/helpers/zephyr_build.sh
+            ${TEST_PATH} ${OUTPUT_PATH} ${RISCV_GCC_PREFIX} ${BEEHIVE_LLVM_PREFIX}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/zephyrproject/zephyr
         VERBATIM
     )

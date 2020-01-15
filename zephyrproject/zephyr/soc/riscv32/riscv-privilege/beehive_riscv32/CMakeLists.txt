@@ -2,7 +2,7 @@
 
 #NOTE: it seems that -Os causes some RIPE tests to fail perfoming attack
 #zephyr_compile_options(-march=rv32imc -Os)
-zephyr_compile_options(-march=rv32imc)
+zephyr_compile_options(-march=rv32imc -I${LIBC_HEADER_PATH})
 
 zephyr_sources()
 zephyr_sources(beehive_clock.c mte_init.c)

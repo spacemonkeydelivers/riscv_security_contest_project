@@ -2,8 +2,11 @@
 
 TEST_PATH="$1"
 OUTPUT_PATH="$2"
-export ZEPHYR_TOOLCHAIN_VARIANT=cross-compile
-export CROSS_COMPILE="$3"
+
+export ZEPHYR_TOOLCHAIN_VARIANT=beehive
+export RISCV_GCC_PREFIX="$3"
+export BEEHIVE_LLVM_PREFIX="$4"
+
 source zephyr-env.sh
 
 set -o xtrace
