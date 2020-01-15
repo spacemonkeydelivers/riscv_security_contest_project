@@ -23,7 +23,7 @@ static int beehive_mte_init(struct device *dev)
     IRQ_CONNECT(RISCV_BEEHIVE_SECURE_MONITOR_PANIC_IRQ, 0, secure_monitor, NULL, 0);
     irq_enable(RISCV_BEEHIVE_SECURE_MONITOR_PANIC_IRQ);
 
-    int en_value = 1;
+    int en_value = 1 | (1 << 3);
     __asm__ __volatile__(
             "csrw tags, %[en_value]"
             :
