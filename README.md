@@ -64,11 +64,11 @@ Build the GCC toolchain:
 
 Build the LLVM toolchain:
 1. `git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_llvm`
-1. `cd llvm-project`
+1. `cd riscv_security_contest_llvm`
 1. `git checkout release/9.x`
 1. `cd .. && mkdir build && cd build`
 1. `PATH=$PATH:<RISCV_GCC_TOOLCHAIN_PATH>`
-1. `cmake -G Ninja -DLLVM_USE_LINKER="gold" -DCMAKE_BUILD_TYPE="Debug" -DLLVM_ENABLE_PROJECTS="clang" -DCMAKE_INSTALL_PREFIX=<LLVM_INSTALL_PATH> -DLLVM_ENABLE_ASSERTIONS=On -DLLVM_TARGETS_TO_BUILD="RISCV" -DLLVM_TARGET_ARCH="riscv32" -DLLVM_DEFAULT_TARGET_TRIPLE="riscv32-unknown-elf" ../llvm-project`
+1. `cmake -G Ninja -DLLVM_USE_LINKER="gold" -DCMAKE_BUILD_TYPE="Debug" -DLLVM_ENABLE_PROJECTS="clang" -DCMAKE_INSTALL_PREFIX=<LLVM_INSTALL_PATH> -DLLVM_ENABLE_ASSERTIONS=On -DLLVM_TARGETS_TO_BUILD="RISCV" -DLLVM_TARGET_ARCH="riscv32" -DLLVM_DEFAULT_TARGET_TRIPLE="riscv32-unknown-elf" ../riscv_security_contest_llvm`
 1. `ninja`
 1. `ninja install`
 
