@@ -1,37 +1,18 @@
+# DISCLAIMER
+
+Please do note that the original version of this repository is located in the
+[submission branch](https://github.com/spacemonkeydelivers/riscv_security_contest_project/tree/submission_branch).
+The **master** branch contains additional work that was added after the contest
+was completed.
+
 # Overview
 
 This repository is a publically-available copy of a work performed by a team
 of SW engineers in an attempt to participate in
 [RISCV security contest](https://riscv.org/2019/07/risc-v-softcpu-core-contest).
 
-
-This repository contains:
-
-1. HDL design (verilog) of a **rv32imc-compliant** RISC-V core integrated in into
-a custom SOC. The soc is called "beehive-riscv!".
-1. Our design introduces a new extension to support **HW memory tagging**. The
-   design of an extension is documented [here](doc/arch/memtag.md).
-1. To enhance the security even further, our soc provides HW generator of
-pseudo-random numbers (LFSR-based). SW routines may want to use this register
-to generate random memory tags.
-1. Testing infrastructure and libraries used to test the design. This includes
-scripts to enable simulation (verilator) and emulation (an fpga by xilinx).
-1. Design documents used for development.
-1. A copy of zephyr OS for RISCV platform with a set of custom patches enhancing
-(at least we hope so) security.
-1. The project also requires **GNU toolchain with a set of custom patches**. It
-   is available from this
-[sattelite repository](https://github.com/spacemonkeydelivers/riscv_security_contest_toolchain).
-Note, that
-**[the binary release of the toolchain](https://github.com/spacemonkeydelivers/riscv_security_contest_toolchain/releases/tag/v1.0-rc1)**
-is also available.
-
-A copy of our application is available [here](doc/application.md)
-
-**The content of the repository is frozen**. Only cosmetic changes to the
-documentation/readme files are expected
-(unless contest organizers allow us to do otherwise). Occasional fixes to the
-testing infrastructure are also expected.
+**Important:** the **master** branch DOES NOT contain the original submission
+(see the disclaimer above) - it hosts the code developed after the contest.
 
 # Participants
 
@@ -47,6 +28,34 @@ testing infrastructure are also expected.
 - Kurapov Petr
 - [maikmerten](https://github.com/maikmerten/spu32)
 - Petushkov Igor
+
+A copy of our original application is available [here](doc/application.md)
+
+# Project Structure
+
+At the current moment this project consists of several repositories:
+* https://github.com/spacemonkeydelivers/riscv_security_contest_project
+  - HDL design (verilog) of a **rv32imc-compliant** RISC-V core integrated in
+into a custom SOC. The soc is called "beehive-riscv!". Our design introduces
+ a new extension to support **HW memory tagging**. The design of an extension
+is documented [here](doc/arch/memtag.md).
+  - Testing infrastructure and libraries used to test the design. This includes
+scripts to enable simulation (verilator) and emulation (an fpga by xilinx).
+  - Design documents used for development.
+  - A copy of zephyr OS for RISCV platform with a set of custom patches to
+ enhance security (at least we hope so).
+  - Homebrewed libc which enables fast prototyping of extensions and baremetal
+ runs of c programs.
+* https://github.com/spacemonkeydelivers/llvm-project
+  - a fork of llvm with implemented support of stack tagging for RISCV
+ (using our architectural extensions).
+* https://github.com/spacemonkeydelivers/riscv_security_contest_toolchain
+  - GNU toolchain with a set of custom patches that enable new HW instructions
+ and a modified version of **newlib** with memory tagging support.
+* https://github.com/spacemonkeydelivers/riscv_security_contest_spike
+  - a fork of SPIKE simulator with support of our architectural extentions and
+ SOC-specific functionality.
+  - used as a submodule of the main repository.
 
 # License
 
@@ -85,14 +94,15 @@ Build RTL simulator (verilator) and run tests:
 1. `west init -l zephyr/`
 1. `west update`
 1. `pip3 install -r zephyr/scripts/requirements.txt`
+1. rebuild the main [project](https://github.com/spacemonkeydelivers/riscv_security_contest_project)
 
 # Testing infrastructure
 
 Our testing infrastructure is rather sophisticated and allows a wide range of
 testing scenarios. The primary focus was to make the simulation of an
 assembly-based or c-based program as simple (for the user) as possible.
-**At the moment of our submission, it was still at the stage of active
-development**.
+**It is still at the stage of active development, some things may be
+broken from time to time**.
 
 We use cmake to create "test list files" and ctest to run our tests. The
 execution of each test is driven by a python script. This python script
