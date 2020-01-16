@@ -7,9 +7,9 @@ of SW engineers in an attempt to participate in
 
 This repository contains:
 
-1. HDL design (verilog) of an  **rv32imc-compliant** RISC-V core integrated in a
-custom SOC. The soc is called "beehive-riscv!".
-1. Our design introduces new extension to support **HW memory tagging**. The
+1. HDL design (verilog) of a **rv32imc-compliant** RISC-V core integrated in into
+a custom SOC. The soc is called "beehive-riscv!".
+1. Our design introduces a new extension to support **HW memory tagging**. The
    design of an extension is documented [here](doc/arch/memtag.md).
 1. To enhance the security even further, our soc provides HW generator of
 pseudo-random numbers (LFSR-based). SW routines may want to use this register
@@ -17,7 +17,7 @@ to generate random memory tags.
 1. Testing infrastructure and libraries used to test the design. This includes
 scripts to enable simulation (verilator) and emulation (an fpga by xilinx).
 1. Design documents used for development.
-1. A copy of zephyr OS for RISV platform with a set of custom patches enhancing
+1. A copy of zephyr OS for RISCV platform with a set of custom patches enhancing
 (at least we hope so) security.
 1. The project also requires **GNU toolchain with a set of custom patches**. It
    is available from this
@@ -29,7 +29,7 @@ is also available.
 A copy of our application is available [here](doc/application.md)
 
 **The content of the repository is frozen**. Only cosmetic changes to the
-documention/readme files are expected
+documentation/readme files are expected
 (unless contest organizers allow us to do otherwise). Occasional fixes to the
 testing infrastructure are also expected.
 
@@ -54,7 +54,7 @@ testing infrastructure are also expected.
 Unless some used open-source component prevents that. We are not lawyers.
 
 
-# Bulding the project
+# Building the project
 
 Build the GCC toolchain:
 1. `git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_toolchain`
@@ -133,24 +133,24 @@ The purpose of **zepyhyr_mte_demo** is to demonstrate how
 out-of-bounds access.
 
 **zephyr_philosophers** demonstrates that other zephyr subsystems work as
-expected with our design. To see dynamic output (from uart) one should do:
+expected with our design. To see the dynamic output (from uart) one should do:
 `cd $BUILD_DIR ; tail -f tests/zephyr_philosophers/io.txt` - this way you can
-see what is printed to the uart port as the simulation goes on.
+see what is printed to the UART port as the simulation goes on.
 
 Please do note, that for tests that depend on the timer functionality the
 simulation process is quite slow.  For example, one may have to wait about
 **4 minutes** for an `eating philosopher` to become a `thinking philosopher`.
 
-**Important note:** for zephyr-based tests "test exit code" , reported by `ctest`
+**Important note:** for zephyr-based tests "test exit code" reported by `ctest`
 does not indicate the actual pass/fail status of the test. To figure out how
-test terminates, one has to check `io.txt` file of the test. **io.txt** file
+termination status of a test one has to check `io.txt` file of the test. **io.txt** file
 is located at:
 
 ```
 $BUILD_DIR/tests/<test_name>/io.txt
 ```
 
-Alternatively the user can run `ctest` with `-V` option, like this:
+Alternatively, a user can run `ctest` with `-V` option, like this:
 
 ```
 ctest -R zephyr_ripe1 -V
@@ -159,7 +159,7 @@ ctest -R zephyr_ripe1 -V
 Then, the contents of `io.txt* shall be printed to standard output once
 simulation is complete.
 
-# Risc-V core
+# RISC-V core
 
 HDL files describing our design are located in [rtl](rtl/) folder.
 
