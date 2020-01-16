@@ -57,13 +57,13 @@ Unless some used open-source component prevents that. We are not lawyers.
 # Bulding the project
 
 Build the GCC toolchain:
-1. `git clone --recursive http://gitea.yggdrasill.ga/Secure_SoC/gcc_toolchain`
+1. `git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_toolchain`
 1. `cd riscv_security_contest_toolchain`
 1. `./configure --prefix=<RISCV_GCC_TOOLCHAIN_PATH> -with-arch=rv32imc --with-abi=ilp32`
 1. `make newlib -j10`
 
 Build the LLVM toolchain:
-1. `git clone --recursive http://gitea.yggdrasill.ga/Secure_SoC/llvm-project`
+1. `git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_llvm`
 1. `cd llvm-project`
 1. `git checkout release/9.x`
 1. `cd .. && mkdir build && cd build`
@@ -73,7 +73,7 @@ Build the LLVM toolchain:
 1. `ninja install`
 
 Build RTL simulator (verilator) and run tests:
-1. `git clone --recursive http://gitea.yggdrasill.ga/Secure_SoC/secure_soc`
+1. `git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_project`
 1. `cd riscv_security_contest_project`
 1. `cd ../ && mkdir build && cd build`
 1. `cmake -DRISCV_GCC_TOOLCHAIN_PATH=<GCC_INSTALL_PREFIX> -DRISCV_LLVM_TOOLCHAIN_PATH=<LLVM_INSTALL_PREFIX> ../ && make -j10`
