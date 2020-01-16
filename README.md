@@ -63,8 +63,8 @@ Build the GCC toolchain:
 1. `make newlib -j10`
 
 Build the LLVM toolchain:
-1. `git clone --recursive https://github.com/spacemonkeydelivers/riscv_security_contest_llvm`
-1. `cd riscv_security_contest_llvm`
+1. `git clone --recursive https://github.com/spacemonkeydelivers/llvm-project`
+1. `cd llvm-project`
 1. `git checkout release/9.x`
 1. `cd .. && mkdir build && cd build`
 1. `PATH=$PATH:<RISCV_GCC_TOOLCHAIN_PATH>`
