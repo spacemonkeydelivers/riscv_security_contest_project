@@ -127,7 +127,6 @@ module soc
    localparam WB_SEL_WIDTH  = 4;
 
    localparam CPU_RESET_ADDR = 32'd4096;
-   localparam CPU_EXCEPTION_ADDR = 32'h00AA_1155;
    
    // external interface
    wire [WB_ADDR_WIDTH - 1:0] wb_ext_addr;
@@ -330,7 +329,6 @@ module soc
    cpu
    #(
       .VECTOR_RESET (CPU_RESET_ADDR),
-      .VECTOR_EXCEPTION (CPU_EXCEPTION_ADDR)
    )
    cpu0
    (
