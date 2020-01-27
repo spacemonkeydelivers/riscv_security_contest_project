@@ -9,6 +9,7 @@ import dut_wrapper.soc as soc_lib
 import benchlibs.debug as debug
 import runner_checks as rchecks
 
+from chores.teelog import TeeLog
 from benchlibs.image_loader import ImageLoader
 
 def run(libbench, opts, runner_override = None):
@@ -36,15 +37,18 @@ def run(libbench, opts, runner_override = None):
   if sys.stdout.isatty() or opts.enforce_repl:
     print('TTY session detected! starting debugger')
 
-  # Unbuffer output (this ensures the output is in the correct order)
+    # Unbuffer output (this ensures the output is in the correct order)
     sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
 
-    tee = subprocess.Popen(["tee", "log.txt"], stdin=subprocess.PIPE)
-    os.dup2(tee.stdin.fileno(), sys.stdout.fileno())
-    os.dup2(tee.stdin.fileno(), sys.stderr.fileno())
-
-    dbg.set_tracing_enabled(True)
-    dbg.repl()
+    if sys.stdin.isatty():
+      tee = TeeLog("log.txt", "w")
+      dbg.set_tracing_enabled(True)
+      dbg.repl()
+    else:
+      print("stdin is not TTY reading data directly...")
+      for line in sys.stdin:
+        print('>>>: `' + line.rstrip() + '`')
+        dbg.process_input(line)
   else:
     soc.run(opts.ticks_limit, expect_failure = opts.expect_failure)
     print("Working directory: {}".format(os.getcwd()))

@@ -218,10 +218,10 @@ TODO: add details.
 
 # TODO
 
++ <TESTS> fix debugger unit-test
+- <RTL/SIM> sp-based disabling is support only for integer (rvi[c]32) instructions.
 - <RTL/SIM> introduce a control mechanism to enforce RND to return sequential numbers
 - <RTL/SIM> introduce "tag freeze mechanism"
-- <RTL/SIM> sp-based disabling is support only for integer (rvi[c]32) instructions.
-- <TESTS> fix debugger unit-test
 - <TESTS> debug failed secure tests
 - <TESTS> write a test for disabling tag checks of SP-based references featuring
 a compressed load/store
