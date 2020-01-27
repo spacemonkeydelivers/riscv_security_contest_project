@@ -15,6 +15,7 @@ def run(libbench, opts, runner_override = None):
 
   soc = soc_lib.RiscVSoc(libbench, 'memtest_trace.vcd', True)
   soc.setDebug(False)
+  soc.setResetPC()
 
   ImageLoader.load_image("test.v", soc)
 
