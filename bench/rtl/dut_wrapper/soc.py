@@ -1,8 +1,8 @@
+import os
 import sys
 import collections
 from collections import deque
 
-#TODO: logger instead of prints?
 class RiscVSoc:
     def __init__(self, libbench, path_to_vcd, debug = False):
         self._soc = libbench.RV_SOC(path_to_vcd)
@@ -23,20 +23,23 @@ class RiscVSoc:
         self._ticks_to_run = 5 * 10 ** 6
         self._min_address = 0
 
-        self._uart = None
         import atexit
         atexit.register(self.printIO)
 
     def printIO(self):
-
-        if self._uart == None:
-            print("no uart output was detected")
-            return
-
-        print('...---...---...---...---')
-        print('Behold! The UART(output) log follows:')
-        print(open('io.txt', 'r').read())
-        print('...---...---...---...---')
+        io_filename = 'io.txt'
+        io_file = open(io_filename, 'r')
+        # NOTE: we have resource race here, but it does not matter
+        io_size = os.path.getsize(io_filename)
+        if io_size == 0:
+            print('no uart output was detected')
+        elif io_size > 4 * 1024:
+            print('uart output is greater than 4Kb, refusing to print')
+        else:
+            print('...---...---...---...---')
+            print('Behold! The UART(output) log follows:')
+            print(io_file.read())
+            print('...---...---...---...---')
 
     def checkFWD(self):
         state = self._soc.cpuState()
